@@ -19,6 +19,15 @@ Revisado por: quien aprobó el cambio
 
 Se omiten los apartados que no apliquen.
 
+## 2.0.3 - 2026-11-19 13:35 (hora de Lima)
+
+Autor: NOVALTEK
+Revisado por: NOVALTEK
+
+### Correcciones
+- La autoprueba de la 2.0.2 mostró el motivo real del fallo al guardar la cola: `ArgumentException: Los tipos de argumentos no coinciden`, un error de `ConvertTo-Json` en Windows PowerShell 5.1. La cola ahora se escribe con un serializador JSON propio, mínimo y predecible (`ConvertTo-TextoJson`), que no depende de `ConvertTo-Json`. El formato del archivo no cambia.
+- Si el guardado vuelve a fallar, el mensaje indica en qué paso ocurrió (crear carpeta, convertir a JSON, escribir o reemplazar) y la línea del código.
+
 ## 2.0.2 - 2026-11-19 13:05 (hora de Lima)
 
 Autor: NOVALTEK

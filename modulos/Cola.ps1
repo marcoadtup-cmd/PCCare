@@ -90,28 +90,83 @@ function ConvertTo-ValorParametro {
     return $Valor
 }
 
+function ConvertTo-CadenaJson {
+    # Escapa una cadena para JSON sin depender de ConvertTo-Json.
+    param([string]$Texto)
+    $sb = New-Object System.Text.StringBuilder
+    foreach ($ch in $Texto.ToCharArray()) {
+        $c = [int]$ch
+        if ($c -eq 34) { [void]$sb.Append('\"') }
+        elseif ($c -eq 92) { [void]$sb.Append('\\') }
+        elseif ($c -eq 10) { [void]$sb.Append('\n') }
+        elseif ($c -eq 13) { [void]$sb.Append('\r') }
+        elseif ($c -eq 9) { [void]$sb.Append('\t') }
+        elseif ($c -lt 32) { [void]$sb.Append(('\u{0:x4}' -f $c)) }
+        else { [void]$sb.Append($ch) }
+    }
+    return $sb.ToString()
+}
+
+function ConvertTo-TextoJson {
+    # Serializador minimo y predecible para los registros de la cola: texto, numeros, booleanos, listas y diccionarios.
+    # Reemplaza a ConvertTo-Json, que en Windows PowerShell 5.1 fallaba con "Los tipos de argumentos no coinciden".
+    param($Valor)
+    if ($null -eq $Valor) { return 'null' }
+    if ($Valor -is [bool]) { if ($Valor) { return 'true' } else { return 'false' } }
+    if ($Valor -is [string] -or $Valor -is [char]) { return ('"' + (ConvertTo-CadenaJson ([string]$Valor)) + '"') }
+    if ($Valor -is [int] -or $Valor -is [long] -or $Valor -is [double] -or $Valor -is [decimal] -or $Valor -is [single] -or $Valor -is [int16] -or $Valor -is [byte] -or $Valor -is [uint32] -or $Valor -is [uint64]) {
+        return $Valor.ToString([System.Globalization.CultureInfo]::InvariantCulture)
+    }
+    if ($Valor -is [System.Collections.IDictionary]) {
+        $partes = New-Object System.Collections.Generic.List[string]
+        foreach ($k in @($Valor.Keys)) {
+            $partes.Add(('"' + (ConvertTo-CadenaJson ([string]$k)) + '":' + (ConvertTo-TextoJson ($Valor[$k]))))
+        }
+        return ('{' + ($partes -join ',') + '}')
+    }
+    if ($Valor -is [System.Collections.IEnumerable]) {
+        $partes = New-Object System.Collections.Generic.List[string]
+        foreach ($e in $Valor) { $partes.Add((ConvertTo-TextoJson $e)) }
+        return ('[' + ($partes -join ',') + ']')
+    }
+    if ($Valor -is [System.Management.Automation.PSCustomObject]) {
+        $partes = New-Object System.Collections.Generic.List[string]
+        foreach ($prop in $Valor.PSObject.Properties) {
+            $partes.Add(('"' + (ConvertTo-CadenaJson ([string]$prop.Name)) + '":' + (ConvertTo-TextoJson ($prop.Value))))
+        }
+        return ('{' + ($partes -join ',') + '}')
+    }
+    return ('"' + (ConvertTo-CadenaJson ([string]$Valor)) + '"')
+}
+
 function Save-Cola {
     # Escritura atomica: primero un archivo temporal y luego se reemplaza. Nunca lanza error.
-    # Si falla devuelve $false y deja el motivo en $script:UltimoErrorCola (la autoprueba lo muestra).
+    # Si falla devuelve $false y deja el paso y el motivo en $script:UltimoErrorCola (la autoprueba lo muestra).
     param($Registros)
     $script:UltimoErrorCola = ''
     $max = 300
-    try { if ([int]$script:MaxRegistros -gt 0) { $max = [int]$script:MaxRegistros } } catch { }
+    if ($script:MaxRegistros -is [int] -and $script:MaxRegistros -gt 0) { $max = $script:MaxRegistros }
     for ($intento = 1; $intento -le 3; $intento++) {
+        $paso = 'preparar'
         try {
+            $paso = 'crear la carpeta'
             $dir = Split-Path -Parent $script:RutaCola
             if (-not (Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+            $paso = 'armar la lista'
             $lista = @($Registros)
             if ($lista.Count -gt $max) { $lista = @($lista | Select-Object -Last $max) }
-            $json = ConvertTo-Json -InputObject $lista -Depth 6
+            $paso = 'convertir a JSON'
+            $json = ConvertTo-TextoJson $lista
+            $paso = 'escribir el temporal'
             $tmp = $script:RutaCola + '.tmp'
             [System.IO.File]::WriteAllText($tmp, $json, (New-Object System.Text.UTF8Encoding($false)))
+            $paso = 'reemplazar el archivo'
             if (Test-Path -LiteralPath $script:RutaCola) { [System.IO.File]::Delete($script:RutaCola) }
             [System.IO.File]::Move($tmp, $script:RutaCola)
             return $true
         }
         catch {
-            $script:UltimoErrorCola = ('{0}: {1}' -f $_.Exception.GetType().Name, $_.Exception.Message)
+            $script:UltimoErrorCola = ('{0} al {1}: {2} (línea {3})' -f $_.Exception.GetType().Name, $paso, $_.Exception.Message, $_.InvocationInfo.ScriptLineNumber)
             # Un antivirus puede tener el archivo abierto un instante: se reintenta.
             Start-Sleep -Milliseconds 200
         }
