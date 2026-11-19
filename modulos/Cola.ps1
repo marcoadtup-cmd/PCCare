@@ -1,4 +1,4 @@
-# Cola.ps1
+﻿# Cola.ps1
 # Registro persistente de tareas de PC Care. No usa interfaz grafica: se carga con "punto" desde PCCare.ps1
 # y tambien se puede probar sola (la autoprueba lo hace).
 #
@@ -92,19 +92,31 @@ function ConvertTo-ValorParametro {
 
 function Save-Cola {
     # Escritura atomica: primero un archivo temporal y luego se reemplaza. Nunca lanza error.
+    # Si falla devuelve $false y deja el motivo en $script:UltimoErrorCola (la autoprueba lo muestra).
     param($Registros)
-    try {
-        $dir = Split-Path -Parent $script:RutaCola
-        if (-not (Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
-        $lista = @($Registros)
-        if ($lista.Count -gt $script:MaxRegistros) { $lista = @($lista | Select-Object -Last $script:MaxRegistros) }
-        $json = ConvertTo-Json -InputObject $lista -Depth 6
-        $tmp = $script:RutaCola + '.tmp'
-        [System.IO.File]::WriteAllText($tmp, $json, (New-Object System.Text.UTF8Encoding($false)))
-        Move-Item -LiteralPath $tmp -Destination $script:RutaCola -Force
-        return $true
+    $script:UltimoErrorCola = ''
+    $max = 300
+    try { if ([int]$script:MaxRegistros -gt 0) { $max = [int]$script:MaxRegistros } } catch { }
+    for ($intento = 1; $intento -le 3; $intento++) {
+        try {
+            $dir = Split-Path -Parent $script:RutaCola
+            if (-not (Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+            $lista = @($Registros)
+            if ($lista.Count -gt $max) { $lista = @($lista | Select-Object -Last $max) }
+            $json = ConvertTo-Json -InputObject $lista -Depth 6
+            $tmp = $script:RutaCola + '.tmp'
+            [System.IO.File]::WriteAllText($tmp, $json, (New-Object System.Text.UTF8Encoding($false)))
+            if (Test-Path -LiteralPath $script:RutaCola) { [System.IO.File]::Delete($script:RutaCola) }
+            [System.IO.File]::Move($tmp, $script:RutaCola)
+            return $true
+        }
+        catch {
+            $script:UltimoErrorCola = ('{0}: {1}' -f $_.Exception.GetType().Name, $_.Exception.Message)
+            # Un antivirus puede tener el archivo abierto un instante: se reintenta.
+            Start-Sleep -Milliseconds 200
+        }
     }
-    catch { return $false }
+    return $false
 }
 
 function Import-Cola {

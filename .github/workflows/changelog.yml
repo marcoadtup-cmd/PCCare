@@ -8,6 +8,8 @@ permissions:
 
 jobs:
   changelog:
+    # Dependabot solo sube la version de una accion oficial; esos PR no llevan entrada de CHANGELOG.
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

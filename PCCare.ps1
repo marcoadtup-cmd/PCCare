@@ -35,7 +35,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$VersionApp = '2.0.1'
+$VersionApp = '2.0.2'
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Xaml
 
 $esAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
@@ -1795,7 +1795,7 @@ if ($AutoPrueba) {
             $a.Estado = 'Pendiente'; $b.Estado = 'En curso'; $c.Estado = 'En curso'; $d.Estado = 'En curso'
             $l = New-Object System.Collections.Generic.List[object]
             foreach ($r in $a, $b, $c, $d) { $l.Add($r) }
-            if (-not (Save-Cola $l)) { throw 'no se pudo guardar la cola' }
+            if (-not (Save-Cola $l)) { throw ('no se pudo guardar la cola en ' + $script:RutaCola + ' -> ' + $script:UltimoErrorCola) }
             $l2 = Import-Cola
             Assert-Igual $l2.Count 4 'registros leídos'
             Assert-Igual (@($l2[0].Parametros['Ids']).Count) 2 'lista de Ids tras leer'

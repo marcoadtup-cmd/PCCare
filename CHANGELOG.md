@@ -19,6 +19,18 @@ Revisado por: quien aprobó el cambio
 
 Se omiten los apartados que no apliquen.
 
+## 2.0.2 - 2026-11-19 13:05 (hora de Lima)
+
+Autor: NOVALTEK
+Revisado por: NOVALTEK
+
+### Correcciones
+- La autoprueba de la versión 2.0.1 falló en "Cola persistente (guardar y recuperar)" con "no se pudo guardar la cola". Guardar la cola ahora reintenta hasta 3 veces (un antivirus puede tener el archivo abierto un instante), reemplaza el archivo sin depender de `Move-Item` y registra el motivo exacto del fallo. La autoprueba muestra ese motivo junto a la ruta usada, para poder corregir la causa real si vuelve a ocurrir.
+- `Cola.ps1`, `Ejecutores.ps1` y `AuditoriaPC.ps1` se habían publicado sin BOM UTF-8 y con saltos de línea LF. Windows PowerShell 5.1 lee un archivo sin BOM como ANSI y los acentos de los mensajes podían verse dañados. Ahora los tres llevan BOM UTF-8 y saltos CRLF, igual que el resto. La validación automática "Archivos con BOM UTF-8" había detectado el problema en la 2.0.1.
+
+### Seguridad
+- El flujo "Exigir CHANGELOG" no se aplica a los Pull Requests de `dependabot[bot]` (solo suben la versión de una acción oficial de GitHub). Siguen necesitando tu revisión y aprobación como cualquier otro cambio.
+
 ## 2.0.1 - 2026-11-19 12:05 (hora de Lima)
 
 Autor: NOVALTEK
