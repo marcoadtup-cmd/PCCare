@@ -14,7 +14,6 @@ $script:ultimoInforme = ''
 function Start-Informe {
     param([bool]$OmitirWU = [bool]$ui.chkInfSinWU.IsChecked)
     $modulo = Join-Path $RaizApp 'modulos\AuditoriaPC.ps1'
-    $ui.txtInfEstado.Text = 'Generando el informe... puede tardar uno o dos minutos.'
     $opcion = 'Con búsqueda de parches de Windows'
     if ($OmitirWU) { $opcion = 'Sin búsqueda de parches de Windows' }
     Add-Tarea 'Generando informe de auditoría del equipo' $sbInformeAuditoria @{ Script = $modulo; Salida = $CarpetaInformes; OmitirWU = $OmitirWU } {
@@ -25,7 +24,8 @@ function Start-Informe {
         $ui.btnInfAbrir.IsEnabled = $true
         $ui.txtInfEstado.Text = 'Informe listo: {0}% de controles conformes, {1} críticos, {2} alertas, {3} apps por actualizar, {4} parches de Windows. Guardado en {5}' -f $r.Puntaje, $r.Criticos, $r.Alertas, $r.Apps, $r.Parches, $r.Carpeta
         Write-Registro ('Informe generado: ' + $script:ultimoInforme)
-    } -Opciones $opcion
+    } -Opciones $opcion -AlIniciar { $ui.txtInfEstado.Text = 'Generando el informe... puede tardar uno o dos minutos.' }
+    $ui.txtInfEstado.Text = Get-TextoEspera 'Generando el informe... puede tardar uno o dos minutos.'
 }
 
 $ui.btnInfGenerar.Add_Click({ Start-Informe })
@@ -43,7 +43,6 @@ $ui.btnInfCarpeta.Add_Click({
 function Start-RedDiagnostico {
     param([bool]$SinDescarga = (-not [bool]$ui.chkRedDescarga.IsChecked))
     $modulo = Join-Path $RaizApp 'modulos\OptimizarRed.ps1'
-    $ui.txtRedInforme.Text = 'Diagnosticando... unos 30 a 60 segundos.'
     $opcion = 'Con medición de velocidad de descarga (unos 9 MB)'
     if ($SinDescarga) { $opcion = 'Sin medición de velocidad (no gasta datos)' }
     Add-Tarea 'Diagnóstico de red' $sbRedDiagnostico @{ Script = $modulo; Carpeta = $CarpetaRed; SinDescarga = $SinDescarga; MB = 8 } {
@@ -58,7 +57,8 @@ function Start-RedDiagnostico {
         if ($tCambiosRed.Rows.Count -gt 0) { $ui.txtRedAviso.Text = '{0} mejoras propuestas. Márcalas y pulsa "Aplicar mejoras marcadas".' -f $tCambiosRed.Rows.Count }
         else { $ui.txtRedAviso.Text = 'No hay mejoras propuestas para esta conexión.' }
         Write-Registro ('Diagnóstico de red terminado. Mejoras propuestas: {0}' -f $tCambiosRed.Rows.Count)
-    } -Opciones $opcion
+    } -Opciones $opcion -AlIniciar { $ui.txtRedInforme.Text = 'Diagnosticando... unos 30 a 60 segundos.' }
+    $ui.txtRedInforme.Text = Get-TextoEspera 'Diagnosticando... unos 30 a 60 segundos.'
 }
 
 function Start-RedAplicar {

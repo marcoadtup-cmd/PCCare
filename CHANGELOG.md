@@ -19,6 +19,17 @@ Revisado por: quien aprobó el cambio
 
 Se omiten los apartados que no apliquen.
 
+## 2.0.1 - 2026-11-19 12:05 (hora de Lima)
+
+Autor: NOVALTEK
+Revisado por: NOVALTEK
+
+### Correcciones
+- Las páginas Red e Informe decían "Diagnosticando..." o "Generando..." aunque la tarea solo estaba esperando en la cola detrás de otra (por ejemplo una actualización de aplicaciones). Ahora muestran "EN COLA", cuántas tareas esperan antes y cuál se está ejecutando, y cambian a "Diagnosticando..." cuando realmente empieza.
+
+### Mejoras
+- Las tareas pueden definir un aviso que se muestra al iniciar (`-AlIniciar`).
+
 ## 2.0.0 - 2026-11-19 11:50 (hora de Lima)
 
 Autor: NOVALTEK

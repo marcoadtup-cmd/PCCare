@@ -35,7 +35,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$VersionApp = '2.0.0'
+$VersionApp = '2.0.1'
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Xaml
 
 $esAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
@@ -1997,8 +1997,18 @@ $ui.txtTareasRuta.Text = 'Cada tarea queda registrada con las opciones que marca
 
 function Get-AhoraTexto { return (Get-Date).ToString('yyyy-MM-dd HH:mm:ss') }
 
+function Get-TextoEspera {
+    # Texto para mostrar en una pagina justo despues de encolar: si hay tareas delante, avisa que esta en espera.
+    param([string]$Mientras)
+    $delante = [int]$script:cola.Count - 1
+    $ahora = ''
+    if ($script:actual) { $delante++; $ahora = [string]$script:actual.Reg.Nombre }
+    if ($delante -le 0) { return $Mientras }
+    return ('EN COLA: esperan {0} tareas antes. Ahora se está ejecutando: {1}.{2}Cuando terminen empieza esta. Puedes verlo en la página Tareas.' -f $delante, $ahora, "`r`n")
+}
+
 function Add-Tarea {
-    param([string]$Nombre, [scriptblock]$Codigo, [hashtable]$Parametros = @{}, [scriptblock]$AlTerminar, $Contexto, [string]$Opciones = '')
+    param([string]$Nombre, [scriptblock]$Codigo, [hashtable]$Parametros = @{}, [scriptblock]$AlTerminar, $Contexto, [string]$Opciones = '', [scriptblock]$AlIniciar)
     $tipo = ''
     if ($script:MetaTarea.ContainsKey($Codigo)) { $tipo = [string]$script:MetaTarea[$Codigo] }
     $modo = 'Solo lectura'
@@ -2015,7 +2025,7 @@ function Add-Tarea {
     $script:registros.Add($reg)
     while ($script:registros.Count -gt $script:MaxRegistros -and @('Pendiente', 'En curso', 'Interrumpida') -notcontains [string]$script:registros[0].Estado) { $script:registros.RemoveAt(0) }
     $Parametros['Ayuda'] = $textoAyuda
-    $script:cola.Add(@{ Reg = $reg; Codigo = $Codigo; Parametros = $Parametros; AlTerminar = $AlTerminar; Contexto = $Contexto; Cancelada = $false })
+    $script:cola.Add(@{ Reg = $reg; Codigo = $Codigo; Parametros = $Parametros; AlTerminar = $AlTerminar; AlIniciar = $AlIniciar; Contexto = $Contexto; Cancelada = $false })
     [void](Save-Cola $script:registros)
     $script:tablaSucia = $true
 }
@@ -2197,6 +2207,7 @@ $reloj.Add_Tick({
                 $script:actual = $t
                 $script:tablaSucia = $true
                 Write-Registro ('Inicio: ' + $t.Reg.Nombre)
+                if ($t.AlIniciar) { try { & $t.AlIniciar } catch { } }
             }
             $ocupado = [bool]$script:actual
             $tipoActual = ''
