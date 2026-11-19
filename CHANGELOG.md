@@ -34,6 +34,7 @@ Revisado por: NOVALTEK
 - Limpieza de navegadores: ahora incluye Vivaldi y Chromium, y avisa antes de limpiar y en el resultado cuando hay navegadores abiertos.
 
 ### Correcciones
+- El selector de modo simulación/real era una casilla que, en modo real, quedaba sin marca y parecía desactivada. Ahora es un botón de estado: verde "SIMULACIÓN ACTIVA" o naranja "MODO REAL ACTIVO", con el texto de lo que hace al pulsarlo.
 - Limpiar el caché de navegadores dejaba parte de los archivos sin borrar mientras el navegador estaba abierto, sin explicar por qué. Ahora se indica qué navegadores están abiertos y que hay que cerrarlos y repetir la limpieza.
 
 ### Seguridad

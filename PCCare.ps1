@@ -1091,8 +1091,16 @@ if (-not $AutoPrueba) {
     <!-- Barra superior -->
     <Border DockPanel.Dock="Top" Background="White" BorderBrush="#E3E7EC" BorderThickness="0,0,0,1" Padding="22,9">
       <DockPanel>
-        <Border x:Name="cajaSim" DockPanel.Dock="Right" Background="#DDF0E2" CornerRadius="8" Padding="12,6" Margin="14,0,0,0">
-          <CheckBox x:Name="chkSimulacion" Content="Simulación activa: no se modifica nada" IsChecked="True" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#12805A"/>
+        <Border x:Name="cajaSim" DockPanel.Dock="Right" Background="Transparent" Margin="14,0,0,0">
+          <ToggleButton x:Name="chkSimulacion" IsChecked="True" Cursor="Hand" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="White" Background="#12805A" Content="SIMULACIÓN ACTIVA (clic para pasar a modo real)" ToolTip="Alterna entre simulación (no modifica nada) y modo real (aplica los cambios).">
+            <ToggleButton.Template>
+              <ControlTemplate TargetType="ToggleButton">
+                <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="14,7">
+                  <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+              </ControlTemplate>
+            </ToggleButton.Template>
+          </ToggleButton>
         </Border>
         <Border Background="#E5F5ED" CornerRadius="10" Padding="10,3" Margin="0,0,8,0" DockPanel.Dock="Right">
           <TextBlock x:Name="txtChipAdmin" Text="✓ Administrador" Foreground="#12805A" FontSize="12" FontWeight="SemiBold"/>
@@ -2057,14 +2065,14 @@ catch { }
 function Update-ModoSim {
     $conv = New-Object System.Windows.Media.BrushConverter
     if (Test-Simulacion) {
-        $ui.cajaSim.Background = $conv.ConvertFromString('#DDF0E2')
-        $ui.chkSimulacion.Foreground = $conv.ConvertFromString('#12805A')
-        $ui.chkSimulacion.Content = 'Simulación activa: no se modifica nada'
+        $ui.chkSimulacion.Background = $conv.ConvertFromString('#12805A')
+        $ui.chkSimulacion.Foreground = $conv.ConvertFromString('#FFFFFF')
+        $ui.chkSimulacion.Content = 'SIMULACIÓN ACTIVA (clic para pasar a modo real)'
     }
     else {
-        $ui.cajaSim.Background = $conv.ConvertFromString('#FCE9CF')
-        $ui.chkSimulacion.Foreground = $conv.ConvertFromString('#8A4300')
-        $ui.chkSimulacion.Content = 'MODO REAL: los cambios se aplican'
+        $ui.chkSimulacion.Background = $conv.ConvertFromString('#C2570C')
+        $ui.chkSimulacion.Foreground = $conv.ConvertFromString('#FFFFFF')
+        $ui.chkSimulacion.Content = 'MODO REAL ACTIVO (clic para volver a simulación)'
     }
 }
 Update-ModoSim
