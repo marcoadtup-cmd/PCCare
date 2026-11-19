@@ -1,0 +1,27 @@
+name: Exigir CHANGELOG
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Si cambia el código, debe cambiar CHANGELOG.md
+        run: |
+          base="origin/${{ github.base_ref }}"
+          cambios=$(git diff --name-only "$base"...HEAD)
+          echo "$cambios"
+          if echo "$cambios" | grep -Eq '\.(ps1|cmd)$|^\.github/workflows/'; then
+            if ! echo "$cambios" | grep -qx 'CHANGELOG.md'; then
+              echo "::error::Este cambio toca código o flujos de trabajo y no actualiza CHANGELOG.md"
+              exit 1
+            fi
+          fi

@@ -13,6 +13,17 @@ Adjunta:
 - El archivo `PCCare_autoprueba_NOMBRE.log` (ver README).
 - Captura de pantalla si es un problema visual. **Quita nombres de equipo, usuarios y rutas privadas.**
 
+## Quién aprueba los cambios
+
+Nadie, salvo el dueño del repositorio, puede modificar el código de este repositorio. Cualquiera puede proponer un cambio, pero el proceso es siempre el mismo:
+
+1. Haces un fork y envías un Pull Request.
+2. Es obligatorio incluir una entrada en `CHANGELOG.md` con fecha, hora y tipo de cambio (nuevo módulo, mejora, corrección, actualización o seguridad). Un Pull Request que toque código sin esa entrada falla la validación automática.
+3. El dueño revisa el código línea por línea antes de aceptarlo. Puede pedir cambios o rechazarlo sin dar más explicación.
+4. Solo el dueño fusiona el cambio y publica la nueva versión.
+
+Cualquiera puede copiar y modificar su propia versión (la licencia MIT lo permite), pero eso no cambia este repositorio ni sus descargas oficiales.
+
 ## Proponer cambios
 
 1. Haz un fork y crea una rama.

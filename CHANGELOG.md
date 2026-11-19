@@ -1,16 +1,48 @@
-# Cambios
+# Registro de cambios
 
-## 2.0.0
+Cada mejora se anota aquí **antes** de aceptarse, con fecha y hora de Lima (UTC-5). Las versiones nuevas van arriba.
 
-- Todo se ejecuta desde la ventana principal: actualizaciones de aplicaciones y drivers, informe del equipo y diagnóstico de red ya no son programas aparte.
-- Nueva página **Tareas**: tarea en ejecución, opciones marcadas, cola completa con estado y duración.
-- Cola persistente en disco. Si PC Care se cierra a mitad de una tarea, al abrirlo se ofrece reanudarla según su riesgo.
+## Cómo se escribe una entrada
+
+```
+## X.Y.Z - AAAA-MM-DD HH:MM (hora de Lima)
+
+Autor: nombre o usuario de GitHub
+Revisado por: quien aprobó el cambio
+
+### Nuevos módulos
+### Mejoras
+### Correcciones
+### Actualizaciones
+### Seguridad
+```
+
+Se omiten los apartados que no apliquen.
+
+## 2.0.0 - 2026-11-19 11:50 (hora de Lima)
+
+Autor: NOVALTEK
+Revisado por: NOVALTEK
+
+### Nuevos módulos
+- Cola persistente de tareas (`modulos\Cola.ps1`) con política de reanudación por tipo de tarea.
+- Página **Tareas**: tarea en ejecución, opciones marcadas, cola completa con estado y duración.
+- Página **Actualizaciones**: aplicaciones (winget y Microsoft Store) y drivers de Windows Update dentro de la ventana principal.
+- Páginas **Red** e **Informe del equipo** integradas, con las herramientas de diagnóstico de red y auditoría.
+
+### Mejoras
+- Todo se ejecuta desde la ventana principal; ya no hay programas aparte.
 - Pausa de la cola y opción de quitar lo que aún no empezó.
-- Una tarea guardada en simulación nunca se repite en modo real.
 - Una sola ventana a la vez para no pisar la cola guardada.
 - Las tareas de actualizaciones, drivers, Store y red aceptan modo simulación.
-- Autoprueba ampliada (cola, módulos, winget) y modo `-Completa` (drivers, informe y red).
-- Validación automática en GitHub Actions.
+- Autoprueba ampliada (cola, módulos, winget) y modo `-Completa`.
+
+### Seguridad
+- Una tarea guardada en simulación nunca se repite en modo real.
+- Lo que estaba a medias al cerrar queda sin marcar para que el usuario decida.
+
+### Actualizaciones
+- Validación automática de sintaxis en GitHub Actions.
 
 ## 1.1.0
 

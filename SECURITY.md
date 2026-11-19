@@ -6,6 +6,13 @@ Si encuentras una falla que pueda borrar datos, escalar privilegios o filtrar in
 
 Si no puedes usar esa opción, escribe a **marcoadtup@gmail.com** con el asunto "PC Care seguridad".
 
+## Quién puede cambiar el código
+
+- Solo el dueño del repositorio puede escribir en la rama principal y publicar versiones.
+- Los demás participan con Pull Requests, que el dueño revisa y aprueba una por una.
+- Cada cambio queda anotado en `CHANGELOG.md` con fecha y hora.
+- Las descargas oficiales son únicamente las de la sección Releases de este repositorio. Una copia en otro sitio puede estar modificada.
+
 ## Diseño
 
 - Modo simulación al arrancar. Los cambios reales exigen desactivarlo y confirmar.
