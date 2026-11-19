@@ -61,3 +61,26 @@ jobs:
           name: autoprueba
           path: PCCare_autoprueba_*.log
           if-no-files-found: ignore
+
+  instalador:
+    runs-on: windows-latest
+    needs: sintaxis
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Compilar el instalador
+        shell: powershell
+        run: .\instalador\compilar.ps1
+
+      - name: Probar instalación, archivos y desinstalación
+        shell: powershell
+        run: .\instalador\probar.ps1
+
+      - name: Guardar el instalador de prueba
+        uses: actions/upload-artifact@v7
+        with:
+          name: instalador
+          path: |
+            salida/PCCare-Setup-*-x64.exe
+            salida/PCCare-Setup-*-x64.exe.sha256
+          retention-days: 7

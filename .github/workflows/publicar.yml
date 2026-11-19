@@ -6,29 +6,78 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
-  zip:
+  publicar:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
 
-      - name: Armar el ZIP y el SHA256
+      - name: Compilar el instalador (la etiqueta debe coincidir con la versión del programa)
         shell: powershell
+        env:
+          ETIQUETA: ${{ github.ref_name }}
         run: |
-          $v = '${{ github.ref_name }}'
-          $dest = "PCCare-$v"
+          $v = $env:ETIQUETA.TrimStart('v')
+          .\instalador\compilar.ps1 -Version $v
+
+      - name: Probar el instalador (instalar, comparar archivos, desinstalar)
+        shell: powershell
+        run: .\instalador\probar.ps1
+
+      - name: Armar el ZIP portable y su SHA256
+        shell: powershell
+        env:
+          ETIQUETA: ${{ github.ref_name }}
+        run: |
+          $v = $env:ETIQUETA.TrimStart('v')
+          $dest = "PCCare-$v-portable"
           New-Item -ItemType Directory -Path $dest | Out-Null
           Copy-Item PCCare.ps1, 'Iniciar PC Care.cmd', 'Autoprueba PC Care.cmd', README.md, LICENSE, CHANGELOG.md, SECURITY.md -Destination $dest
           Copy-Item modulos -Destination $dest -Recurse
-          Compress-Archive -Path $dest -DestinationPath "$dest.zip"
-          $h = (Get-FileHash "$dest.zip" -Algorithm SHA256).Hash.ToLower()
-          Set-Content -Path "$dest.zip.sha256" -Value "$h  $dest.zip" -Encoding ascii
+          Compress-Archive -Path $dest -DestinationPath "salida\$dest.zip"
+          $h = (Get-FileHash "salida\$dest.zip" -Algorithm SHA256).Hash.ToLower()
+          [System.IO.File]::WriteAllText("$PWD\salida\$dest.zip.sha256", "$h  $dest.zip`n", (New-Object System.Text.UTF8Encoding($false)))
+
+      - name: Certificar el origen de los archivos (attestation)
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: |
+            salida/PCCare-Setup-*-x64.exe
+            salida/PCCare-*-portable.zip
 
       - name: Crear la release
         shell: powershell
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ETIQUETA: ${{ github.ref_name }}
         run: |
-          $v = '${{ github.ref_name }}'
-          gh release create $v "PCCare-$v.zip" "PCCare-$v.zip.sha256" --title "PC Care $v" --generate-notes
+          $v = $env:ETIQUETA.TrimStart('v')
+          $notas = @"
+          ## Descarga
+
+          - **Instalador para Windows de 64 bits:** ``PCCare-Setup-$v-x64.exe``
+          - **Versión portable (sin instalar):** ``PCCare-$v-portable.zip``
+
+          ## Verificar la descarga
+
+          ``````powershell
+          Get-FileHash .\PCCare-Setup-$v-x64.exe -Algorithm SHA256
+          gh attestation verify .\PCCare-Setup-$v-x64.exe --repo marcoadtup-cmd/PCCare
+          ``````
+
+          El hash debe coincidir con el archivo ``.sha256``. El comando ``gh attestation verify`` comprueba que el archivo lo compiló GitHub Actions desde este repositorio.
+
+          ## Aviso de SmartScreen
+
+          El instalador aún no está firmado digitalmente, por lo que Windows puede mostrar "Windows protegió su PC". Pulsa **Más información** y luego **Ejecutar de todas formas**, después de verificar el SHA256.
+
+          ## Cambios
+
+          Detalle completo en [CHANGELOG.md](https://github.com/marcoadtup-cmd/PCCare/blob/main/CHANGELOG.md).
+          "@
+          $notas = ($notas -split "`n" | ForEach-Object { $_.TrimStart() }) -join "`n"
+          [System.IO.File]::WriteAllText("$PWD\notas.md", $notas, (New-Object System.Text.UTF8Encoding($false)))
+          gh release create $env:ETIQUETA "salida\PCCare-Setup-$v-x64.exe" "salida\PCCare-Setup-$v-x64.exe.sha256" "salida\PCCare-$v-portable.zip" "salida\PCCare-$v-portable.zip.sha256" --title "PC Care $v" --notes-file notas.md

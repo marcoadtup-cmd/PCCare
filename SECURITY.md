@@ -27,4 +27,7 @@ Si no puedes usar esa opción, escribe a **marcoadtup@gmail.com** con el asunto 
 
 1. Descárgala solo desde la sección Releases de este repositorio.
 2. Compara el SHA256 con el archivo `.sha256` de la release.
-3. El programa no está firmado digitalmente, por eso SmartScreen avisa. Todo el código es legible en texto plano.
+3. Comprueba el origen: `gh attestation verify ARCHIVO --repo marcoadtup-cmd/PCCare`. Confirma que lo compiló GitHub Actions desde este repositorio.
+4. El instalador y el programa no están firmados digitalmente, por eso SmartScreen avisa. Dentro del instalador, PC Care sigue siendo PowerShell en texto plano y puedes leerlo en la carpeta instalada.
+
+Cómo se compila: al crear una etiqueta `vX.Y.Z`, GitHub Actions compila el instalador con Inno Setup, lo instala y desinstala en silencio, compara cada archivo instalado con el del repositorio y recién entonces publica la release. La etiqueta debe coincidir con la versión del programa o la compilación se detiene.
