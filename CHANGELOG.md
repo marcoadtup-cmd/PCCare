@@ -19,6 +19,15 @@ Revisado por: quien aprobó el cambio
 
 Se omiten los apartados que no apliquen.
 
+## 2.0.4 - 2026-11-19 13:50 (hora de Lima)
+
+Autor: NOVALTEK
+Revisado por: NOVALTEK
+
+### Correcciones
+- La autoprueba de la 2.0.3 localizó el punto exacto del fallo: `ArgumentException: Los tipos de argumentos no coinciden` al convertir la lista de tareas con `@($Registros)` en Windows PowerShell 5.1. Guardar la cola ahora copia los registros por posición a una lista simple y el serializador recorre listas y diccionarios sin enumeradores. `Set-TareasInterrumpidas` también recorre por posición.
+- El mensaje de error de la cola indica ahora un paso más preciso (contar, copiar, convertir, escribir o reemplazar).
+
 ## 2.0.3 - 2026-11-19 13:35 (hora de Lima)
 
 Autor: NOVALTEK
