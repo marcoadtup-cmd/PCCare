@@ -1,0 +1,15 @@
+# Windows y editores
+Thumbs.db
+Desktop.ini
+*.tmp
+
+# Salidas generadas al ejecutar
+PCCare_autoprueba_*.log
+Informe*.html
+Salida/
+Cola.json
+*.danado
+
+# Paquetes locales
+*.zip
+*.sha256

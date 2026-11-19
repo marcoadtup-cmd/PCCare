@@ -1,0 +1,60 @@
+name: Validar
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  sintaxis:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sintaxis de todos los scripts
+        shell: powershell
+        run: |
+          $fallos = 0
+          Get-ChildItem -Recurse -Filter *.ps1 | ForEach-Object {
+            $err = $null; $tok = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tok, [ref]$err)
+            foreach ($e in @($err)) {
+              if ($e) {
+                Write-Host ("::error file={0},line={1}::{2}" -f $_.Name, $e.Extent.StartLineNumber, $e.Message)
+                $fallos++
+              }
+            }
+            Write-Host ("{0}: {1} errores" -f $_.Name, @($err | Where-Object { $_ }).Count)
+          }
+          if ($fallos -gt 0) { exit 1 }
+
+      - name: Archivos con BOM UTF-8
+        shell: powershell
+        run: |
+          $mal = @()
+          Get-ChildItem -Recurse -Filter *.ps1 | ForEach-Object {
+            $b = [System.IO.File]::ReadAllBytes($_.FullName)
+            if (-not ($b.Length -ge 3 -and $b[0] -eq 0xEF -and $b[1] -eq 0xBB -and $b[2] -eq 0xBF)) { $mal += $_.Name }
+          }
+          if ($mal) { Write-Host ("Sin BOM: " + ($mal -join ', ')); exit 1 }
+
+      - name: PSScriptAnalyzer (informativo)
+        continue-on-error: true
+        shell: powershell
+        run: |
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+          Invoke-ScriptAnalyzer -Path . -Recurse -Severity Error | Format-Table -AutoSize
+
+      - name: Autoprueba (informativa, el runner no es un PC real)
+        continue-on-error: true
+        shell: powershell
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File .\PCCare.ps1 -AutoPrueba
+          Get-Content .\PCCare_autoprueba_*.log
+
+      - name: Guardar el informe de la autoprueba
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: autoprueba
+          path: PCCare_autoprueba_*.log
+          if-no-files-found: ignore

@@ -1,0 +1,34 @@
+name: Publicar versión
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  zip:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Armar el ZIP y el SHA256
+        shell: powershell
+        run: |
+          $v = '${{ github.ref_name }}'
+          $dest = "PCCare-$v"
+          New-Item -ItemType Directory -Path $dest | Out-Null
+          Copy-Item PCCare.ps1, 'Iniciar PC Care.cmd', 'Autoprueba PC Care.cmd', README.md, LICENSE, CHANGELOG.md, SECURITY.md -Destination $dest
+          Copy-Item modulos -Destination $dest -Recurse
+          Compress-Archive -Path $dest -DestinationPath "$dest.zip"
+          $h = (Get-FileHash "$dest.zip" -Algorithm SHA256).Hash.ToLower()
+          Set-Content -Path "$dest.zip.sha256" -Value "$h  $dest.zip" -Encoding ascii
+
+      - name: Crear la release
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $v = '${{ github.ref_name }}'
+          gh release create $v "PCCare-$v.zip" "PCCare-$v.zip.sha256" --title "PC Care $v" --generate-notes
