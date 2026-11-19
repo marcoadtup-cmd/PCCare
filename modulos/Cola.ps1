@@ -118,11 +118,22 @@ function ConvertTo-TextoJson {
         return $Valor.ToString([System.Globalization.CultureInfo]::InvariantCulture)
     }
     if ($Valor -is [System.Collections.IDictionary]) {
+        # Sin enumeradores: se copian las claves a un arreglo y se recorre por indice.
         $partes = New-Object System.Collections.Generic.List[string]
-        foreach ($k in @($Valor.Keys)) {
+        $nClaves = $Valor.Count
+        $claves = New-Object object[] $nClaves
+        $Valor.Keys.CopyTo($claves, 0)
+        for ($i = 0; $i -lt $nClaves; $i++) {
+            $k = $claves[$i]
             $partes.Add(('"' + (ConvertTo-CadenaJson ([string]$k)) + '":' + (ConvertTo-TextoJson ($Valor[$k]))))
         }
         return ('{' + ($partes -join ',') + '}')
+    }
+    if ($Valor -is [System.Collections.IList]) {
+        $partes = New-Object System.Collections.Generic.List[string]
+        $nItems = $Valor.Count
+        for ($i = 0; $i -lt $nItems; $i++) { $partes.Add((ConvertTo-TextoJson ($Valor[$i]))) }
+        return ('[' + ($partes -join ',') + ']')
     }
     if ($Valor -is [System.Collections.IEnumerable]) {
         $partes = New-Object System.Collections.Generic.List[string]
@@ -152,9 +163,17 @@ function Save-Cola {
             $paso = 'crear la carpeta'
             $dir = Split-Path -Parent $script:RutaCola
             if (-not (Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
-            $paso = 'armar la lista'
-            $lista = @($Registros)
-            if ($lista.Count -gt $max) { $lista = @($lista | Select-Object -Last $max) }
+            $paso = 'contar los registros'
+            $esLista = ($Registros -is [System.Collections.IList])
+            $total = 0
+            if ($esLista) { $total = $Registros.Count } elseif ($null -ne $Registros) { $total = 1 }
+            $paso = 'copiar los registros'
+            $lista = New-Object System.Collections.ArrayList
+            $desde = 0
+            if ($total -gt $max) { $desde = $total - $max }
+            for ($i = $desde; $i -lt $total; $i++) {
+                if ($esLista) { [void]$lista.Add($Registros[$i]) } else { [void]$lista.Add($Registros) }
+            }
             $paso = 'convertir a JSON'
             $json = ConvertTo-TextoJson $lista
             $paso = 'escribir el temporal'
@@ -204,7 +223,8 @@ function Set-TareasInterrumpidas {
     # Los analisis de solo lectura no se ofrecen: se repiten solos al abrir.
     param($Registros)
     $n = 0
-    foreach ($r in $Registros) {
+    for ($i = 0; $i -lt $Registros.Count; $i++) {
+        $r = $Registros[$i]
         if ($r.Estado -eq 'Pendiente' -or $r.Estado -eq 'En curso') {
             if ($r.Politica -eq 'Seguro' -and $r.Modo -eq 'Solo lectura') {
                 $r.Estado = 'Descartada'
