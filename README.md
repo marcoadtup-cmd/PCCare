@@ -9,15 +9,25 @@ Es una alternativa libre a las suites de limpieza comerciales. No contiene códi
 - Empieza en **modo simulación**: muestra qué haría sin tocar nada, hasta que tú lo desactives.
 - Si se cierra o se corta a mitad de una tarea, al abrirlo te ofrece continuar.
 
-## Cómo usarlo (3 pasos)
+## Cómo usarlo
 
-1. Descarga el ZIP de la última versión en la sección **Releases** de este repositorio (archivo `PCCare-vX.Y.Z.zip`).
-2. Haz clic derecho sobre el ZIP, elige **Extraer todo** y abre la carpeta que se crea. No ejecutes nada desde dentro del ZIP.
-3. Haz doble clic en **`Iniciar PC Care.cmd`** y acepta el aviso de administrador.
+Las versiones nuevas se publican en la sección **Releases** de este repositorio: https://github.com/marcoadtup-cmd/PCCare/releases/latest. Dentro del programa, la página **Acerca de y ayuda** abre ese enlace con un clic.
 
-Si Windows muestra "Windows protegió su PC" (SmartScreen), pulsa **Más información** y luego **Ejecutar de todas formas**. Aparece porque el programa no está firmado digitalmente; el código es público y puedes revisarlo completo antes.
+### Opción A: instalador para Windows de 64 bits (recomendado)
 
-Requisitos: Windows 10 u 11, PowerShell 5.1 (viene incluido) y permisos de administrador. Las actualizaciones de aplicaciones usan `winget`, que viene con Windows 11 y con las versiones recientes de Windows 10.
+1. Descarga `PCCare-Setup-X.Y.Z-x64.exe` (el número de versión va en el nombre del archivo).
+2. Verifica el SHA256 (ver más abajo) y ejecútalo. Acepta el aviso de administrador.
+3. Abre **PC Care** desde el menú Inicio.
+
+### Opción B: versión portable (sin instalar)
+
+1. Descarga `PCCare-X.Y.Z-portable.zip`.
+2. Clic derecho, **Extraer todo**. No ejecutes nada desde dentro del ZIP.
+3. Doble clic en **`Iniciar PC Care.cmd`** y acepta el aviso de administrador.
+
+Si Windows muestra "Windows protegió su PC" (SmartScreen), pulsa **Más información** y luego **Ejecutar de todas formas**. Aparece porque el instalador aún no está firmado digitalmente. Está compilado por GitHub Actions a partir del código público de este repositorio, y puedes comprobarlo con la verificación de más abajo.
+
+Requisitos: Windows 11 (probado) o Windows 10 (compatible, sin pruebas propias todavía), PowerShell 5.1 (viene incluido) y permisos de administrador. El instalador es solo para 64 bits; la versión portable funciona igual en el mismo sistema. Las actualizaciones de aplicaciones usan `winget`, que viene con Windows 11 y con las versiones recientes de Windows 10.
 
 ## Qué hace cada página
 
@@ -70,13 +80,17 @@ Más detalle y cómo reportar un problema de seguridad en [SECURITY.md](SECURITY
 
 ## Verificar la descarga
 
-Cada release incluye un archivo `.sha256`. En PowerShell:
+Cada release incluye un archivo `.sha256` por descarga. En PowerShell:
 
 ```powershell
-Get-FileHash .\PCCare-vX.Y.Z.zip -Algorithm SHA256
+Get-FileHash .\PCCare-Setup-X.Y.Z-x64.exe -Algorithm SHA256
 ```
 
-El resultado debe coincidir con el del archivo `.sha256`.
+El resultado debe coincidir con el del archivo `.sha256`. Además, cada archivo lleva una certificación de origen de GitHub. Con la herramienta `gh` puedes comprobar que lo compiló este repositorio y no otro:
+
+```powershell
+gh attestation verify .\PCCare-Setup-X.Y.Z-x64.exe --repo marcoadtup-cmd/PCCare
+```
 
 ## Probar que funciona en tu equipo
 
@@ -96,7 +110,10 @@ Si algo falla, adjunta ese archivo al abrir un Issue.
 
 ## Desinstalar
 
-No instala nada. Borra la carpeta de PC Care y, si quieres, `%LOCALAPPDATA%\PCCare` y `Documentos\PCCare`.
+- Instalador: Configuración, Aplicaciones, **PC Care**, Desinstalar (o el acceso **Desinstalar PC Care** del menú Inicio).
+- Portable: borra la carpeta.
+
+En ambos casos tus datos se conservan. Si quieres quitarlos también, borra `%LOCALAPPDATA%\PCCare` y `Documentos\PCCare`.
 
 ## Contribuir
 

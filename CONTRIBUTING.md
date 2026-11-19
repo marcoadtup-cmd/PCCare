@@ -46,3 +46,6 @@ La validación automática comprueba la sintaxis de todos los `.ps1` en cada Pul
 | `modulos\UI_InformeRed.ps1` | Páginas Informe y Red. |
 | `modulos\AuditoriaPC.ps1` | Auditoría de solo lectura que genera `Informe.html`. |
 | `modulos\OptimizarRed.ps1` | Diagnóstico y mejoras de red. |
+| `instalador\PCCare.iss` | Script de Inno Setup del instalador de 64 bits. |
+| `instalador\compilar.ps1` | Compila el instalador y calcula su SHA256. |
+| `instalador\probar.ps1` | Instala, verifica y desinstala en silencio (lo usa CI). |

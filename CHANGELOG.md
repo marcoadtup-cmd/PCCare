@@ -19,6 +19,27 @@ Revisado por: quien aprobó el cambio
 
 Se omiten los apartados que no apliquen.
 
+## 2.1.0 - 2026-11-19 17:25 (hora de Lima)
+
+Autor: NOVALTEK
+Revisado por: NOVALTEK
+
+### Nuevos módulos
+- Página **Acerca de y ayuda**: versión instalada, datos del equipo para soporte (con botón copiar), contacto y enlaces al repositorio para descargar la última versión, ver todas las versiones, reportar un problema y leer la política de seguridad. Solo abre direcciones del repositorio oficial y solo cuando el usuario pulsa un botón; PC Care sigue sin consultar internet por su cuenta.
+- **Instalador para Windows de 64 bits** (`PCCare-Setup-X.Y.Z-x64.exe`, la versión va en el nombre). Instala en Archivos de programa, crea accesos en el menú Inicio, acceso opcional en el escritorio y desinstalador. Conserva los datos del usuario al desinstalar.
+
+### Mejoras
+- La release publica ahora el instalador y la versión portable (`PCCare-X.Y.Z-portable.zip`), cada uno con su `.sha256` y una certificación de origen de GitHub (`gh attestation verify`).
+- CI: nuevo trabajo `instalador` que compila, instala, compara cada archivo con el repositorio y desinstala en silencio en cada cambio. Al publicar, la etiqueta debe coincidir con la versión del programa.
+- Limpieza de navegadores: ahora incluye Vivaldi y Chromium, y avisa antes de limpiar y en el resultado cuando hay navegadores abiertos.
+
+### Correcciones
+- El selector de modo simulación/real era una casilla que, en modo real, quedaba sin marca y parecía desactivada. Ahora es un botón de estado: verde "SIMULACIÓN ACTIVA" o naranja "MODO REAL ACTIVO", con el texto de lo que hace al pulsarlo.
+- Limpiar el caché de navegadores dejaba parte de los archivos sin borrar mientras el navegador estaba abierto, sin explicar por qué. Ahora se indica qué navegadores están abiertos y que hay que cerrarlos y repetir la limpieza.
+
+### Seguridad
+- Los enlaces del programa se abren con el navegador del usuario (sin permisos de administrador) y se bloquean si no pertenecen al repositorio oficial. La autoprueba lo verifica.
+
 ## 2.0.4 - 2026-11-19 13:50 (hora de Lima)
 
 Autor: NOVALTEK

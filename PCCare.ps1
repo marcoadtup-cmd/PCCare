@@ -35,7 +35,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$VersionApp = '2.0.4'
+$VersionApp = '2.1.0'
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Xaml
 
 $esAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
@@ -158,11 +158,30 @@ $ayuda = {
     }
 
     # --- Basura --------------------------------------------------------------
+    function Get-NombresNavegadores {
+        # Convierte nombres de proceso en nombres legibles, sin repetir.
+        param([string[]]$Procesos)
+        $mapa = @{ chrome = 'Chrome'; msedge = 'Edge'; brave = 'Brave'; firefox = 'Firefox'; vivaldi = 'Vivaldi'; chromium = 'Chromium' }
+        $nombres = New-Object System.Collections.Generic.List[string]
+        foreach ($p in $Procesos) {
+            $clave = ([string]$p).ToLowerInvariant()
+            if ($mapa.ContainsKey($clave) -and -not $nombres.Contains([string]$mapa[$clave])) { $nombres.Add([string]$mapa[$clave]) }
+        }
+        return $nombres.ToArray()
+    }
+
+    function Get-NavegadoresAbiertos {
+        # Mientras un navegador esta abierto mantiene archivos de su cache en uso: no se pueden borrar todos.
+        $procesos = @()
+        try { $procesos = @(Get-Process -Name chrome, msedge, brave, firefox, vivaldi, chromium -ErrorAction SilentlyContinue | ForEach-Object { $_.Name }) } catch { }
+        return Get-NombresNavegadores ([string[]]$procesos)
+    }
+
     function Get-CategoriasBasura {
         $local = $env:LOCALAPPDATA
         $win = $env:windir
         $navegadores = @()
-        foreach ($base in @("$local\Microsoft\Edge\User Data", "$local\Google\Chrome\User Data", "$local\BraveSoftware\Brave-Browser\User Data")) {
+        foreach ($base in @("$local\Microsoft\Edge\User Data", "$local\Google\Chrome\User Data", "$local\BraveSoftware\Brave-Browser\User Data", "$local\Vivaldi\User Data", "$local\Chromium\User Data")) {
             if (-not (Test-Path -LiteralPath $base)) { continue }
             foreach ($perfil in (Get-ChildItem -LiteralPath $base -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq 'Default' -or $_.Name -like 'Profile *' })) {
                 foreach ($sub in @('Cache\Cache_Data', 'Code Cache', 'GPUCache')) { $navegadores += (Join-Path $perfil.FullName $sub) }
@@ -178,7 +197,7 @@ $ayuda = {
             @{ Id = 'TempUsuario'; Nombre = 'Temporales del usuario'; Rutas = $tempUsuario; Horas = 24 },
             @{ Id = 'TempWindows'; Nombre = 'Temporales de Windows'; Rutas = @("$win\Temp"); Horas = 24 },
             @{ Id = 'WUCache'; Nombre = 'Caché de descargas de Windows Update'; Rutas = @("$win\SoftwareDistribution\Download"); Horas = 0 },
-            @{ Id = 'Navegadores'; Nombre = 'Caché de navegadores (Edge, Chrome, Brave, Firefox)'; Rutas = $navegadores; Horas = 0 },
+            @{ Id = 'Navegadores'; Nombre = 'Caché de navegadores (Edge, Chrome, Brave, Vivaldi, Firefox)'; Rutas = $navegadores; Horas = 0 },
             @{ Id = 'Errores'; Nombre = 'Informes y volcados de error'; Rutas = @("$local\CrashDumps", "$env:ProgramData\Microsoft\Windows\WER\ReportArchive", "$env:ProgramData\Microsoft\Windows\WER\ReportQueue", "$win\Minidump"); Horas = 0 },
             @{ Id = 'Papelera'; Nombre = 'Papelera de reciclaje'; Rutas = @(); Horas = 0 }
         )
@@ -352,6 +371,8 @@ $sbLimpiarBasura = {
     foreach ($c in (Get-CategoriasBasura)) {
         if ($Ids -notcontains $c.Id) { continue }
         $liberado = [double]0; $borrados = 0; $omitidos = 0
+        $abiertos = @()
+        if ($c.Id -eq 'Navegadores') { $abiertos = @(Get-NavegadoresAbiertos) }
         if ($c.Id -eq 'Papelera') {
             $p = Get-TamanoPapelera
             if (-not $Simular) { try { Clear-RecycleBin -Force -ErrorAction Stop } catch { } }
@@ -380,6 +401,9 @@ $sbLimpiarBasura = {
         }
         $total += $liberado
         $mensajes.Add(('{0}: {1} en {2} archivos; {3} en uso, omitidos.' -f $c.Nombre, (Format-Tamano $liberado), $borrados, $omitidos))
+        if ($abiertos.Count -gt 0) {
+            $mensajes.Add(('   Navegadores abiertos: {0}. Mientras estén abiertos mantienen parte de su caché en uso y se vuelve a llenar al navegar. Ciérralos y repite la limpieza para borrar todo.' -f ($abiertos -join ', ')))
+        }
     }
     [pscustomobject]@{ Mensajes = $mensajes.ToArray(); Bytes = $total; Simulado = $Simular }
 }
@@ -1058,6 +1082,8 @@ if (-not $AutoPrueba) {
           <TextBlock Text="ACTIVIDAD" Foreground="#8AA0BB" FontSize="11" Margin="8,14,0,6"/>
           <RadioButton x:Name="navTareas" GroupName="nav" Style="{StaticResource Nav}" Content="Tareas"/>
           <RadioButton x:Name="navHist" GroupName="nav" Style="{StaticResource Nav}" Content="Historial"/>
+          <TextBlock Text="AYUDA" Foreground="#8AA0BB" FontSize="11" Margin="8,14,0,6"/>
+          <RadioButton x:Name="navAcerca" GroupName="nav" Style="{StaticResource Nav}" Content="Acerca de y ayuda"/>
         </StackPanel></ScrollViewer>
       </DockPanel>
     </Border>
@@ -1065,8 +1091,16 @@ if (-not $AutoPrueba) {
     <!-- Barra superior -->
     <Border DockPanel.Dock="Top" Background="White" BorderBrush="#E3E7EC" BorderThickness="0,0,0,1" Padding="22,9">
       <DockPanel>
-        <Border x:Name="cajaSim" DockPanel.Dock="Right" Background="#DDF0E2" CornerRadius="8" Padding="12,6" Margin="14,0,0,0">
-          <CheckBox x:Name="chkSimulacion" Content="Simulación activa: no se modifica nada" IsChecked="True" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#12805A"/>
+        <Border x:Name="cajaSim" DockPanel.Dock="Right" Background="Transparent" Margin="14,0,0,0">
+          <ToggleButton x:Name="chkSimulacion" IsChecked="True" Cursor="Hand" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="White" Background="#12805A" Content="SIMULACIÓN ACTIVA (clic para pasar a modo real)" ToolTip="Alterna entre simulación (no modifica nada) y modo real (aplica los cambios).">
+            <ToggleButton.Template>
+              <ControlTemplate TargetType="ToggleButton">
+                <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="14,7">
+                  <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+              </ControlTemplate>
+            </ToggleButton.Template>
+          </ToggleButton>
         </Border>
         <Border Background="#E5F5ED" CornerRadius="10" Padding="10,3" Margin="0,0,8,0" DockPanel.Dock="Right">
           <TextBlock x:Name="txtChipAdmin" Text="✓ Administrador" Foreground="#12805A" FontSize="12" FontWeight="SemiBold"/>
@@ -1689,6 +1723,44 @@ if (-not $AutoPrueba) {
           </Border>
         </StackPanel>
       </ScrollViewer>
+
+      <!-- ============ ACERCA DE Y AYUDA ============ -->
+      <ScrollViewer x:Name="vAcerca" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+        <StackPanel Margin="24,20,10,10">
+          <TextBlock Text="Acerca de PC Care" Style="{StaticResource H1}" Margin="0,0,0,6"/>
+          <TextBlock Style="{StaticResource Mut}" Margin="0,0,0,14" TextWrapping="Wrap" Text="Mantenimiento de Windows de código abierto, licencia MIT. Sin telemetría: no envía datos fuera del equipo."/>
+          <UniformGrid Columns="2">
+            <Border Style="{StaticResource Card}"><StackPanel>
+              <TextBlock Text="Versión instalada" Style="{StaticResource H2}"/>
+              <TextBlock x:Name="txtAcercaVersion" FontWeight="SemiBold" Margin="0,0,0,6"/>
+              <TextBlock x:Name="txtAcercaSistema" TextWrapping="Wrap" Style="{StaticResource Mut}"/>
+            </StackPanel></Border>
+            <Border Style="{StaticResource Card}"><StackPanel>
+              <TextBlock Text="Contacto" Style="{StaticResource H2}"/>
+              <TextBlock Text="NOVALTEK" FontWeight="SemiBold"/>
+              <TextBlock Text="marcoadtup@gmail.com" Style="{StaticResource Mut}"/>
+              <TextBlock Text="https://github.com/marcoadtup-cmd/PCCare" Style="{StaticResource Mut}" Margin="0,6,0,0"/>
+            </StackPanel></Border>
+          </UniformGrid>
+          <Border Style="{StaticResource Card}"><StackPanel>
+            <TextBlock Text="Buscar versiones nuevas" Style="{StaticResource H2}"/>
+            <TextBlock TextWrapping="Wrap" Text="Las versiones nuevas se publican en GitHub. PC Care no se actualiza sola ni consulta internet por su cuenta: abres la página y descargas tú. Cada descarga incluye su archivo .sha256 para comprobar que no fue alterada."/>
+            <WrapPanel Margin="0,8,0,0">
+              <Button x:Name="btnAcercaUltima" Style="{StaticResource Btn}" Content="Descargar la última versión"/>
+              <Button x:Name="btnAcercaVersiones" Style="{StaticResource Btn2}" Content="Ver todas las versiones"/>
+            </WrapPanel>
+          </StackPanel></Border>
+          <Border Style="{StaticResource Card}"><StackPanel>
+            <TextBlock Text="Ayuda y soporte" Style="{StaticResource H2}"/>
+            <TextBlock TextWrapping="Wrap" Text="Si algo falla, copia los datos del equipo y pégalos en el reporte. Incluyen la versión de PC Care, de Windows y de PowerShell; no incluyen archivos ni datos personales."/>
+            <WrapPanel Margin="0,8,0,0">
+              <Button x:Name="btnAcercaCopiar" Style="{StaticResource Btn}" Content="Copiar datos para soporte"/>
+              <Button x:Name="btnAcercaIssues" Style="{StaticResource Btn2}" Content="Reportar un problema"/>
+              <Button x:Name="btnAcercaSeguridad" Style="{StaticResource Btn2}" Content="Política de seguridad"/>
+            </WrapPanel>
+          </StackPanel></Border>
+        </StackPanel>
+      </ScrollViewer>
     </Grid>
   </DockPanel>
 </Window>
@@ -1699,6 +1771,23 @@ function New-Ventana { return [Windows.Markup.XamlReader]::Load((New-Object Syst
 $textoAyuda = $ayuda.ToString() + "`r`n" + $ayudaActualizaciones.ToString()
 . $ayuda   # las mismas funciones quedan disponibles en el hilo de la interfaz
 . $ayudaActualizaciones
+
+# Enlaces de la pagina "Acerca de y ayuda": solo se abren direcciones del repositorio oficial.
+$script:UrlRepo = 'https://github.com/marcoadtup-cmd/PCCare'
+function Test-UrlOficial {
+    param([string]$Url)
+    if (-not $Url) { return $false }
+    if ($Url -eq $script:UrlRepo) { return $true }
+    return $Url.StartsWith(($script:UrlRepo + '/'), [System.StringComparison]::Ordinal)
+}
+function Get-TextoSoporte {
+    # Datos que el usuario puede pegar en un reporte. No incluye archivos ni datos personales.
+    $sistema = Get-CimInstance Win32_OperatingSystem
+    return ('PC Care ' + $VersionApp + "`r`n" +
+        'Windows: ' + $sistema.Caption + ' (compilación ' + $sistema.BuildNumber + ')' + "`r`n" +
+        'PowerShell: ' + $PSVersionTable.PSVersion + "`r`n" +
+        'Arquitectura: ' + $env:PROCESSOR_ARCHITECTURE)
+}
 
 # ===========================================================================
 # AUTOPRUEBA: ejecuta todos los analisis en solo lectura y deja un informe
@@ -1751,7 +1840,8 @@ if ($AutoPrueba) {
         'gridApps', 'gridDrvPend', 'gridDrvInst', 'tabApps', 'tabDrivers', 'btnActAnalizar', 'txtActAviso', 'btnAppsTodo', 'btnAppsSel', 'btnAppsReinst',
         'btnAppsIgnorar', 'btnStore', 'chkTerceros', 'chkSoloPend', 'txtResApps', 'txtResDrv', 'txtFabricante', 'panelHerr', 'btnDrvTodo', 'btnDrvSel',
         'chkDrvPunto', 'chkDrvRespaldo', 'chkInfSinWU', 'btnInfGenerar', 'btnInfAbrir', 'btnInfCarpeta', 'txtInfEstado',
-        'chkRedDescarga', 'btnRedDiag', 'btnRedCarpeta', 'txtRedInforme', 'gridRedCambios', 'btnRedAplicar', 'btnRedReparar', 'txtRedAviso', 'txtRedRevertir'
+        'chkRedDescarga', 'btnRedDiag', 'btnRedCarpeta', 'txtRedInforme', 'gridRedCambios', 'btnRedAplicar', 'btnRedReparar', 'txtRedAviso', 'txtRedRevertir',
+        'navAcerca', 'vAcerca', 'txtAcercaVersion', 'txtAcercaSistema', 'btnAcercaUltima', 'btnAcercaVersiones', 'btnAcercaCopiar', 'btnAcercaIssues', 'btnAcercaSeguridad'
         foreach ($n in $claves) { if (-not $v.FindName($n)) { throw ('falta el control ' + $n) } }
         'carga correcta, {0} controles clave' -f @($claves).Count
     }
@@ -1827,6 +1917,22 @@ if ($AutoPrueba) {
             if (-not $script:PoliticaTipos.ContainsKey([string]$script:MetaTarea[$b])) { throw ('sin política: ' + $nom) }
         }
         '{0} tareas con tipo y política' -f @($nombres).Count
+    }
+    Test-Paso 'Acerca de: enlaces y datos de soporte' {
+        Assert-Igual (Test-UrlOficial ($script:UrlRepo + '/releases')) $true 'releases es oficial'
+        Assert-Igual (Test-UrlOficial ($script:UrlRepo + '/releases/latest')) $true 'ultima versión es oficial'
+        Assert-Igual (Test-UrlOficial 'https://github.com/otro/repo/releases') $false 'otro repositorio se bloquea'
+        Assert-Igual (Test-UrlOficial 'https://github.com/marcoadtup-cmd/PCCare.falso/x') $false 'nombre parecido se bloquea'
+        Assert-Igual (Test-UrlOficial 'http://github.com/marcoadtup-cmd/PCCare/releases') $false 'http se bloquea'
+        $texto = Get-TextoSoporte
+        if ($texto -notmatch [regex]::Escape($VersionApp)) { throw 'el texto de soporte no trae la versión' }
+        'enlaces permitidos y datos de soporte: correcto'
+    }
+    Test-Paso 'Navegadores abiertos (nombres)' {
+        $n = @(Get-NombresNavegadores @('chrome', 'msedge', 'chrome', 'notepad', 'firefox'))
+        Assert-Igual ($n -join ',') 'Chrome,Edge,Firefox' 'nombres de navegadores'
+        $abiertos = @(Get-NavegadoresAbiertos)
+        'navegadores abiertos ahora: {0}' -f $(if ($abiertos.Count -gt 0) { $abiertos -join ', ' } else { 'ninguno' })
     }
     Test-Paso 'Aplicaciones (winget, solo lectura)' { $r = @(& $sbAnalizarApps -Ayuda $textoAyuda); '{0} apps, {1} con actualización' -f $r.Count, @($r | Where-Object { $_.Disponible }).Count }
     if ($Completa) {
@@ -1959,14 +2065,14 @@ catch { }
 function Update-ModoSim {
     $conv = New-Object System.Windows.Media.BrushConverter
     if (Test-Simulacion) {
-        $ui.cajaSim.Background = $conv.ConvertFromString('#DDF0E2')
-        $ui.chkSimulacion.Foreground = $conv.ConvertFromString('#12805A')
-        $ui.chkSimulacion.Content = 'Simulación activa: no se modifica nada'
+        $ui.chkSimulacion.Background = $conv.ConvertFromString('#12805A')
+        $ui.chkSimulacion.Foreground = $conv.ConvertFromString('#FFFFFF')
+        $ui.chkSimulacion.Content = 'SIMULACIÓN ACTIVA (clic para pasar a modo real)'
     }
     else {
-        $ui.cajaSim.Background = $conv.ConvertFromString('#FCE9CF')
-        $ui.chkSimulacion.Foreground = $conv.ConvertFromString('#8A4300')
-        $ui.chkSimulacion.Content = 'MODO REAL: los cambios se aplican'
+        $ui.chkSimulacion.Background = $conv.ConvertFromString('#C2570C')
+        $ui.chkSimulacion.Foreground = $conv.ConvertFromString('#FFFFFF')
+        $ui.chkSimulacion.Content = 'MODO REAL ACTIVO (clic para volver a simulación)'
     }
 }
 Update-ModoSim
@@ -2322,7 +2428,12 @@ function Start-LimpiezaBasura {
     $nombres = ($filas | ForEach-Object { [string]$_['Nombre'] }) -join ', '
     if (-not $SinConfirmar) {
         $lista = ($filas | ForEach-Object { '  - {0}: {1}' -f $_['Nombre'], $_['Tamano'] }) -join "`n"
-        if (-not (Confirm-Accion ("Se eliminarán de forma definitiva:`n`n{0}`n`n¿Continuar?" -f $lista) 'Limpiar archivos basura')) { return }
+        $avisoNav = ''
+        if ($ids -contains 'Navegadores') {
+            $abiertos = @(Get-NavegadoresAbiertos)
+            if ($abiertos.Count -gt 0) { $avisoNav = ("`n`nNavegadores abiertos: {0}. Ciérralos antes para borrar todo su caché; si no, parte quedará en uso." -f ($abiertos -join ', ')) }
+        }
+        if (-not (Confirm-Accion (("Se eliminarán de forma definitiva:`n`n{0}" -f $lista) + $avisoNav + "`n`n¿Continuar?") 'Limpiar archivos basura')) { return }
     }
     Add-TareaLimpiezaBasura -Ids ([string[]]$ids) -Opciones $nombres
     Start-AnalisisBasura
@@ -2553,14 +2664,20 @@ foreach ($nombreMod in 'UI_Actualizaciones.ps1', 'UI_InformeRed.ps1') {
 # ===========================================================================
 # EVENTOS
 # ===========================================================================
+function Update-Acerca {
+    $ui.txtAcercaVersion.Text = 'PC Care ' + $VersionApp
+    try { $ui.txtAcercaSistema.Text = Get-TextoSoporte }
+    catch { $ui.txtAcercaSistema.Text = 'No se pudieron leer los datos del equipo.' }
+}
 function Show-Vista {
     param([string]$Nombre)
-    foreach ($v in 'vPanel', 'vLimpieza', 'vRend', 'vMonitor', 'vSeg', 'vAct', 'vRed', 'vInforme', 'vTareas', 'vHist') {
+    foreach ($v in 'vPanel', 'vLimpieza', 'vRend', 'vMonitor', 'vSeg', 'vAct', 'vRed', 'vInforme', 'vTareas', 'vHist', 'vAcerca') {
         if ($v -eq $Nombre) { $ui[$v].Visibility = 'Visible' } else { $ui[$v].Visibility = 'Collapsed' }
     }
-    $titulos = @{ vPanel = 'Panel'; vLimpieza = 'Limpieza'; vRend = 'Rendimiento'; vMonitor = 'Monitor'; vSeg = 'Seguridad'; vAct = 'Actualizaciones'; vRed = 'Red'; vInforme = 'Informe del equipo'; vTareas = 'Tareas'; vHist = 'Historial' }
+    $titulos = @{ vPanel = 'Panel'; vLimpieza = 'Limpieza'; vRend = 'Rendimiento'; vMonitor = 'Monitor'; vSeg = 'Seguridad'; vAct = 'Actualizaciones'; vRed = 'Red'; vInforme = 'Informe del equipo'; vTareas = 'Tareas'; vHist = 'Historial'; vAcerca = 'Acerca de y ayuda' }
     $ui.txtMigas.Text = 'PC Care  /  ' + $titulos[$Nombre]
     if ($Nombre -eq 'vHist') { Update-Historial }
+    if ($Nombre -eq 'vAcerca') { Update-Acerca }
     if ($Nombre -eq 'vTareas') { Update-TablaTareas; Update-ResumenSeleccion; Update-Interrumpidas }
 }
 $ui.navPanel.Add_Checked({ Show-Vista 'vPanel' })
@@ -2573,6 +2690,24 @@ $ui.navRed.Add_Checked({ Show-Vista 'vRed' })
 $ui.navInforme.Add_Checked({ Show-Vista 'vInforme' })
 $ui.navTareas.Add_Checked({ Show-Vista 'vTareas' })
 $ui.navHist.Add_Checked({ Show-Vista 'vHist' })
+$ui.navAcerca.Add_Checked({ Show-Vista 'vAcerca' })
+
+# Pagina Acerca de y ayuda
+function Open-EnlaceGitHub {
+    # explorer.exe abre el navegador del usuario sin permisos de administrador.
+    param([string]$Url)
+    if (-not (Test-UrlOficial $Url)) { Write-Registro 'Enlace bloqueado: no es del repositorio oficial de PC Care.'; return }
+    try { Start-Process -FilePath 'explorer.exe' -ArgumentList $Url }
+    catch { Write-Registro ('No se pudo abrir el navegador. Copia esta dirección: ' + $Url) }
+}
+$ui.btnAcercaUltima.Add_Click({ Open-EnlaceGitHub ($script:UrlRepo + '/releases/latest') })
+$ui.btnAcercaVersiones.Add_Click({ Open-EnlaceGitHub ($script:UrlRepo + '/releases') })
+$ui.btnAcercaIssues.Add_Click({ Open-EnlaceGitHub ($script:UrlRepo + '/issues') })
+$ui.btnAcercaSeguridad.Add_Click({ Open-EnlaceGitHub ($script:UrlRepo + '/security/policy') })
+$ui.btnAcercaCopiar.Add_Click({
+        try { [System.Windows.Clipboard]::SetText((Get-TextoSoporte)); Write-Registro 'Datos para soporte copiados al portapapeles.' }
+        catch { Write-Registro 'No se pudo copiar al portapapeles.' }
+    })
 
 # Pagina Tareas
 $ui.btnReanudar.Add_Click({ Invoke-ReanudarTareas })
