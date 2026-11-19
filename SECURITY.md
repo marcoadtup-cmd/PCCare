@@ -4,6 +4,8 @@
 
 Si encuentras una falla que pueda borrar datos, escalar privilegios o filtrar información, **no la publiques en un Issue abierto**. Usa la opción "Report a vulnerability" de la pestaña Security de este repositorio. Incluye pasos para reproducirla y la versión de PC Care.
 
+Si no puedes usar esa opción, escribe a **marcoadtup@gmail.com** con el asunto "PC Care seguridad".
+
 ## Diseño
 
 - Modo simulación al arrancar. Los cambios reales exigen desactivarlo y confirmar.

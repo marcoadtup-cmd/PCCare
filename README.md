@@ -102,8 +102,12 @@ No instala nada. Borra la carpeta de PC Care y, si quieres, `%LOCALAPPDATA%\PCCa
 
 Los aportes son bienvenidos. Lee [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Contacto
+
+Para consultas, ideas o reportes que no sean públicos: **marcoadtup@gmail.com**. Para errores y mejoras, usa los Issues de este repositorio.
+
 ## Licencia y aviso
 
 Licencia MIT, ver [LICENSE](LICENSE). El software se entrega tal cual, sin garantía. Haz una copia de seguridad antes de aplicar cambios en modo real.
 
-PC Care es un proyecto independiente. No está afiliado ni respaldado por IObit, Microsoft ni ningún otro fabricante. Los nombres de productos que se mencionan pertenecen a sus dueños.
+PC Care es un proyecto de NOVALTEK, independiente. No está afiliado ni respaldado por IObit, Microsoft ni ningún otro fabricante. Los nombres de productos que se mencionan pertenecen a sus dueños.

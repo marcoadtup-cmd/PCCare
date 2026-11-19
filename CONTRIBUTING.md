@@ -2,6 +2,8 @@
 
 Gracias por querer mejorar PC Care. Un Issue claro ya es una gran ayuda.
 
+Contacto: marcoadtup@gmail.com
+
 ## Reportar un error
 
 Adjunta:
