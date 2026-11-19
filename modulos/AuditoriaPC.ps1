@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
     Auditoria de seguridad, inventario de software, actualizaciones pendientes y rendimiento para Windows 11.

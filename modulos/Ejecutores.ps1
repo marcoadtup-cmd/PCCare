@@ -1,4 +1,4 @@
-# Ejecutores.ps1
+﻿# Ejecutores.ps1
 # Tareas en segundo plano que lanzan los modulos independientes (AuditoriaPC.ps1 y OptimizarRed.ps1)
 # desde PC Care. Usan Invoke-Exe, que viene en $ayudaActualizaciones (Actualizaciones.ps1).
 # Cada modulo sigue pudiendose ejecutar solo, pero desde PC Care pasa por la cola de tareas y queda en el historial.
