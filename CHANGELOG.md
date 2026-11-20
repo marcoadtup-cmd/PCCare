@@ -19,6 +19,26 @@ Revisado por: quien aprobó el cambio
 
 Se omiten los apartados que no apliquen.
 
+## 2.2.0 - 2026-11-20 08:33 (hora de Lima)
+
+Autor: NOVALTEK
+Revisado por: NOVALTEK
+
+### Nuevos módulos
+- **Interfaz en español e inglés.** Lista **Idioma / Language** en la barra superior (junto al botón de simulación). Cambiarla guarda la elección en `%LOCALAPPDATA%\PCCare\config.json` y ofrece reiniciar PC Care para aplicarla (si hay tareas en curso, se aplica la próxima vez que se abra). Sin elección guardada, usa el idioma de Windows: español si es español, inglés en cualquier otro caso. También se puede forzar con `PCCare.ps1 -Idioma en` o `-Idioma es`.
+- `modulos\Idioma.ps1` (motor) y `modulos\idioma\en.tsv` (diccionario ES a EN, 800 entradas). Se traduce solo lo que se ve: botones, menús, tablas, mensajes, confirmaciones y el informe HTML (se abre una copia `Informe_EN.html`). Los datos internos, el historial y los archivos de configuración siguen en español para que nada dependa del idioma. Si falta una traducción se muestra el texto en español.
+- **Proceso de firma digital** del instalador con SignPath Foundation, integrado en `publicar.yml`. Se activa solo cuando el proyecto esté aprobado en SignPath y existan la variable `SIGNPATH_ORGANIZATION_ID` y el secreto `SIGNPATH_API_TOKEN` en el repositorio. Cada versión se firma tras una aprobación manual, se comprueba que la firma sea válida y el `.sha256` publicado es el del archivo firmado. Sin esa configuración, la release sale sin firma como hasta ahora.
+- `pruebas\Idioma.Tests.ps1`: pruebas del sistema de idiomas.
+
+### Mejoras
+- CI: nuevo paso **obligatorio** que ejecuta las pruebas de idiomas (diccionario bien formado, plantillas, XAML traducido válido, informe) y bloquea el cambio si fallan.
+- El instalador de prueba también compara `modulos\idioma\en.tsv` con el del repositorio.
+- Las notas de cada release indican si el instalador está firmado y, en ese caso, incluyen la atribución a SignPath. Están en español e inglés.
+- README y SECURITY: sección de firma digital, política de firma de código, roles y declaración de privacidad.
+
+### Actualizaciones
+- Versión 2.2.0.
+
 ## 2.1.0 - 2026-11-19 17:25 (hora de Lima)
 
 Autor: NOVALTEK

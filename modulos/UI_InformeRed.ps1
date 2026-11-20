@@ -30,7 +30,7 @@ function Start-Informe {
 
 $ui.btnInfGenerar.Add_Click({ Start-Informe })
 $ui.btnInfAbrir.Add_Click({
-        if ($script:ultimoInforme -and (Test-Path -LiteralPath $script:ultimoInforme)) { Start-Process -FilePath $script:ultimoInforme }
+        if ($script:ultimoInforme -and (Test-Path -LiteralPath $script:ultimoInforme)) { Start-Process -FilePath (Convert-InformeIdioma $script:ultimoInforme) }
     })
 $ui.btnInfCarpeta.Add_Click({
         if (-not (Test-Path -LiteralPath $CarpetaInformes)) { New-Item -ItemType Directory -Path $CarpetaInformes -Force | Out-Null }

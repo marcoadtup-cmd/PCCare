@@ -23,6 +23,51 @@ jobs:
           $v = $env:ETIQUETA.TrimStart('v')
           .\instalador\compilar.ps1 -Version $v
 
+      # ---- Firma digital (SignPath Foundation) ----
+      # Solo corre si el proyecto ya fue aprobado y configurado en SignPath:
+      #   variable del repositorio SIGNPATH_ORGANIZATION_ID y secreto SIGNPATH_API_TOKEN.
+      # Sin esas dos cosas la release sale sin firma, como hasta ahora.
+      # [POR CONFIRMAR] nombres exactos de las entradas y la version de la accion en
+      # https://docs.signpath.io/trusted-build-systems/github antes de la primera firma.
+      - name: Subir el instalador sin firmar (entrada para SignPath)
+        if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+        id: sinfirmar
+        uses: actions/upload-artifact@v7
+        with:
+          name: instalador-sin-firmar
+          path: salida/PCCare-Setup-*-x64.exe
+
+      - name: Firmar con SignPath (la aprobación de cada versión es manual)
+        if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_POLICY_SLUG }}
+          github-artifact-id: ${{ steps.sinfirmar.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 7200
+          output-artifact-directory: firmado
+
+      - name: Reemplazar por el instalador firmado y comprobar la firma
+        if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+        shell: powershell
+        env:
+          ETIQUETA: ${{ github.ref_name }}
+        run: |
+          $v = $env:ETIQUETA.TrimStart('v')
+          $nombre = "PCCare-Setup-$v-x64.exe"
+          $firmado = Get-ChildItem -Path firmado -Recurse -Filter $nombre | Select-Object -First 1
+          if (-not $firmado) { throw "SignPath no devolvió $nombre" }
+          Copy-Item -LiteralPath $firmado.FullName -Destination "salida\$nombre" -Force
+          $firma = Get-AuthenticodeSignature -LiteralPath "salida\$nombre"
+          Write-Host ("Firma: {0} | Firmante: {1}" -f $firma.Status, $firma.SignerCertificate.Subject)
+          if ($firma.Status -ne 'Valid') { throw ("La firma no es válida: " + $firma.Status) }
+          # el SHA256 publicado debe ser el del archivo firmado
+          $h = (Get-FileHash "salida\$nombre" -Algorithm SHA256).Hash.ToLower()
+          [System.IO.File]::WriteAllText("$PWD\salida\$nombre.sha256", "$h  $nombre`n", (New-Object System.Text.UTF8Encoding($false)))
+
       - name: Probar el instalador (instalar, comparar archivos, desinstalar)
         shell: powershell
         run: .\instalador\probar.ps1
@@ -53,8 +98,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ETIQUETA: ${{ github.ref_name }}
+          FIRMADO: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' && 'si' || 'no' }}
         run: |
           $v = $env:ETIQUETA.TrimStart('v')
+          if ($env:FIRMADO -eq 'si') {
+            $avisoFirma = "El instalador está firmado digitalmente (Authenticode). Free code signing provided by SignPath.io, certificate by SignPath Foundation. Comprueba la firma con clic derecho, Propiedades, Firmas digitales, o con ``Get-AuthenticodeSignature``. La versión portable (ZIP) no se firma: verifica su SHA256 y su attestation."
+            $avisoFirmaEn = "The installer is digitally signed (Authenticode). Free code signing provided by SignPath.io, certificate by SignPath Foundation. The portable ZIP is not signed: verify its SHA256 and attestation."
+          }
+          else {
+            $avisoFirma = "El instalador aún no está firmado digitalmente, por lo que Windows puede mostrar ""Windows protegió su PC"". Pulsa **Más información** y luego **Ejecutar de todas formas**, después de verificar el SHA256."
+            $avisoFirmaEn = "The installer is not digitally signed yet, so Windows may show ""Windows protected your PC"". Click **More info** and then **Run anyway**, after verifying the SHA256."
+          }
           $notas = @"
           ## Descarga
 
@@ -70,9 +124,13 @@ jobs:
 
           El hash debe coincidir con el archivo ``.sha256``. El comando ``gh attestation verify`` comprueba que el archivo lo compiló GitHub Actions desde este repositorio.
 
-          ## Aviso de SmartScreen
+          ## Firma digital y SmartScreen
 
-          El instalador aún no está firmado digitalmente, por lo que Windows puede mostrar "Windows protegió su PC". Pulsa **Más información** y luego **Ejecutar de todas formas**, después de verificar el SHA256.
+          $avisoFirma
+
+          ## Language
+
+          PC Care includes a Spanish and English interface. Use the language list at the top right of the window. $avisoFirmaEn
 
           ## Cambios
 

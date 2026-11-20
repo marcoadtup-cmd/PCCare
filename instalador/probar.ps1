@@ -32,6 +32,7 @@ Write-Host '== 3. Cada archivo instalado debe ser idéntico al del repositorio'
 $rutas = New-Object System.Collections.Generic.List[string]
 $rutas.Add('PCCare.ps1')
 foreach ($m in Get-ChildItem -LiteralPath (Join-Path $raiz 'modulos') -File) { $rutas.Add('modulos\' + $m.Name) }
+foreach ($m in Get-ChildItem -LiteralPath (Join-Path $raiz 'modulos\idioma') -File) { $rutas.Add('modulos\idioma\' + $m.Name) }
 for ($i = 0; $i -lt $rutas.Count; $i++) {
     $rel = $rutas[$i]
     $rutaInst = Join-Path $dir $rel

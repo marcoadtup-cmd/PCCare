@@ -31,11 +31,12 @@
 param(
     [switch]$AutoPrueba,
     [switch]$Completa,
+    [ValidateSet('es', 'en')][string]$Idioma,
     [string]$CarpetaDatos = (Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PCCare')
 )
 
 $ErrorActionPreference = 'Stop'
-$VersionApp = '2.1.0'
+$VersionApp = '2.2.0'
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Xaml
 
 $esAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
@@ -45,9 +46,10 @@ if (-not $esAdmin) {
         $argumentos = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', ('"{0}"' -f $PSCommandPath))
         if ($AutoPrueba) { $argumentos += '-AutoPrueba' }
         if ($Completa) { $argumentos += '-Completa' }
+        if ($Idioma) { $argumentos += '-Idioma'; $argumentos += $Idioma }
         Start-Process -FilePath (Get-Process -Id $PID).Path -Verb RunAs -ArgumentList $argumentos
     }
-    catch { [void][System.Windows.MessageBox]::Show('PC Care necesita permisos de administrador.', 'PC Care') }
+    catch { [void][System.Windows.MessageBox]::Show("PC Care necesita permisos de administrador.`nPC Care needs administrator permissions.", 'PC Care') }
     exit
 }
 
@@ -869,14 +871,21 @@ $sbRestauracion = {
 # MODULOS: cola persistente, actualizaciones, informe y red (carpeta "modulos")
 # ===========================================================================
 $RaizApp = $PSScriptRoot
-foreach ($nombreMod in 'Cola.ps1', 'Actualizaciones.ps1', 'Ejecutores.ps1') {
+foreach ($nombreMod in 'Idioma.ps1', 'Cola.ps1', 'Actualizaciones.ps1', 'Ejecutores.ps1') {
     $rutaMod = Join-Path $RaizApp ('modulos\' + $nombreMod)
     if (-not (Test-Path -LiteralPath $rutaMod)) {
-        [void][System.Windows.MessageBox]::Show((('Falta el archivo modulos\{0}.' -f $nombreMod) + "`n`nExtrae TODA la carpeta del ZIP (no solo PCCare.ps1) y vuelve a abrir PC Care."), 'PC Care')
+        [void][System.Windows.MessageBox]::Show((('Falta el archivo modulos\{0}.' -f $nombreMod) + "`n`nExtrae TODA la carpeta del ZIP (no solo PCCare.ps1) y vuelve a abrir PC Care.`n`nMissing file modulos\{0}. Extract the WHOLE ZIP folder (not just PCCare.ps1) and open PC Care again." -f $nombreMod), 'PC Care')
         exit 1
     }
     . $rutaMod
 }
+
+# Idioma de la interfaz: parametro -Idioma, luego el guardado en config.json y, si no hay, el de Windows
+$rutaConfig = Join-Path $env:LOCALAPPDATA 'PCCare\config.json'
+$idiomaInicial = $Idioma
+if (-not $idiomaInicial) { $idiomaInicial = Get-IdiomaGuardado $rutaConfig }
+if (-not $idiomaInicial) { $idiomaInicial = Get-IdiomaSistema }
+Set-IdiomaActual -Codigo $idiomaInicial -Raiz $RaizApp
 
 # Tipo de cada tarea: decide la politica de reanudacion (ver modulos\Cola.ps1)
 $script:MetaTarea = @{}
@@ -896,7 +905,7 @@ foreach ($k in $mapaTipos.Keys) { $script:MetaTarea[$mapaTipos[$k]] = [string]$k
 if (-not $AutoPrueba) {
     $script:mutexApp = New-Object System.Threading.Mutex($false, 'Local\PCCare_UnaSolaInstancia')
     if (-not $script:mutexApp.WaitOne(0)) {
-        [void][System.Windows.MessageBox]::Show('PC Care ya está abierto en este equipo. Búscalo en la barra de tareas.', 'PC Care')
+        [void][System.Windows.MessageBox]::Show((T 'PC Care ya está abierto en este equipo. Búscalo en la barra de tareas.'), 'PC Care')
         exit 0
     }
 }
@@ -1102,6 +1111,10 @@ if (-not $AutoPrueba) {
             </ToggleButton.Template>
           </ToggleButton>
         </Border>
+        <ComboBox x:Name="cmbIdioma" DockPanel.Dock="Right" Width="104" Margin="14,0,0,0" VerticalAlignment="Center" ToolTip="Idioma / Language" SelectedIndex="0">
+          <ComboBoxItem Tag="es" Content="Español"/>
+          <ComboBoxItem Tag="en" Content="English"/>
+        </ComboBox>
         <Border Background="#E5F5ED" CornerRadius="10" Padding="10,3" Margin="0,0,8,0" DockPanel.Dock="Right">
           <TextBlock x:Name="txtChipAdmin" Text="✓ Administrador" Foreground="#12805A" FontSize="12" FontWeight="SemiBold"/>
         </Border>
@@ -1766,6 +1779,11 @@ if (-not $AutoPrueba) {
 </Window>
 '@
 
+# Textos fijos del XAML en el idioma elegido (en espanol no se toca nada)
+if ($script:IdiomaActual -eq 'en') {
+    try { $xaml = [xml](Convert-XamlIdioma $xaml.OuterXml) }
+    catch { $script:IdFallas++ }
+}
 function New-Ventana { return [Windows.Markup.XamlReader]::Load((New-Object System.Xml.XmlNodeReader $xaml)) }
 
 $textoAyuda = $ayuda.ToString() + "`r`n" + $ayudaActualizaciones.ToString()
@@ -1841,7 +1859,7 @@ if ($AutoPrueba) {
         'btnAppsIgnorar', 'btnStore', 'chkTerceros', 'chkSoloPend', 'txtResApps', 'txtResDrv', 'txtFabricante', 'panelHerr', 'btnDrvTodo', 'btnDrvSel',
         'chkDrvPunto', 'chkDrvRespaldo', 'chkInfSinWU', 'btnInfGenerar', 'btnInfAbrir', 'btnInfCarpeta', 'txtInfEstado',
         'chkRedDescarga', 'btnRedDiag', 'btnRedCarpeta', 'txtRedInforme', 'gridRedCambios', 'btnRedAplicar', 'btnRedReparar', 'txtRedAviso', 'txtRedRevertir',
-        'navAcerca', 'vAcerca', 'txtAcercaVersion', 'txtAcercaSistema', 'btnAcercaUltima', 'btnAcercaVersiones', 'btnAcercaCopiar', 'btnAcercaIssues', 'btnAcercaSeguridad'
+        'cmbIdioma', 'navAcerca', 'vAcerca', 'txtAcercaVersion', 'txtAcercaSistema', 'btnAcercaUltima', 'btnAcercaVersiones', 'btnAcercaCopiar', 'btnAcercaIssues', 'btnAcercaSeguridad'
         foreach ($n in $claves) { if (-not $v.FindName($n)) { throw ('falta el control ' + $n) } }
         'carga correcta, {0} controles clave' -f @($claves).Count
     }
@@ -1973,6 +1991,10 @@ $so = Get-CimInstance Win32_OperatingSystem
 $equipo = Get-CimInstance Win32_ComputerSystem
 $ui.txtEquipo.Text = '{0}  |  {1} {2}  |  {3}' -f $env:COMPUTERNAME, $equipo.Manufacturer, $equipo.Model, $so.Caption
 $ui.txtVersion.Text = 'Versión ' + $VersionApp
+Register-TraduccionVisual -Ventana $ventana -Controles $ui
+$script:idiomaListo = $false
+foreach ($it in $ui.cmbIdioma.Items) { if ([string]$it.Tag -eq $script:IdiomaActual) { $ui.cmbIdioma.SelectedItem = $it } }
+$script:idiomaListo = $true
 
 function New-Tabla {
     param([string[]]$Columnas)
@@ -2016,7 +2038,7 @@ try {
 catch { }
 function Write-Registro {
     param([string]$Texto)
-    $ui.txtLog.AppendText(('[{0}] {1}' -f (Get-Date).ToString('HH:mm:ss'), $Texto) + "`r`n")
+    $ui.txtLog.AppendText(('[{0}] {1}' -f (Get-Date).ToString('HH:mm:ss'), (T $Texto)) + "`r`n")
     $ui.txtLog.ScrollToEnd()
     try {
         if (-not (Test-Path -LiteralPath $CarpetaDatos)) { New-Item -ItemType Directory -Path $CarpetaDatos -Force | Out-Null }
@@ -2049,12 +2071,12 @@ function Get-Marcadas {
 function Test-Simulacion { return [bool]$ui.chkSimulacion.IsChecked }
 function Confirm-Accion {
     param([string]$Texto, [string]$Titulo = 'PC Care')
-    if (Test-Simulacion) { $Texto = "MODO SIMULACIÓN: no se modificará nada, solo se mostrará el resultado esperado.`n`n" + $Texto }
-    return ([System.Windows.MessageBox]::Show($Texto, $Titulo, 'YesNo', 'Question') -eq 'Yes')
+    if (Test-Simulacion) { $Texto = (T "MODO SIMULACIÓN: no se modificará nada, solo se mostrará el resultado esperado.`n`n") + (T $Texto) }
+    else { $Texto = T $Texto }
+    return ([System.Windows.MessageBox]::Show($Texto, (T $Titulo), 'YesNo', 'Question') -eq 'Yes')
 }
 
 # Configuracion por equipo: la simulacion queda activa hasta que el usuario la quite en ESE equipo
-$rutaConfig = Join-Path $env:LOCALAPPDATA 'PCCare\config.json'
 try {
     if (Test-Path -LiteralPath $rutaConfig) {
         $cfg = Get-Content -LiteralPath $rutaConfig -Raw | ConvertFrom-Json
@@ -2067,19 +2089,20 @@ function Update-ModoSim {
     if (Test-Simulacion) {
         $ui.chkSimulacion.Background = $conv.ConvertFromString('#12805A')
         $ui.chkSimulacion.Foreground = $conv.ConvertFromString('#FFFFFF')
-        $ui.chkSimulacion.Content = 'SIMULACIÓN ACTIVA (clic para pasar a modo real)'
+        $ui.chkSimulacion.Content = T 'SIMULACIÓN ACTIVA (clic para pasar a modo real)'
     }
     else {
         $ui.chkSimulacion.Background = $conv.ConvertFromString('#C2570C')
         $ui.chkSimulacion.Foreground = $conv.ConvertFromString('#FFFFFF')
-        $ui.chkSimulacion.Content = 'MODO REAL ACTIVO (clic para volver a simulación)'
+        $ui.chkSimulacion.Content = T 'MODO REAL ACTIVO (clic para volver a simulación)'
     }
 }
 Update-ModoSim
 function Save-Config {
     try {
         New-Item -ItemType Directory -Path (Split-Path $rutaConfig) -Force | Out-Null
-        @{ Simulacion = (Test-Simulacion) } | ConvertTo-Json | Set-Content -LiteralPath $rutaConfig -Encoding UTF8
+        $jsonSim = if (Test-Simulacion) { 'true' } else { 'false' }
+        ('{{"Simulacion": {0}, "Idioma": "{1}"}}' -f $jsonSim, $script:IdiomaElegido) | Set-Content -LiteralPath $rutaConfig -Encoding UTF8
     }
     catch { }
 }
@@ -2171,6 +2194,7 @@ function Update-NavTareas {
     if ($script:actual) { $n++ }
     $txt = 'Tareas'
     if ($n -gt 0) { $txt = 'Tareas ({0})' -f $n }
+    $txt = T $txt
     if ([string]$ui.navTareas.Content -ne $txt) { $ui.navTareas.Content = $txt }
 }
 
@@ -2536,7 +2560,7 @@ function Switch-Turbo {
             param($res, $ctx, $fallo)
             $script:turboActivo = $false
             $script:planPrevio = ''
-            $ui.btnTurbo.Content = 'Activar TurboPC'; $ui.btnTurbo2.Content = 'Activar TurboPC'
+            $ui.btnTurbo.Content = T 'Activar TurboPC'; $ui.btnTurbo2.Content = T 'Activar TurboPC'
             if ($res) { foreach ($m in $res[0].Mensajes) { Write-Registro ('   ' + $m) } }
             $ui.txtTurbo.Text = 'TurboPC desactivado.'
         } -Opciones 'Volver al plan de energía anterior'
@@ -2554,7 +2578,7 @@ function Switch-Turbo {
         if (Test-Simulacion) { $ui.txtTurbo.Text = 'Simulación de TurboPC completada. Revisa el registro de actividad.'; $ui.expLog.IsExpanded = $true; return }
         $script:turboActivo = $true
         $script:planPrevio = [string]$res[0].PlanPrevio
-        $ui.btnTurbo.Content = 'Desactivar TurboPC'; $ui.btnTurbo2.Content = 'Desactivar TurboPC'
+        $ui.btnTurbo.Content = T 'Desactivar TurboPC'; $ui.btnTurbo2.Content = T 'Desactivar TurboPC'
         $ui.txtTurbo.Text = 'TurboPC activo. RAM liberada: ' + (Format-Tamano $res[0].LiberadoBytes)
     } -Opciones $(if ($nombres.Count -gt 0) { 'Cerrar: ' + ($nombres -join ', ') } else { 'Alto rendimiento y liberar RAM' })
     Start-Procesos
@@ -2655,7 +2679,7 @@ $relojMonitor.Add_Tick({
 foreach ($nombreMod in 'UI_Actualizaciones.ps1', 'UI_InformeRed.ps1') {
     $rutaMod = Join-Path $RaizApp ('modulos\' + $nombreMod)
     if (-not (Test-Path -LiteralPath $rutaMod)) {
-        [void][System.Windows.MessageBox]::Show(('Falta el archivo modulos\{0}.' -f $nombreMod), 'PC Care')
+        [void][System.Windows.MessageBox]::Show((T ('Falta el archivo modulos\{0}.' -f $nombreMod)), 'PC Care')
         exit 1
     }
     . $rutaMod
@@ -2675,7 +2699,7 @@ function Show-Vista {
         if ($v -eq $Nombre) { $ui[$v].Visibility = 'Visible' } else { $ui[$v].Visibility = 'Collapsed' }
     }
     $titulos = @{ vPanel = 'Panel'; vLimpieza = 'Limpieza'; vRend = 'Rendimiento'; vMonitor = 'Monitor'; vSeg = 'Seguridad'; vAct = 'Actualizaciones'; vRed = 'Red'; vInforme = 'Informe del equipo'; vTareas = 'Tareas'; vHist = 'Historial'; vAcerca = 'Acerca de y ayuda' }
-    $ui.txtMigas.Text = 'PC Care  /  ' + $titulos[$Nombre]
+    $ui.txtMigas.Text = 'PC Care  /  ' + (T $titulos[$Nombre])
     if ($Nombre -eq 'vHist') { Update-Historial }
     if ($Nombre -eq 'vAcerca') { Update-Acerca }
     if ($Nombre -eq 'vTareas') { Update-TablaTareas; Update-ResumenSeleccion; Update-Interrumpidas }
@@ -2709,18 +2733,41 @@ $ui.btnAcercaCopiar.Add_Click({
         catch { Write-Registro 'No se pudo copiar al portapapeles.' }
     })
 
+# Idioma: se guarda y se aplica al reiniciar PC Care
+$ui.cmbIdioma.Add_SelectionChanged({
+        if (-not $script:idiomaListo) { return }
+        $nuevo = [string]$ui.cmbIdioma.SelectedItem.Tag
+        if (-not $nuevo -or $nuevo -eq $script:IdiomaActual) { return }
+        $script:IdiomaElegido = $nuevo
+        Save-Config
+        $ocupado = ($script:actual -or $script:cola.Count -gt 0)
+        if ($ocupado) {
+            [void][System.Windows.MessageBox]::Show("Idioma guardado. Hay tareas en curso: se aplicará la próxima vez que abras PC Care.`nLanguage saved. Tasks are running: it will apply the next time you open PC Care.", 'PC Care')
+            return
+        }
+        $r = [System.Windows.MessageBox]::Show("¿Reiniciar PC Care ahora para aplicar el idioma?`nRestart PC Care now to apply the language?", 'PC Care', 'YesNo', 'Question')
+        if ($r -ne 'Yes') { return }
+        try {
+            $exe = (Get-Process -Id $PID).Path
+            $orden = 'ping -n 3 127.0.0.1 >nul & start "" "{0}" -NoProfile -ExecutionPolicy Bypass -File "{1}"' -f $exe, $PSCommandPath
+            Start-Process -FilePath 'cmd.exe' -ArgumentList @('/c', $orden) -WindowStyle Hidden
+            $ventana.Close()
+        }
+        catch { [void][System.Windows.MessageBox]::Show("No se pudo reiniciar. Abre PC Care de nuevo.`nCould not restart. Open PC Care again.", 'PC Care') }
+    })
+
 # Pagina Tareas
 $ui.btnReanudar.Add_Click({ Invoke-ReanudarTareas })
 $ui.btnDescartar.Add_Click({ Invoke-DescartarInterrumpidas })
 $ui.btnPausar.Add_Click({
         $script:pausada = -not $script:pausada
-        if ($script:pausada) { $ui.btnPausar.Content = 'Reanudar cola'; Write-Registro 'Cola en pausa: la tarea en curso termina y las siguientes esperan.' }
-        else { $ui.btnPausar.Content = 'Pausar cola'; Write-Registro 'Cola reanudada.' }
+        if ($script:pausada) { $ui.btnPausar.Content = T 'Reanudar cola'; Write-Registro 'Cola en pausa: la tarea en curso termina y las siguientes esperan.' }
+        else { $ui.btnPausar.Content = T 'Pausar cola'; Write-Registro 'Cola reanudada.' }
         $script:tablaSucia = $true
     })
 $ui.btnQuitarPend.Add_Click({
         if ($script:cola.Count -eq 0) { return }
-        $r = [System.Windows.MessageBox]::Show(('Se quitarán {0} tareas que aún no empezaron. La tarea en curso no se toca. ¿Continuar?' -f $script:cola.Count), 'PC Care', 'YesNo', 'Question')
+        $r = [System.Windows.MessageBox]::Show((T ('Se quitarán {0} tareas que aún no empezaron. La tarea en curso no se toca. ¿Continuar?' -f $script:cola.Count)), 'PC Care', 'YesNo', 'Question')
         if ($r -eq 'Yes') { Clear-ColaPendiente }
     })
 
@@ -2735,7 +2782,7 @@ $script:Reanudadores['AccionDiag'] = { param($p, $reg) Add-TareaAccion -Id ([str
 
 $ui.chkSimulacion.Add_Click({
         if (-not (Test-Simulacion)) {
-            $r = [System.Windows.MessageBox]::Show("Al quitar el modo simulación, las acciones de limpieza y optimización se aplicarán de verdad en este equipo.`n`n¿Quitar el modo simulación?", 'PC Care', 'YesNo', 'Warning')
+            $r = [System.Windows.MessageBox]::Show((T "Al quitar el modo simulación, las acciones de limpieza y optimización se aplicarán de verdad en este equipo.`n`n¿Quitar el modo simulación?"), 'PC Care', 'YesNo', 'Warning')
             if ($r -ne 'Yes') { $ui.chkSimulacion.IsChecked = $true }
         }
         Update-ModoSim
@@ -2745,7 +2792,7 @@ $ui.chkSimulacion.Add_Click({
 
 $ui.btnCancelar.Add_Click({
         if (-not $script:actual -and $script:cola.Count -eq 0) { return }
-        $r = [System.Windows.MessageBox]::Show("Se cancelará la tarea en curso y se vaciará la cola.`n`nLo que ya se procesó no se deshace (por ejemplo, archivos ya enviados a la Papelera). ¿Cancelar?", 'PC Care', 'YesNo', 'Warning')
+        $r = [System.Windows.MessageBox]::Show((T "Se cancelará la tarea en curso y se vaciará la cola.`n`nLo que ya se procesó no se deshace (por ejemplo, archivos ya enviados a la Papelera). ¿Cancelar?"), 'PC Care', 'YesNo', 'Warning')
         if ($r -ne 'Yes') { return }
         Clear-ColaPendiente
         if ($script:actual -and ([string]$script:actual.Reg.Tipo -ne 'Turbo')) {
@@ -2910,7 +2957,7 @@ $ventana.Add_ContentRendered({
 $ventana.Add_Closing({
         param($origen, $e)
         if ($script:actual -or $script:cola.Count -gt 0) {
-            $r = [System.Windows.MessageBox]::Show("Hay tareas en curso o en espera.`n`nSi cierras ahora se guarda lo que falta y podrás reanudarlo al abrir PC Care (página Tareas). Lo que ya se hizo no se deshace, y un programa externo ya lanzado (por ejemplo winget) puede seguir unos segundos.`n`n¿Cerrar de todos modos?", 'PC Care', 'YesNo', 'Warning')
+            $r = [System.Windows.MessageBox]::Show((T "Hay tareas en curso o en espera.`n`nSi cierras ahora se guarda lo que falta y podrás reanudarlo al abrir PC Care (página Tareas). Lo que ya se hizo no se deshace, y un programa externo ya lanzado (por ejemplo winget) puede seguir unos segundos.`n`n¿Cerrar de todos modos?"), 'PC Care', 'YesNo', 'Warning')
             if ($r -ne 'Yes') { $e.Cancel = $true; return }
         }
         [void](Save-Cola $script:registros)
