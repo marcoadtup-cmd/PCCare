@@ -4,10 +4,15 @@ $ErrorActionPreference = 'Stop'
 $raiz = Split-Path -Parent $PSScriptRoot
 . (Join-Path $raiz 'modulos\Idioma.ps1')
 $script:fallas = 0
+try {
 function Assert-Prueba {
     param([string]$Nombre, [bool]$Condicion, [string]$Detalle = '')
     if ($Condicion) { Write-Host ('OK     ' + $Nombre) }
-    else { Write-Host ('FALLA  ' + $Nombre + ' ' + $Detalle); $script:fallas++ }
+    else {
+        Write-Host ('FALLA  ' + $Nombre + ' ' + $Detalle)
+        Write-Host ('::error file=pruebas/Idioma.Tests.ps1::' + $Nombre + ' ' + (($Detalle -replace '[\r\n]+', ' ')))
+        $script:fallas++
+    }
 }
 
 # 1) Estructura del diccionario
@@ -92,5 +97,10 @@ Assert-Prueba 'lee el idioma guardado' ((Get-IdiomaGuardado $cfgTmp) -ceq 'en')
 Remove-Item -LiteralPath $cfgTmp -Force -ErrorAction SilentlyContinue
 Assert-Prueba 'sin archivo no hay idioma guardado' ($null -eq (Get-IdiomaGuardado 'C:\no\existe\config.json'))
 
+}
+catch {
+    Write-Host ('::error file=pruebas/Idioma.Tests.ps1,line=' + $_.InvocationInfo.ScriptLineNumber + '::' + ($_.Exception.Message -replace '[\r\n]+', ' '))
+    $script:fallas++
+}
 if ($script:fallas -gt 0) { Write-Host ('RESULTADO: {0} fallas' -f $script:fallas); exit 1 }
 Write-Host 'RESULTADO: todo correcto'
