@@ -52,7 +52,7 @@ jobs:
 
       - name: Reemplazar por el instalador firmado y comprobar la firma
         if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
-        shell: powershell
+        shell: pwsh
         env:
           ETIQUETA: ${{ github.ref_name }}
         run: |
@@ -94,7 +94,8 @@ jobs:
             salida/PCCare-*-portable.zip
 
       - name: Crear la release
-        shell: powershell
+        # pwsh lee el script en UTF-8; Windows PowerShell 5.1 lo leia como ANSI y rompia las tildes
+        shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ETIQUETA: ${{ github.ref_name }}
