@@ -49,3 +49,6 @@ La validación automática comprueba la sintaxis de todos los `.ps1` en cada Pul
 | `instalador\PCCare.iss` | Script de Inno Setup del instalador de 64 bits. |
 | `instalador\compilar.ps1` | Compila el instalador y calcula su SHA256. |
 | `instalador\probar.ps1` | Instala, verifica y desinstala en silencio (lo usa CI). |
+| `modulos\Idioma.ps1` | Motor de idiomas (traduce lo que se muestra; los datos siguen en español). |
+| `modulos\idioma\en.tsv` | Diccionario ES a EN, una fila por texto. Las filas con `{0}` son plantillas. Todo texto nuevo de la interfaz necesita su fila. |
+| `pruebas\Idioma.Tests.ps1` | Pruebas obligatorias del sistema de idiomas (las corre CI). |

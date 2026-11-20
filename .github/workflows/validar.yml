@@ -40,6 +40,10 @@ jobs:
           }
           if ($mal) { Write-Host ("Sin BOM: " + ($mal -join ', ')); exit 1 }
 
+      - name: Pruebas del sistema de idiomas ES/EN (obligatorias)
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\pruebas\Idioma.Tests.ps1
+
       - name: PSScriptAnalyzer (informativo)
         continue-on-error: true
         shell: powershell

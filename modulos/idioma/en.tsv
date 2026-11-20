@@ -1,0 +1,809 @@
+﻿# PC Care: diccionario ES<TAB>EN. Escapes: \n salto de linea, \t tab, \\ barra. Las filas con {0} son plantillas.
+Mantenimiento de Windows	Windows maintenance
+Panel	Dashboard
+Limpieza	Cleanup
+Rendimiento	Performance
+Monitor	Monitor
+MANTENIMIENTO	MAINTENANCE
+Seguridad	Security
+Actualizaciones	Updates
+Red	Network
+Informe del equipo	System report
+ACTIVIDAD	ACTIVITY
+Tareas	Tasks
+Historial	History
+AYUDA	HELP
+Acerca de y ayuda	About and help
+SIMULACIÓN ACTIVA (clic para pasar a modo real)	SIMULATION ON (click to switch to real mode)
+Alterna entre simulación (no modifica nada) y modo real (aplica los cambios).	Switches between simulation (changes nothing) and real mode (applies changes).
+✓ Administrador	✓ Administrator
+Restauración: leyendo...	Restore: reading...
+PC Care  /  Panel	PC Care  /  Dashboard
+Cancelar tarea	Cancel task
+Listo	Ready
+Registro de actividad	Activity log
+controles en orden	controls in order
+Analizando el equipo...	Analyzing the computer...
+Cuidado inteligente: limpia la basura marcada, vacía la caché DNS y optimiza la unidad. Siempre muestra el detalle antes de aplicar.	Smart care: cleans the checked junk, flushes the DNS cache and optimizes the drive. It always shows the details before applying.
+Cuidado inteligente	Smart care
+Analizar todo	Analyze all
+TurboPC	TurboPC
+Libera memoria RAM, pasa a alto rendimiento y cierra solo los procesos que marques en Rendimiento. Se revierte al desactivarlo.	Frees RAM, switches to high performance and closes only the processes you check in Performance. It is reverted when turned off.
+Activar TurboPC	Turn on TurboPC
+Archivos basura	Junk files
+Sin analizar	Not analyzed
+Grandes y duplicados	Large and duplicate files
+Se buscan desde Limpieza	Searched from Cleanup
+Arranque	Startup
+Problemas detectados	Problems found
+En tiempo real	Real time
+CPU	CPU
+Memoria	Memory
+Temperatura del disco	Disk temperature
+Lista cerrada de carpetas. Nunca se toca Windows, Archivos de programa, ProgramData ni AppData. Tus archivos van a la Papelera, no se borran directo.	Closed list of folders. Windows, Program Files, ProgramData and AppData are never touched. Your files go to the Recycle Bin, they are not deleted directly.
+Basura	Junk
+Solo se borra dentro de carpetas temporales y de caché conocidas. Los archivos en uso se omiten. No toca cookies, contraseñas ni historial.	Files are only deleted inside known temporary and cache folders. Files in use are skipped. Cookies, passwords and history are not touched.
+Categoría	Category
+Archivos	Files
+Tamaño	Size
+Limpiar seleccionados	Clean selected
+Volver a analizar	Analyze again
+Archivos grandes y duplicados en la unidad del sistema	Large and duplicate files on the system drive
+Busca en carpetas de usuario. No entra a Windows, Archivos de programa ni AppData. Los duplicados se comparan por contenido. Lo que elijas va a la Papelera, así se puede recuperar.	Searches user folders. It does not enter Windows, Program Files or AppData. Duplicates are compared by content. What you choose goes to the Recycle Bin, so it can be recovered.
+Tamaño mínimo:	Minimum size:
+Buscar archivos grandes	Find large files
+Buscar duplicados	Find duplicates
+Marcar copias (conserva la más reciente)	Mark copies (keeps the most recent)
+Grupo	Group
+Archivo	File
+Carpeta	Folder
+Modificado	Modified
+Nube	Cloud
+Enviar a la Papelera	Send to Recycle Bin
+Sin búsqueda todavía.	No search yet.
+Registro (avanzado)	Registry (advanced)
+Registro de Windows (avanzado)	Windows registry (advanced)
+Solo tres tipos de entrada comprobada: programas de inicio cuyo archivo ya no existe, rutas de aplicación rotas y desinstaladores huérfanos. Antes de borrar se exporta un respaldo .reg. No mejora la velocidad: sirve para ordenar.	Only three kinds of verified entries: startup programs whose file no longer exists, broken application paths and orphaned uninstallers. A .reg backup is exported before deleting. It does not improve speed: it is for tidiness.
+Tipo	Type
+Clave	Key
+Valor	Value
+Motivo	Reason
+Limpiar seleccionadas	Clean selected
+Analizar registro	Analyze registry
+Crear punto de restauración antes de limpiar	Create a restore point before cleaning
+¿Word o Excel van lentos? TurboPC pasa el equipo a alto rendimiento y libera memoria RAM de los programas en segundo plano. Además cierra los procesos que marques abajo; por su cuenta no cierra ninguno. Nunca toca procesos de Windows ni el antivirus.	Are Word or Excel slow? TurboPC switches the computer to high performance and frees RAM from background programs. It also closes the processes you check below; on its own it closes none. It never touches Windows processes or the antivirus.
+Actualizar lista	Refresh list
+Programas que más memoria usan (marca los que TurboPC debe cerrar)	Programs using the most memory (check the ones TurboPC should close)
+Programa	Program
+Instancias	Instances
+Memoria (MB)	Memory (MB)
+Estado	Status
+Arranque de Windows	Windows startup
+Desmarca lo que no necesitas que inicie con Windows. No se desinstala nada: es el mismo interruptor del Administrador de tareas.	Uncheck what you do not need to start with Windows. Nothing is uninstalled: it is the same switch as Task Manager.
+Inicia	Starts
+Comando	Command
+Origen	Source
+Aplicar cambios	Apply changes
+Diagnóstico	Diagnostics
+Volver a diagnosticar	Diagnose again
+Diagnóstico de problemas comunes	Common problems diagnostics
+Revisión	Check
+Detalle	Details
+Último minuto. Referencia general: hasta 55 °C normal, 55 a 70 °C atención, más de 70 °C crítico.	Last minute. General reference: up to 55 °C normal, 55 to 70 °C attention, over 70 °C critical.
+Disco	Disk
+Salud	Health
+Desgaste %	Wear %
+Horas	Hours
+Velocidad de red en tiempo real	Real-time network speed
+Descarga	Download
+Subida	Upload
+Línea continua: descarga. Línea punteada: subida.	Solid line: download. Dotted line: upload.
+Programas conectados a la red	Programs connected to the network
+Conexiones activas por programa, actualizado cada pocos segundos. Sirve para ubicar qué está usando la red en segundo plano. Esta versión no mide Mbps por programa.	Active connections per program, refreshed every few seconds. It helps find what is using the network in the background. This version does not measure Mbps per program.
+Conexiones activas	Active connections
+Destinos distintos	Distinct destinations
+Estado de las protecciones de Windows. PC Care solo informa: no cambia la configuración del antivirus ni del firewall.	Status of Windows protections. PC Care only reports: it does not change the antivirus or firewall settings.
+Volver a revisar	Check again
+Abrir Seguridad de Windows	Open Windows Security
+Protecciones y exposición	Protections and exposure
+Actualizar	Refresh
+Carpeta de respaldos	Backup folder
+Qué analizó y cambió PC Care (últimas 500 líneas)	What PC Care analyzed and changed (last 500 lines)
+Fecha y hora	Date and time
+Modo	Mode
+Actividad	Activity
+Aplicaciones con winget y drivers firmados de Windows Update. Todo pasa por la cola de tareas y respeta el modo simulación de la barra superior.	Apps with winget and signed drivers from Windows Update. Everything goes through the task queue and respects the simulation mode in the top bar.
+Analizar equipo	Analyze computer
+Pulsa Analizar para buscar actualizaciones. Usa internet y la búsqueda de drivers puede tardar unos minutos.	Press Analyze to look for updates. It uses the internet and the driver search can take a few minutes.
+Aplicaciones	Applications
+Actualizar todas	Update all
+Actualizar seleccionadas	Update selected
+Reinstalar seleccionadas	Reinstall selected
+Desinstala e instala la versión nueva. Para apps que winget no puede actualizar por cambio de instalador.	Uninstalls and installs the new version. For apps that winget cannot update because the installer changed.
+Ignorar seleccionadas	Ignore selected
+Deja de ofrecer la actualización de esas apps en este equipo.	Stops offering the update for those apps on this computer.
+Actualizar Microsoft Store	Update Microsoft Store
+Pide a Microsoft Store que actualice sus aplicaciones en segundo plano.	Asks Microsoft Store to update its apps in the background.
+Solo terceros	Third-party only
+Solo pendientes	Pending only
+Aplicación	Application
+Instalada	Installed
+Disponible	Available
+Drivers	Drivers
+Instalar todos	Install all
+Instalar seleccionados	Install selected
+Punto de restauración	Restore point
+Respaldar drivers actuales	Back up current drivers
+Actualizaciones de drivers disponibles	Available driver updates
+Actualización	Update
+Dispositivo	Device
+Clase	Class
+Proveedor	Provider
+Fecha	Date
+Instalar	Install
+Drivers de terceros instalados	Installed third-party drivers
+Los antiguos que Windows Update no ofrece se revisan con la herramienta o la web del fabricante.	Older ones that Windows Update does not offer are checked with the manufacturer's tool or website.
+Versión	Version
+Nota	Note
+Diagnóstico de la conexión: adaptadores, latencia, pérdida de paquetes, MTU, DNS, proxy y configuración de Windows. Sirve para Wi-Fi, cable y compartir internet del celular por USB.	Connection diagnostics: adapters, latency, packet loss, MTU, DNS, proxy and Windows settings. Works for Wi-Fi, cable and phone internet sharing over USB.
+Diagnosticar la conexión	Diagnose the connection
+Carpeta de informes de red	Network reports folder
+Medir también la velocidad de descarga (usa unos 9 MB de datos)	Also measure download speed (uses about 9 MB of data)
+Pulsa Diagnosticar. Con un plan de datos limitado, deja sin marcar la medición de velocidad.	Press Diagnose. With a limited data plan, leave the speed test unchecked.
+Mejoras propuestas	Proposed improvements
+Aparecen después de diagnosticar. Cada cambio se puede revertir con el archivo que se guarda en la carpeta de informes.	They appear after diagnosing. Each change can be reverted with the file saved in the reports folder.
+Cambio	Change
+Efecto	Effect
+Reparar la pila de red (avanzado)	Repair the network stack (advanced)
+Reinicia Winsock y la pila IP. No se puede revertir y exige reiniciar el equipo.	Resets Winsock and the IP stack. It cannot be reverted and requires restarting the computer.
+Aplicar mejoras marcadas	Apply checked improvements
+Auditoría de solo lectura. No modifica nada en el equipo.	Read-only audit. It changes nothing on the computer.
+Informe completo en HTML	Full HTML report
+Revisa seguridad (antivirus, Defender, BitLocker, TPM, Secure Boot, SMBv1), parches de Windows pendientes, software instalado y por actualizar, rendimiento y programas de inicio. Genera un Informe.html y varios archivos CSV que se pueden compartir.	Reviews security (antivirus, Defender, BitLocker, TPM, Secure Boot, SMBv1), pending Windows patches, installed and outdated software, performance and startup programs. It generates an Informe.html and several CSV files that can be shared.
+Omitir la búsqueda de parches de Windows (más rápido)	Skip the Windows patch search (faster)
+Generar informe	Generate report
+Abrir el último informe	Open the latest report
+Carpeta de informes	Reports folder
+Tareas que quedaron a medias	Tasks left half done
+PC Care se cerró antes de terminar estas tareas. Marca las que quieres continuar.	PC Care closed before finishing these tasks. Check the ones you want to continue.
+Tarea	Task
+Opciones marcadas	Checked options
+Estaba	It was
+Descartar todas	Discard all
+Reanudar marcadas	Resume checked
+En ejecución ahora	Running now
+Nada en ejecución.	Nothing running.
+Marcado ahora, sin ejecutar	Checked now, not running
+No hay nada marcado.	Nothing is checked.
+Quitar pendientes	Remove pending
+Saca de la cola lo que aún no empezó. No cancela la tarea en curso.	Removes from the queue what has not started yet. It does not cancel the running task.
+Pausar cola	Pause queue
+La tarea en curso termina; las siguientes esperan hasta que reanudes.	The running task finishes; the next ones wait until you resume.
+Cola y actividad (se guarda en disco)	Queue and activity (saved to disk)
+Inicio	Start
+Duración	Duration
+Acerca de PC Care	About PC Care
+Mantenimiento de Windows de código abierto, licencia MIT. Sin telemetría: no envía datos fuera del equipo.	Open source Windows maintenance, MIT license. No telemetry: it does not send data off the computer.
+Versión instalada	Installed version
+Contacto	Contact
+Buscar versiones nuevas	Look for new versions
+Las versiones nuevas se publican en GitHub. PC Care no se actualiza sola ni consulta internet por su cuenta: abres la página y descargas tú. Cada descarga incluye su archivo .sha256 para comprobar que no fue alterada.	New versions are published on GitHub. PC Care does not update itself or check the internet on its own: you open the page and download. Each download includes its .sha256 file to check it was not altered.
+Descargar la última versión	Download the latest version
+Ver todas las versiones	See all versions
+Ayuda y soporte	Help and support
+Si algo falla, copia los datos del equipo y pégalos en el reporte. Incluyen la versión de PC Care, de Windows y de PowerShell; no incluyen archivos ni datos personales.	If something fails, copy the computer data and paste it into the report. It includes the PC Care, Windows and PowerShell versions; it does not include files or personal data.
+Copiar datos para soporte	Copy support data
+Reportar un problema	Report a problem
+Política de seguridad	Security policy
+PC Care necesita permisos de administrador.	PC Care needs administrator permissions.
+Temporales del usuario	User temporary files
+Temporales de Windows	Windows temporary files
+Caché de descargas de Windows Update	Windows Update download cache
+Caché de navegadores (Edge, Chrome, Brave, Vivaldi, Firefox)	Browser cache (Edge, Chrome, Brave, Vivaldi, Firefox)
+Informes y volcados de error	Error reports and dumps
+Papelera de reciclaje	Recycle Bin
+Ruta de aplicación	Application path
+Desinstalador huérfano	Orphaned uninstaller
+{0}: {1} en {2} archivos; {3} en uso, omitidos.	{0}: {1} in {2} files; {3} in use, skipped.
+   Navegadores abiertos: {0}. Mientras estén abiertos mantienen parte de su caché en uso y se vuelve a llenar al navegar. Ciérralos y repite la limpieza para borrar todo.	   Browsers open: {0}. While open, they keep part of their cache in use and it fills up again as you browse. Close them and repeat the cleanup to delete everything.
+BLOQUEADO por seguridad (fuera de carpetas de usuario): 	BLOCKED for safety (outside user folders): 
+Ya no existe: 	No longer exists: 
+No se pudo mover {0}: {1}	Could not move {0}: {1}
+{0} archivos a la Papelera, {1}.	{0} files to the Recycle Bin, {1}.
+: ya no existe 	: no longer exists 
+PC Care antes de limpiar registro	PC Care before registry cleanup
+Punto de restauración solicitado.	Restore point requested.
+AVISO: no se pudo crear el punto de restauración: 	WARNING: could not create the restore point: 
+BLOQUEADO por seguridad: 	BLOCKED for safety: 
+Se eliminaría [{0}] {1} {2}	Would delete [{0}] {1} {2}
+Sin respaldo, no se toca: 	No backup, not touched: 
+No se pudo eliminar {0}: {1}	Could not delete {0}: {1}
+Para deshacer: doble clic en los .reg de 	To undo: double-click the .reg files in 
+Hay parches instalados que no aplican hasta reiniciar. Reinicia cuando puedas.	Some installed patches do not apply until a restart. Restart when you can.
+{0}% libre ({1} de {2}).	{0}% free ({1} of {2}).
+Espacio en 	Space on 
+ Conviene liberar espacio en Limpieza.	 It is worth freeing space in Cleanup.
+Salud del disco 	Disk health 
+Estado: {0}. Respalda la información y reemplaza el disco.	Status: {0}. Back up your data and replace the disk.
+Optimización de 	Optimization of 
+Unidad SSD: se optimiza con TRIM. No se desfragmenta.	SSD drive: optimized with TRIM. It is not defragmented.
+Windows elige el método según el tipo de disco (desfragmentar en discos mecánicos).	Windows chooses the method by disk type (defragmentation on mechanical disks).
+Archivos de sistema	System files
+El almacén de componentes de Windows no reporta daños.	The Windows component store reports no damage.
+Estado: {0}. Se repara con DISM y SFC (tarda 15 a 40 minutos).	Status: {0}. It is repaired with DISM and SFC (takes 15 to 40 minutes).
+No se pudo consultar el estado con DISM.	Could not query the status with DISM.
+Servicio de Windows Update	Windows Update service
+Está deshabilitado: el equipo no recibe parches.	It is disabled: the computer does not receive patches.
+Uso de memoria	Memory usage
+{0}% en uso. Activa TurboPC o cierra lo que no uses.	{0}% in use. Turn on TurboPC or close what you do not use.
+{0}% en uso de {1}.	{0}% in use of {1}.
+{0} días. Reiniciar libera memoria y aplica parches.	{0} days. Restarting frees memory and applies patches.
+{0} días.	{0} days.
+Caché DNS	DNS cache
+Vaciarla resuelve páginas que no cargan tras un cambio de red.	Flushing it fixes pages that do not load after a network change.
+Vaciar caché	Flush cache
+SIMULACIÓN: se ejecutaría la acción "{0}".	SIMULATION: the action "{0}" would run.
+Caché DNS vaciada.	DNS cache flushed.
+DISM terminó con código {0}; SFC con código {1}. Detalle en C:\\Windows\\Logs\\CBS\\CBS.log	DISM finished with code {0}; SFC with code {1}. Details in C:\\Windows\\Logs\\CBS\\CBS.log
+Acción no reconocida.	Unrecognized action.
+TurboPC desactivado: plan de energía anterior restaurado.	TurboPC turned off: previous power plan restored.
+SIMULACIÓN: plan de energía a alto rendimiento, liberar memoria de trabajo y cerrar: {0}	SIMULATION: power plan to high performance, free working memory and close: {0}
+Plan de energía: alto rendimiento.	Power plan: high performance.
+Este equipo no ofrece el plan de alto rendimiento; se mantiene el plan actual.	This computer does not offer the high performance plan; the current plan is kept.
+Procesos a los que se pidió cerrar: {0}.	Processes asked to close: {0}.
+Memoria de trabajo recortada en {0} procesos. RAM liberada: {1}.	Working memory trimmed in {0} processes. RAM freed: {1}.
+Al día	Up to date
+Protección en tiempo real activa.	Real-time protection is on.
+Crítico	Critical
+La protección en tiempo real está desactivada. Actívala en Seguridad de Windows.	Real-time protection is off. Turn it on in Windows Security.
+Definiciones del antivirus	Antivirus definitions
+Tienen {0} días. Ejecuta Windows Update.	They are {0} days old. Run Windows Update.
+Actualizadas hace {0} día(s).	Updated {0} day(s) ago.
+No se pudo leer el estado. Puede haber otro antivirus instalado y administrando la protección.	Could not read the status. Another antivirus may be installed and managing protection.
+Firewall de Windows	Windows Firewall
+Activo en los perfiles de dominio, privado y público.	On in the domain, private and public profiles.
+Desactivado en: 	Off in: 
+No se pudo leer el estado.	Could not read the status.
+Está habilitado. Si no lo usas, desactívalo; si lo usas, que no quede expuesto a internet.	It is enabled. If you do not use it, turn it off; if you do, do not leave it exposed to the internet.
+Cifrado BitLocker en 	BitLocker encryption on 
+El disco del sistema no está cifrado. Si el equipo se pierde, los datos quedan legibles.	The system disk is not encrypted. If the computer is lost, the data stays readable.
+No disponible en esta edición de Windows o sin permisos para leerlo.	Not available in this Windows edition or no permission to read it.
+Está habilitado. Es obsoleto e inseguro; conviene desactivarlo.	It is enabled. It is obsolete and insecure; turning it off is recommended.
+Control de cuentas de usuario (UAC)	User Account Control (UAC)
+Está desactivado. Actívalo en Configuración de Windows.	It is off. Turn it on in Windows Settings.
+Puertos TCP en escucha	Listening TCP ports
+{0} puertos accesibles desde la red. Principales: {1}	{0} ports reachable from the network. Main ones: {1}
+Falta el archivo modulos\\{0}.	File modulos\\{0} is missing.
+\n\nExtrae TODA la carpeta del ZIP (no solo PCCare.ps1) y vuelve a abrir PC Care.	\\n\\nExtract the WHOLE ZIP folder (not just PCCare.ps1) and open PC Care again.
+PC Care ya está abierto en este equipo. Búscalo en la barra de tareas.	PC Care is already open on this computer. Look for it in the taskbar.
+ (compilación 	 (build 
+Versión 	Version 
+Se guarda en 	Saved in 
+. Modo SIM = simulación, REAL = se aplicó en el equipo.	. SIM mode = simulation, REAL = it was applied on the computer.
+Simulación	Simulation
+MODO SIMULACIÓN: no se modificará nada, solo se mostrará el resultado esperado.\n\n	SIMULATION MODE: nothing will be changed, only the expected result will be shown.\\n\\n
+MODO REAL ACTIVO (clic para volver a simulación)	REAL MODE ON (click to go back to simulation)
+Cada tarea queda registrada con las opciones que marcaste. Se guarda en 	Each task is recorded with the options you checked. It is saved in 
+. Si PC Care se cierra a mitad de una tarea, al abrirlo de nuevo puedes reanudarla desde aquí.	. If PC Care closes in the middle of a task, you can resume it from here when you open it again.
+EN COLA: esperan {0} tareas antes. Ahora se está ejecutando: {1}.{2}Cuando terminen empieza esta. Puedes verlo en la página Tareas.	QUEUED: {0} tasks wait before it. Now running: {1}.{2}When they finish, this one starts. You can see it on the Tasks page.
+AVISO en "{0}": {1}	WARNING in "{0}": {1}
+Cancelada por el usuario	Cancelled by the user
+Tarea cancelada por el usuario: 	Task cancelled by the user: 
+ERROR en "{0}": {1}	ERROR in "{0}": {1}
+ERROR al mostrar el resultado de "{0}": {1}	ERROR showing the result of "{0}": {1}
+\nModo: {0}. Lleva {1}.	\\nMode: {0}. Running for {1}.
+\nEn espera ({0}): {1}	\\nWaiting ({0}): {1}
+Cola en pausa. Esperan {0} tareas: {1}	Queue paused. {0} tasks waiting: {1}
+Limpieza de basura: 	Junk cleanup: 
+Archivos para la Papelera: {0}	Files for the Recycle Bin: {0}
+Entradas de registro por limpiar: {0}	Registry entries to clean: {0}
+Programas que cerraría TurboPC: 	Programs TurboPC would close: 
+Cambios de arranque sin aplicar: {0}	Startup changes not applied: {0}
+Mejoras de red marcadas: 	Network improvements checked: 
+No hay nada marcado. Lo que marques en las páginas queda aquí hasta que pulses el botón que lo ejecuta.	Nothing is checked. What you check on the pages stays here until you press the button that runs it.
+No se reanuda sola: repítela a mano si la necesitas.	It does not resume on its own: repeat it by hand if you need it.
+Estaba a medias. Revisa el resultado antes de repetirla.	It was half done. Check the result before repeating it.
+No llegó a empezar.	It never started.
+Era una simulación. 	It was a simulation. 
+Quitada de la cola	Removed from the queue
+No se reanuda sola; repítela a mano	It does not resume on its own; repeat it by hand
+Era una simulación; no se repite en modo real	It was a simulation; it is not repeated in real mode
+Reanudada desde la página Tareas	Resumed from the Tasks page
+No se pudo reanudar "{0}": {1}	Could not resume "{0}": {1}
+Descartada por el usuario	Discarded by the user
+ (en cola: {0})	 (queued: {0})
+Cola en pausa: {0} tareas esperando	Queue paused: {0} tasks waiting
+El equipo requiere atención	The computer needs attention
+El equipo es mejorable	The computer can be improved
+El equipo está en buen estado	The computer is in good shape
+. Se cuentan los controles de Rendimiento (diagnóstico) y de Seguridad.	. Performance (diagnostics) and Security checks are counted.
+Todos los controles de diagnóstico y seguridad están en orden.	All diagnostic and security checks are in order.
+{0} críticos, {1} alertas. Detalle en Rendimiento y Seguridad.	{0} critical, {1} alerts. Details in Performance and Security.
+Revisando la seguridad de Windows	Checking Windows security
+Leyendo puntos de restauración	Reading restore points
+Restauración: 	Restore: 
+Sin puntos de restauración	No restore points
+Temporales, cachés, informes de error y Papelera	Temporary files, caches, error reports and Recycle Bin
+SIMULACIÓN: se liberarían 	SIMULATION: would free 
+\n\nNavegadores abiertos: {0}. Ciérralos antes para borrar todo su caché; si no, parte quedará en uso.	\\n\\nBrowsers open: {0}. Close them first to delete all their cache; otherwise part of it will stay in use.
+Se eliminarán de forma definitiva:\n\n{0}	The following will be permanently deleted:\\n\\n{0}
+{0} archivos en lista. Seleccionados: {1} ({2}).	{0} files in list. Selected: {1} ({2}).
+Registro: {0} entradas inválidas comprobadas.	Registry: {0} invalid entries checked.
+Analizando programas de inicio	Analyzing startup programs
+{0} programas inician con Windows	{0} programs start with Windows
+Clave no permitida: 	Key not allowed: 
+Listando programas en memoria	Listing programs in memory
+Volver al plan de energía anterior	Go back to the previous power plan
+TurboPC pasará el equipo a alto rendimiento y liberará memoria RAM.	TurboPC will switch the computer to high performance and free RAM.
+\n\nAdemás cerrará estos programas (guarda tu trabajo antes):\n  - 	\\n\\nIt will also close these programs (save your work first):\\n  - 
+\n\nNo cerrará ningún programa. Si quieres que cierre alguno, márcalo antes en Rendimiento.	\\n\\nIt will not close any program. If you want it to close one, check it first in Performance.
+Simulación de TurboPC completada. Revisa el registro de actividad.	TurboPC simulation completed. Check the activity log.
+Alto rendimiento y liberar RAM	High performance and free RAM
+{0} de {1} en uso	{0} of {1} in use
+Último minuto, escala hasta {0}. Línea continua: descarga. Línea punteada: subida.	Last minute, scale up to {0}. Solid line: download. Dotted line: upload.
+{0} °C	{0} °C
+Crítico: revisa ventilación y carga del equipo	Critical: check ventilation and computer load
+Atención: temperatura elevada	Attention: high temperature
+Este disco no informa su temperatura a Windows	This disk does not report its temperature to Windows
+No se pudieron leer los datos del equipo.	Could not read the computer data.
+Enlace bloqueado: no es del repositorio oficial de PC Care.	Link blocked: it does not belong to the official PC Care repository.
+No se pudo abrir el navegador. Copia esta dirección: 	Could not open the browser. Copy this address: 
+Datos para soporte copiados al portapapeles.	Support data copied to the clipboard.
+No se pudo copiar al portapapeles.	Could not copy to the clipboard.
+Cola en pausa: la tarea en curso termina y las siguientes esperan.	Queue paused: the running task finishes and the next ones wait.
+Se quitarán {0} tareas que aún no empezaron. La tarea en curso no se toca. ¿Continuar?	{0} tasks that have not started will be removed. The running task is not touched. Continue?
+Al quitar el modo simulación, las acciones de limpieza y optimización se aplicarán de verdad en este equipo.\n\n¿Quitar el modo simulación?	If you turn off simulation mode, the cleanup and optimization actions will really be applied on this computer.\\n\\nTurn off simulation mode?
+Modo de trabajo cambiado a: 	Work mode changed to: 
+simulación	simulation
+Se cancelará la tarea en curso y se vaciará la cola.\n\nLo que ya se procesó no se deshace (por ejemplo, archivos ya enviados a la Papelera). ¿Cancelar?	The running task will be cancelled and the queue emptied.\\n\\nWhat was already processed is not undone (for example, files already sent to the Recycle Bin). Cancel?
+No se pudo abrir Seguridad de Windows.	Could not open Windows Security.
+El cuidado inteligente hará esto:\n\n  1. Limpiar las categorías de basura marcadas en Limpieza ({0}).\n  2. Vaciar la caché DNS.\n  3. Optimizar la unidad del sistema (TRIM en SSD).\n\nNo toca el registro, los programas de inicio ni tus archivos personales.\n\n¿Continuar?	Smart care will do this:\\n\\n  1. Clean the junk categories checked in Cleanup ({0}).\\n  2. Flush the DNS cache.\\n  3. Optimize the system drive (TRIM on SSD).\\n\\nIt does not touch the registry, startup programs or your personal files.\\n\\nContinue?
+{0} MB o más	{0} MB or more
+Buscando duplicados por contenido (puede tardar varios minutos)	Searching for duplicates by content (it can take several minutes)
+ y {0} más	 and {0} more
+Enviando archivos a la Papelera	Sending files to the Recycle Bin
+Se enviarán {0} archivos ({1}) a la Papelera de reciclaje.	{0} files ({1}) will be sent to the Recycle Bin.
+\n\nATENCIÓN: {0} están en carpetas sincronizadas con OneDrive o SharePoint. Al quitarlos aquí también se quitan de la nube y de los demás equipos.	\\n\\nWARNING: {0} are in folders synced with OneDrive or SharePoint. Removing them here also removes them from the cloud and from other computers.
+Se eliminarán {0} entradas del registro. Antes se exporta un respaldo .reg de cada una en:\n{1}\n\n¿Continuar?	{0} registry entries will be deleted. A .reg backup of each one is exported first to:\\n{1}\\n\\nContinue?
+{0} entradas del registro	{0} registry entries
+No hay cambios por aplicar.	There are no changes to apply.
+iniciará con Windows	will start with Windows
+dejará de iniciar con Windows	will stop starting with Windows
+Cambios en el arranque:\n\n{0}\n\nSe puede revertir aquí mismo o en el Administrador de tareas. ¿Aplicar?	Startup changes:\\n\\n{0}\\n\\nThey can be reverted right here or in Task Manager. Apply?
+SIMULACIÓN: {0} -> inicia = {1}	SIMULATION: {0} -> starts = {1}
+No se pudo cambiar {0}: {1}	Could not change {0}: {1}
+{0} cambios aplicados. Rigen desde el próximo inicio de sesión.	{0} changes applied. They take effect at the next sign-in.
+Simulación: {0} cambios registrados, ninguno aplicado.	Simulation: {0} changes recorded, none applied.
+\n\nEjecuta DISM y SFC. Tarda entre 15 y 40 minutos; el resto de tareas espera en cola.	\\n\\nIt runs DISM and SFC. It takes 15 to 40 minutes; the other tasks wait in the queue.
+Diagnóstico: 	Diagnostics: 
+Modo simulación activo: ninguna acción modifica el equipo hasta que lo desactives arriba a la derecha.	Simulation mode on: no action modifies the computer until you turn it off at the top right.
+Quedaron {0} tareas a medias la última vez. Revísalas en la página Tareas.	{0} tasks were left half done last time. Review them on the Tasks page.
+Hay tareas en curso o en espera.\n\nSi cierras ahora se guarda lo que falta y podrás reanudarlo al abrir PC Care (página Tareas). Lo que ya se hizo no se deshace, y un programa externo ya lanzado (por ejemplo winget) puede seguir unos segundos.\n\n¿Cerrar de todos modos?	There are running or waiting tasks.\\n\\nIf you close now, what remains is saved and you can resume it when you open PC Care (Tasks page). What was already done is not undone, and an external program already launched (for example winget) may keep running for a few seconds.\\n\\nClose anyway?
+Windows Update (origen por defecto)	Windows Update (default source)
+Windows Update no respondio: 	Windows Update did not respond: 
+winget no esta disponible. Instala "Instalador de aplicacion" desde Microsoft Store.	winget is not available. Install "App Installer" from Microsoft Store.
+actualizaría	would update
+desinstalaría y volvería a instalar	would uninstall and reinstall
+SIMULACIÓN: se {0} {1} con winget. No se cambió nada.	SIMULATION: {0} {1} with winget. Nothing was changed.
+winget no esta disponible.	winget is not available.
+No se pudo desinstalar; la version actual sigue instalada.	Could not uninstall; the current version is still installed.
+ATENCION: se desinstalo pero la instalacion fallo. Instala manualmente: winget install --id "{0}" --exact	WARNING: it was uninstalled but the installation failed. Install it manually: winget install --id "{0}" --exact
+SIMULACIÓN: se instalaría {0} con winget. No se cambió nada.	SIMULATION: {0} would be installed with winget. Nothing was changed.
+Fecha no fiable	Unreliable date
+Antiguo ({0} años)	Old ({0} years)
+No se pudo consultar Windows Update: 	Could not query Windows Update: 
+SIMULACIÓN: se instalarían {0} drivers desde Windows Update (con punto de restauración: {1}; con respaldo de drivers: {2}). No se cambió nada.	SIMULATION: {0} drivers would be installed from Windows Update (with restore point: {1}; with driver backup: {2}). Nothing was changed.
+ActualizadorPC antes de drivers	PC Care before drivers
+Punto de restauracion solicitado (Windows lo omite si ya hubo uno en las ultimas 24 h).	Restore point requested (Windows skips it if one was already created in the last 24 h).
+AVISO: no se pudo crear el punto de restauracion: 	WARNING: could not create the restore point: 
+Respaldo de drivers en {0} (codigo {1}).	Driver backup in {0} (code {1}).
+AVISO: no se pudo respaldar los drivers: 	WARNING: could not back up the drivers: 
+Los drivers seleccionados ya no figuran como pendientes.	The selected drivers no longer appear as pending.
+Instalado con avisos	Installed with warnings
+REINICIO REQUERIDO para terminar de aplicar los drivers.	RESTART REQUIRED to finish applying the drivers.
+{0} apps ({1} de terceros) | {2} por actualizar | {3} de terceros sin catálogo	{0} apps ({1} third-party) | {2} to update | {3} third-party without catalog
+{0} por actualizar | {1} instalados de terceros | {2} antiguos	{0} to update | {1} third-party installed | {2} old
+No se pudo analizar las aplicaciones: 	Could not analyze the applications: 
+Manual (sin catálogo)	Manual (no catalog)
+Análisis de aplicaciones terminado. Marca las que quieras actualizar o usa "Actualizar todas".	Application analysis finished. Check the ones you want to update or use "Update all".
+Equipo: {0}. Herramientas oficiales para lo que Windows Update no ofrece:	Computer: {0}. Official tools for what Windows Update does not offer:
+Equipo: {0}. Sin herramienta oficial reconocida: los drivers que falten se bajan de la web de soporte del fabricante.	Computer: {0}. No recognized official tool: missing drivers are downloaded from the manufacturer's support website.
+Analizando... los resultados aparecen en las pestañas Aplicaciones y Drivers.	Analyzing... results appear in the Applications and Drivers tabs.
+{0} ya está instalada. Ábrela desde el menú Inicio para buscar e instalar drivers.	{0} is already installed. Open it from the Start menu to search for and install drivers.
+Se instalará {0} con winget (herramienta oficial del fabricante). ¿Continuar?	{0} will be installed with winget (the manufacturer's official tool). Continue?
+{0} quedó instalada. Ábrela desde el menú Inicio para buscar e instalar drivers.	{0} was installed. Open it from the Start menu to search for and install drivers.
+No se pudo instalar {0} (código 0x{1:X8}).	Could not install {0} (code 0x{1:X8}).
+   Si el mensaje habla de una tecnología de instalación diferente, marca la fila y usa "Reinstalar seleccionadas".	   If the message mentions a different installation technology, check the row and use "Reinstall selected".
+No se puede actualizar "{0}": winget devolvió el Id recortado.	Cannot update "{0}": winget returned a truncated Id.
+Los drivers se instalaron. Reinicia el equipo para terminar de aplicarlos.	The drivers were installed. Restart the computer to finish applying them.
+Se instalarán {0} drivers desde Windows Update:\n\n{1}\n\nLa pantalla, la red o el audio pueden cortarse unos segundos y puede requerirse un reinicio. ¿Continuar?	{0} drivers will be installed from Windows Update:\\n\\n{1}\\n\\nThe screen, network or audio may cut out for a few seconds and a restart may be required. Continue?
+SIMULACIÓN: se pediría a Microsoft Store que actualice sus aplicaciones.	SIMULATION: Microsoft Store would be asked to update its apps.
+Microsoft Store está actualizando sus aplicaciones en segundo plano. Vuelve a analizar en unos minutos.	Microsoft Store is updating its apps in the background. Analyze again in a few minutes.
+Se desinstalarán y volverán a instalar {0} aplicaciones:\n\n{1}\n\nSi la instalación falla, la aplicación quedará desinstalada. Algunas pierden su configuración al reinstalar. ¿Continuar?	{0} applications will be uninstalled and reinstalled:\\n\\n{1}\\n\\nIf the installation fails, the application will stay uninstalled. Some lose their settings when reinstalled. Continue?
+Ignoradas guardadas en 	Ignored list saved in 
+No se pudo guardar la lista de ignoradas: 	Could not save the ignored list: 
+Se actualizarán {0} aplicaciones. Las que estén abiertas pueden cerrarse. ¿Continuar?	{0} applications will be updated. Open ones may close. Continue?
+Con búsqueda de parches de Windows	With Windows patch search
+Sin búsqueda de parches de Windows	Without Windows patch search
+Generando informe de auditoría del equipo	Generating the computer audit report
+No se pudo generar el informe: 	Could not generate the report: 
+Informe listo: {0}% de controles conformes, {1} críticos, {2} alertas, {3} apps por actualizar, {4} parches de Windows. Guardado en {5}	Report ready: {0}% of controls compliant, {1} critical, {2} alerts, {3} apps to update, {4} Windows patches. Saved in {5}
+Generando el informe... puede tardar uno o dos minutos.	Generating the report... it can take a minute or two.
+Con medición de velocidad de descarga (unos 9 MB)	With download speed measurement (about 9 MB)
+Sin medición de velocidad (no gasta datos)	Without speed measurement (uses no data)
+Diagnóstico de red	Network diagnostics
+No se pudo diagnosticar la red: 	Could not diagnose the network: 
+{0} mejoras propuestas. Márcalas y pulsa "Aplicar mejoras marcadas".	{0} improvements proposed. Check them and press "Apply checked improvements".
+No hay mejoras propuestas para esta conexión.	There are no proposed improvements for this connection.
+Diagnóstico de red terminado. Mejoras propuestas: {0}	Network diagnostics finished. Proposed improvements: {0}
+Se aplicarán estos cambios de red:\n\n{0}\n\nSe guarda un archivo para revertirlos. ¿Continuar?	These network changes will be applied:\\n\\n{0}\\n\\nA file is saved to revert them. Continue?
+Mejoras de red	Network improvements
+Aplicando mejoras de red	Applying network improvements
+No se pudieron aplicar los cambios: 	Could not apply the changes: 
+No se aplicó ningún cambio.	No change was applied.
+Mejoras de red aplicadas. Revisa el informe en la página Red.	Network improvements applied. Check the report on the Network page.
+Reparando la pila de red	Repairing the network stack
+No se pudo reparar: 	Could not repair: 
+Reinicia el equipo para completar la reparación de red.	Restart the computer to complete the network repair.
+La reparación reinicia Winsock y la pila IP. Corrige fallos profundos de conexión.\n\nNO se puede revertir, exige reiniciar el equipo y se pierde la conexión unos segundos. Úsala solo si el diagnóstico no encontró otra causa.\n\n¿Continuar?	The repair resets Winsock and the IP stack. It fixes deep connection failures.\\n\\nIt CANNOT be reverted, requires restarting the computer and the connection is lost for a few seconds. Use it only if the diagnostics found no other cause.\\n\\nContinue?
+Reparar la pila de red	Repair the network stack
+No se encontró el módulo 	Module not found: 
+El informe no se generó (código {0}). {1}	The report was not generated (code {0}). {1}
+No se encontró Informe.html en 	Informe.html not found in 
+El diagnóstico no generó informe (código {0}). {1}	The diagnostics did not generate a report (code {0}). {1}
+SIMULACIÓN: no se aplicó nada. Se habrían aplicado: 	SIMULATION: nothing was applied. These would have been applied: 
+La aplicación de cambios no generó informe (código {0}).	Applying the changes did not generate a report (code {0}).
+SIMULACIÓN: no se reparó nada. Se habría ejecutado: ipconfig /flushdns, netsh winsock reset, netsh int ip reset (exige reiniciar).	SIMULATION: nothing was repaired. These would have run: ipconfig /flushdns, netsh winsock reset, netsh int ip reset (requires restart).
+La reparación no generó informe (código {0}).	The repair did not generate a report (code {0}).
+Análisis de solo lectura interrumpido; se repite solo al abrir PC Care	Read-only analysis interrupted; it repeats on its own when PC Care opens
+PC Care se cerró antes de terminarla	PC Care closed before finishing it
+Para aplicar cambios se necesitan permisos de administrador.	Administrator permissions are required to apply changes.
+OptimizarRed: validación y optimización de conectividad	OptimizarRed: connectivity validation and optimization
+Equipo: {0}  |  {1} (compilación {2})  |  PowerShell {3}	Computer: {0}  |  {1} (build {2})  |  PowerShell {3}
+Solo diagnóstico (no se cambia nada)	Diagnostics only (nothing is changed)
+Diagnóstico y aplicación de cambios con confirmación	Diagnostics and applying changes with confirmation
+Diagnóstico y aplicación de los cambios aprobados en PC Care	Diagnostics and applying the changes approved in PC Care
+Esta prueba consume unos {0} MB de tu plan de datos (descarga de prueba).	This test uses about {0} MB of your data plan (test download).
+Adaptadores de red activos	Active network adapters
+No hay ningún adaptador con dirección IP	No adapter has an IP address
+Conecta el cable USB, activa "Compartir Internet por USB" en el celular y vuelve a ejecutar.	Connect the USB cable, turn on "USB tethering" on the phone and run again.
+Métrica	Metric
+No se detectó un adaptador USB de tethering con dirección IP	No USB tethering adapter with an IP address was detected
+En el celular activa "Compartir Internet por USB" (Android) o "Punto de acceso personal" con cable (iPhone). Se analizará el adaptador preferido.	On the phone turn on "USB tethering" (Android) or "Personal Hotspot" with a cable (iPhone). The preferred adapter will be analyzed.
+Adaptador USB visto pero sin conexión usable: {0} (estado: {1})	USB adapter seen but without a usable connection: {0} (status: {1})
+Si dice Disconnected o Not Present: reconecta el cable, desactiva y activa "Compartir Internet por USB" en el celular. Si no tiene IP, desactiva y activa el adaptador en Windows.	If it says Disconnected or Not Present: reconnect the cable, turn "USB tethering" off and on on the phone. If it has no IP, disable and enable the adapter in Windows.
+Windows no ve ningún adaptador USB de tethering	Windows does not see any USB tethering adapter
+Causas típicas: cable solo de carga, celular en modo "Solo carga" (elige "Transferencia de archivos"), falta el controlador RNDIS, o en iPhone falta Apple Devices/iTunes. Prueba otro cable y otro puerto USB directo.	Typical causes: charge-only cable, phone in "Charge only" mode (choose "File transfer"), missing RNDIS driver, or on iPhone missing Apple Devices/iTunes. Try another cable and another port.
+Adaptador de tethering detectado: 	Tethering adapter detected: 
+Prueba otro cable de datos (no solo de carga) y un puerto USB directo del equipo, sin hub.	Try another data cable (not charge-only) and a USB port directly on the computer, without a hub.
+Windows prefiere {0} ({1}) antes que el USB	Windows prefers {0} ({1}) over the USB
+Parte del tráfico sale por la otra red. Se propone dar prioridad al USB.	Part of the traffic goes out through the other network. Giving priority to the USB is proposed.
+Dar prioridad al adaptador USB	Give priority to the USB adapter
+Métrica de interfaz de {0} en 5. Windows usará primero el USB.	Interface metric of {0} set to 5. Windows will use the USB first.
+Windows ya prefiere el adaptador de tethering para salir a internet	Windows already prefers the tethering adapter to reach the internet
+El Wi-Fi también está conectado	Wi-Fi is also connected
+En un café, esa red es pública y compite con tu USB. Conviene desconectarla mientras usas el tethering.	In a cafe, that network is public and competes with your USB. It is advisable to disconnect it while using tethering.
+Desconectar el Wi-Fi público	Disconnect the public Wi-Fi
+Cierra la conexión Wi-Fi actual. Se vuelve a conectar desde la barra de tareas.	Closes the current Wi-Fi connection. It reconnects from the taskbar.
+{0}: puerta de enlace fuera de la red del adaptador ({1})	{0}: gateway outside the adapter network ({1})
+La IP {0} no pertenece a esa red, por eso no responde. Si internet funciona, es una puerta sobrante o una configuración manual vieja: revísala con "ipconfig /all".	The IP {0} does not belong to that network, so it does not respond. If the internet works, it is a leftover gateway or an old manual setting: check it with "ipconfig /all".
+No se cambiará el DNS mientras haya VPN, para no romper nombres internos.	DNS will not be changed while a VPN is present, so internal names are not broken.
+Latencia, pérdida de paquetes y jitter (15 pings por destino)	Latency, packet loss and jitter (15 pings per destination)
+Puerta de enlace	Gateway
+Puerta del celular	Phone gateway
+Dirección	Address
+Pérdida %	Loss %
+{0}: no responde ping	{0}: does not answer ping
+Muchos celulares y routers bloquean el ping. Se usa el resto de pruebas como referencia.	Many phones and routers block ping. The other tests are used as reference.
+El enlace USB al celular es lento o pierde paquetes ({0} ms, {1}% perdido)	The USB link to the phone is slow or loses packets ({0} ms, {1}% lost)
+Cambia el cable, usa un puerto USB directo, sin hub, y revisa que el celular no esté en ahorro de batería.	Change the cable, use a USB port directly on the computer, without a hub, and check that the phone is not in battery saver.
+Enlace USB con el celular sano ({0} ms)	USB link with the phone is healthy ({0} ms)
+No hay respuesta de internet por ping	No internet response by ping
+Puede ser un bloqueo de ICMP del operador o que el plan sin saldo/estancado. Se continúa con pruebas HTTP.	It can be an ICMP block by the carrier or a plan with no balance/stalled. HTTP tests continue.
+Pérdida de paquetes hacia internet: {0}% (incluso hacia el mejor destino)	Packet loss toward the internet: {0}% (even toward the best destination)
+Es pérdida real del enlace: mejora la señal, cambia el cable USB o de puerto, o prueba otra banda.	It is real link loss: improve the signal, change the USB cable or port, or try another band.
+{0} perdió {1}% de los pings, pero {2} respondió con {3}%	{0} lost {1}% of the pings, but {2} answered with {3}%
+Es limitación de ICMP hacia ese destino (límite de tasa del operador o del router), no del enlace. Tu conexión no está perdiendo paquetes.	It is an ICMP limitation toward that destination (rate limit of the carrier or router), not of the link. Your connection is not losing packets.
+Pérdida de paquetes baja ({0}%)	Low packet loss ({0}%)
+Señal móvil débil o red congestionada. Las videollamadas y el escritorio remoto se sentirán lentos.	Weak mobile signal or congested network. Video calls and remote desktop will feel slow.
+Aceptable para web y correo; justa para videollamadas.	Acceptable for web and email; borderline for video calls.
+Las llamadas VoIP y videollamadas pueden cortarse. Mejora la cobertura o usa la banda 5G si tu plan la permite.	VoIP calls and video calls can drop. Improve coverage or use the 5G band if your plan allows it.
+Tamaño de paquete (MTU)	Packet size (MTU)
+No se pudo medir el MTU de la ruta	Could not measure the path MTU
+La red bloquea los paquetes de prueba sin fragmentar. No se cambia nada.	The network blocks unfragmented test packets. Nothing is changed.
+MTU de la interfaz: {0}  |  MTU soportado por la ruta: {1}	Interface MTU: {0}  |  MTU supported by the path: {1}
+El MTU de la interfaz ({0}) es mayor que el de la ruta ({1})	The interface MTU ({0}) is larger than the path MTU ({1})
+Causa páginas que no cargan por completo o conexiones que se cuelgan en redes móviles.	It causes pages that do not load completely or connections that hang on mobile networks.
+Ajustar el MTU al de la ruta	Adjust the MTU to the path MTU
+MTU de {0} en {1} hasta el próximo reinicio.	MTU of {0} on {1} until the next restart.
+El MTU es adecuado para esta red	The MTU is suitable for this network
+Prueba de MTU omitida (sin respuesta de internet por ping)	MTU test skipped (no internet response by ping)
+Velocidad de resolución DNS (mediana de 5 consultas)	DNS resolution speed (median of 5 queries)
+DNS actual del adaptador	Current adapter DNS
+Ningún servidor DNS respondió	No DNS server answered
+Sin DNS no se abren sitios por nombre. Revisa el plan de datos y vuelve a conectar el USB.	Without DNS, sites do not open by name. Check the data plan and reconnect the USB.
+El DNS que entrega el celular no responde	The DNS provided by the phone does not answer
+Es una causa habitual de "hay conexión pero no abre nada".	It is a common cause of "there is a connection but nothing opens".
+{0} responde {1} ms más rápido que el DNS actual	{0} answers {1} ms faster than the current DNS
+Usar DNS de 	Use DNS from 
+ en el adaptador USB	 on the USB adapter
+DNS {0} y {1} solo en {2}.	DNS {0} and {1} only on {2}.
+Velocidad de descarga real	Real download speed
+Descarga omitida por -SinDescarga (no se gastan datos)	Download skipped by -SinDescarga (no data used)
+No se pudo completar la descarga de prueba	Could not complete the test download
+Revisa el saldo del plan, el proxy y que el navegador abra páginas.	Check the plan balance, the proxy and that the browser opens pages.
+Descarga: {0} Mbps  |  respuesta del servidor: {1} ms  |  datos usados: {2:N1} MB	Download: {0} Mbps  |  server response: {1} ms  |  data used: {2:N1} MB
+Suficiente solo para mensajería y correo. Revisa señal, throttling del plan o consumo en segundo plano.	Enough only for messaging and email. Check signal, plan throttling or background usage.
+Sirve para trabajo en la nube y videollamadas sencillas.	Good for cloud work and simple video calls.
+(Una sola conexión suele medir menos que el máximo real del plan. Úsalo como referencia.)	(A single connection usually measures less than the real plan maximum. Use it as a reference.)
+Configuración de Windows	Windows settings
+Windows NO trata esta conexión como de uso medido	Windows does NOT treat this connection as metered
+Las actualizaciones y la sincronización pueden gastar tu plan. Actívalo en Configuración > Red e Internet > (tu conexión) > Conexión de uso medido.	Updates and syncing can use up your plan. Turn it on in Settings > Network and Internet > (your connection) > Metered connection.
+La conexión está marcada como de uso medido	The connection is marked as metered
+No se pudo leer si la conexión es de uso medido	Could not read whether the connection is metered
+Revísalo manualmente en Configuración > Red e Internet.	Check it manually in Settings > Network and Internet.
+El ajuste automático de la ventana TCP está desactivado	TCP window auto-tuning is disabled
+Limita la velocidad en enlaces con latencia, como los móviles.	It limits speed on high-latency links such as mobile ones.
+Activar el ajuste automático de TCP	Turn on TCP auto-tuning
+Vuelve al valor normal recomendado por Microsoft.	Goes back to the normal value recommended by Microsoft.
+Ajuste automático de TCP: 	TCP auto-tuning: 
+La suspensión selectiva de USB está activa	USB selective suspend is on
+Windows puede apagar el puerto USB y cortar el tethering sin avisar. Desactivarla aumenta un poco el consumo de batería.	Windows can power off the USB port and cut tethering without warning. Turning it off slightly increases battery use.
+Desactivar la suspensión selectiva de USB	Turn off USB selective suspend
+Evita cortes del tethering en el plan de energía actual (red eléctrica y batería).	Prevents tethering drops on the current power plan (AC and battery).
+La suspensión selectiva de USB ya está desactivada	USB selective suspend is already off
+Hay un proxy configurado en Windows	A proxy is configured in Windows
+{0}{1}Si es de tu empresa y no usas VPN, puede bloquear la navegación fuera de la oficina.	{0}{1}If it belongs to your company and you do not use a VPN, it can block browsing outside the office.
+Hay dirección IPv6 pero no sale a internet	There is an IPv6 address but it does not reach the internet
+Puede causar esperas de varios segundos al abrir sitios. No se desactiva IPv6 por seguridad; prueba reconectar el USB.	It can cause waits of several seconds when opening sites. IPv6 is not disabled for security; try reconnecting the USB.
+La red solo entrega IPv4 (normal en muchos planes móviles)	The network only provides IPv4 (normal on many mobile plans)
+La red intercepta la conexión (portal cautivo o filtro)	The network intercepts the connection (captive portal or filter)
+Abre el navegador y acepta el portal, o desconecta el Wi-Fi del café para usar solo el USB.	Open the browser and accept the portal, or disconnect the cafe Wi-Fi to use only the USB.
+No se pudo confirmar la salida HTTP a internet	Could not confirm HTTP output to the internet
+Programas que pueden gastar datos en segundo plano	Programs that can use data in the background
+. Pausa la sincronización mientras uses el plan del celular.	. Pause syncing while you use the phone plan.
+Más conexiones abiertas: 	More open connections: 
+{0} en orden, {1} avisos, {2} problemas. Datos usados por esta prueba: {3:N1} MB.	{0} in order, {1} warnings, {2} problems. Data used by this test: {3:N1} MB.
+Qué atender primero:	What to address first:
+Cambios propuestos ({0}), no aplicados:	Proposed changes ({0}), not applied:
+Márcalos en la lista de PC Care y pulsa "Aplicar mejoras marcadas".	Check them in the PC Care list and press "Apply checked improvements".
+  Aprobado en PC Care.	  Approved in PC Care.
+Reparación de la pila de red	Network stack repair
+Reinicia Winsock y la pila IP. Corrige fallos profundos de conexión. NO se puede revertir y exige reiniciar el equipo.	Resets Winsock and the IP stack. It fixes deep connection failures. It CANNOT be reverted and requires restarting the computer.
+  {0} -> código {1}	  {0} -> code {1}
+Reinicia el equipo para completar la reparación.	Restart the computer to complete the repair.
+{0} cambios aplicados. Caché DNS vaciada.	{0} changes applied. DNS cache flushed.
+Informe guardado en: 	Report saved in: 
+Para deshacer los cambios (como administrador): 	To undo the changes (as administrator): 
+No se pudo guardar el informe: 	Could not save the report: 
+Sin privilegios de administrador: BitLocker, TPM, Secure Boot y SMBv1 pueden quedar sin evaluar.	No administrator privileges: BitLocker, TPM, Secure Boot and SMBv1 may be left unevaluated.
+Numero de serie	Serial number
+{0} GB instalados, {1} GB libres ({2}% en uso)	{0} GB installed, {1} GB free ({2}% in use)
+Fecha de auditoria	Audit date
+Activo: {0}. Firmas al dia: {1}.	Active: {0}. Signatures up to date: {1}.
+Actualizar las firmas del antivirus.	Update the antivirus signatures.
+No hay ningun antivirus registrado en el Centro de seguridad.	No antivirus is registered in the Security Center.
+Habilitar Microsoft Defender o instalar un antivirus.	Enable Microsoft Defender or install an antivirus.
+No se pudo consultar el Centro de seguridad (normal en Windows Server).	Could not query the Security Center (normal on Windows Server).
+Defender: proteccion en tiempo real	Defender: real-time protection
+Inactiva porque hay un antivirus de terceros activo.	Inactive because a third-party antivirus is active.
+Inactiva y sin antivirus de terceros activo.	Inactive and no active third-party antivirus.
+Activar la proteccion en tiempo real en Seguridad de Windows.	Turn on real-time protection in Windows Security.
+Ejecutar Update-MpSignature o revisar Windows Update.	Run Update-MpSignature or check Windows Update.
+Activar Tamper Protection en Seguridad de Windows.	Turn on Tamper Protection in Windows Security.
+Hace {0} dias o nunca.	{0} days ago or never.
+No se pudo consultar el estado de Defender.	Could not query the Defender status.
+Habilitar el firewall de Windows en este perfil.	Enable the Windows firewall on this profile.
+No se pudo consultar.	Could not query.
+Control de cuentas (UAC)	User Account Control (UAC)
+Habilitar UAC (EnableLUA = 1) y reiniciar.	Enable UAC (EnableLUA = 1) and restart.
+Cifrado de disco (BitLocker)	Disk encryption (BitLocker)
+Activar BitLocker y resguardar la clave de recuperacion, sobre todo en laptops.	Turn on BitLocker and keep the recovery key safe, especially on laptops.
+No evaluado (requiere administrador o la edicion no incluye BitLocker).	Not evaluated (requires administrator or the edition does not include BitLocker).
+Habilitar Secure Boot en la UEFI.	Enable Secure Boot in the UEFI.
+No evaluado (requiere administrador o el equipo arranca en modo BIOS heredado).	Not evaluated (requires administrator or the computer boots in legacy BIOS mode).
+Presente y listo.	Present and ready.
+Habilitar el TPM en la UEFI.	Enable the TPM in the UEFI.
+Habilitado en el servidor SMB.	Enabled on the SMB server.
+Habilitado con NLA.	Enabled with NLA.
+Confirmar que el puerto 3389 no este publicado a Internet; usar VPN.	Confirm that port 3389 is not published to the Internet; use a VPN.
+Habilitado sin autenticacion a nivel de red (NLA).	Enabled without network level authentication (NLA).
+Exigir NLA y restringir el acceso por VPN.	Require NLA and restrict access through a VPN.
+Reducir administradores locales al minimo necesario.	Reduce local administrators to the necessary minimum.
+No se pudo enumerar el grupo.	Could not enumerate the group.
+Deshabilitar la cuenta Invitado.	Disable the Guest account.
+Inicio de sesion automatico	Automatic sign-in
+Habilitado: la credencial puede estar almacenada en el registro.	Enabled: the credential may be stored in the registry.
+No habilitada por registro.	Not enabled in the registry.
+Evaluar habilitar RunAsPPL para dificultar el robo de credenciales.	Consider enabling RunAsPPL to make credential theft harder.
+Hay parches instalados que no aplican hasta reiniciar.	Some installed patches do not apply until a restart.
+Reiniciar el equipo.	Restart the computer.
+Revisar por que el equipo no recibe parches mensuales.	Check why the computer does not receive monthly patches.
+Ultimo parche de Windows	Latest Windows patch
+Parches de Windows pendientes	Pending Windows patches
+Consulta omitida por parametro.	Query skipped by parameter.
+{0} pendientes ({1} criticos o importantes).	{0} pending ({1} critical or important).
+No se pudo consultar: 	Could not query: 
+[4/6] Inventario de aplicaciones...	[4/6] Application inventory...
+      Consultando actualizaciones de aplicaciones con winget...	      Querying application updates with winget...
+winget no esta disponible en este equipo.	winget is not available on this computer.
+Instalar "Instalador de aplicacion" desde Microsoft Store.	Install "App Installer" from Microsoft Store.
+winget no reporta actualizaciones pendientes.	winget reports no pending updates.
+{0} aplicaciones con version nueva disponible.	{0} applications have a new version available.
+Priorizar navegadores, Java, lectores PDF, VPN y herramientas de acceso remoto. Ejecutar el script con -ActualizarApps.	Prioritize browsers, Java, PDF readers, VPN and remote access tools. Run the script with -ActualizarApps.
+[5/6] Rendimiento (muestreo de {0} s)...	[5/6] Performance ({0} s sampling)...
+{0}% en uso. Mayores consumidores: {1}.	{0}% in use. Largest consumers: {1}.
+Cerrar o desinstalar lo que no se usa; si el uso es habitual, ampliar RAM.	Close or uninstall what is not used; if usage is habitual, add RAM.
+{0}% en uso de {1} GB.	{0}% in use of {1} GB.
+Windows 11 con ofimatica y navegador rinde mejor con 16 GB.	Windows 11 with office apps and a browser performs better with 16 GB.
+Carga de CPU	CPU load
+{0}% durante el muestreo. Procesos: {1}.	{0}% during sampling. Processes: {1}.
+Revisar esos procesos; si es sostenido sin motivo, analizar con antivirus.	Review those processes; if it is sustained for no reason, scan with the antivirus.
+{0}% durante el muestreo.	{0}% during sampling.
+Programas de inicio	Startup programs
+{0} entradas arrancan con Windows.	{0} entries start with Windows.
+Deshabilitar las innecesarias en Administrador de tareas > Aplicaciones de arranque.	Disable the unnecessary ones in Task Manager > Startup apps.
+Liberar espacio: Windows Update puede fallar por falta de disco.	Free up space: Windows Update can fail for lack of disk.
+Liberar espacio con Sensor de almacenamiento.	Free up space with Storage Sense.
+Respaldar la informacion y reemplazar el disco.	Back up the information and replace the disk.
+Tipo de disco 	Disk type 
+Migrar a SSD: es la mejora de rendimiento con mayor retorno.	Migrate to SSD: it is the performance upgrade with the highest return.
+Reiniciar para aplicar parches y liberar memoria.	Restart to apply patches and free memory.
+{0} MB entre temporales de usuario y de sistema.	{0} MB between user and system temporary files.
+Ejecutar el script con -LimpiarTemporales o usar Sensor de almacenamiento.	Run the script with -LimpiarTemporales or use Storage Sense.
+Plan de energia	Power plan
+Resultado: {0}% conforme | {1} criticos | {2} alertas | {3} apps por actualizar | {4} parches de Windows	Result: {0}% compliant | {1} critical | {2} alerts | {3} apps to update | {4} Windows patches
+Reanudar cola	Resume queue
+Desactivar TurboPC	Turn off TurboPC
+Rango normal	Normal range
+No disponible	Not available
+Cola reanudada.	Queue resumed.
+Por revisar: 	To review: 
+Seleccionado: 	Selected: 
+TurboPC desactivado.	TurboPC is off.
+TurboPC activo. RAM liberada: 	TurboPC is on. RAM freed: 
+Tareas ({0})	Tasks ({0})
+Real	Real
+SIM	SIM
+REAL	REAL
+OK	OK
+ALERTA	WARNING
+CRITICO	CRITICAL
+INFO	INFO
+Alerta	Warning
+Atención	Attention
+Si	Yes
+No (resultado parcial)	No (partial result)
+Area	Area
+Control	Check
+Recomendacion	Recommendation
+Sistema	System
+Dato	Item
+Nombre	Name
+Titulo	Title
+Severidad	Severity
+Proceso	Process
+MemoriaMB	Memory (MB)
+CPUPct	CPU %
+Ubicacion	Location
+Usuario	User
+Almacenamiento	Storage
+Unidad	Drive
+TamanoGB	Size (GB)
+LibreGB	Free (GB)
+LibrePct	Free %
+Version	Version
+Editor	Publisher
+FechaInstalacion	Install date
+TamanoMB	Size (MB)
+Ambito	Scope
+Parches	Patches
+No clasificada	Unclassified
+Controles conformes	Compliant checks
+Criticos	Critical
+Alertas	Alerts
+Apps por actualizar	Apps to update
+Parches de Windows	Windows patches
+Memoria en uso	Memory in use
+Hallazgos y recomendaciones	Findings and recommendations
+Aplicaciones con actualizacion disponible ({0})	Applications with an update available ({0})
+Parches de Windows pendientes ({0})	Pending Windows patches ({0})
+Consumo de memoria: 15 procesos principales	Memory usage: top 15 processes
+Consumo de CPU: 10 procesos principales	CPU usage: top 10 processes
+Programas de inicio ({0})	Startup programs ({0})
+Inventario de software ({0})	Software inventory ({0})
+Mostrar aplicaciones instaladas	Show installed applications
+Mostrar aplicaciones de Microsoft Store ({0})	Show Microsoft Store applications ({0})
+Generado por AuditoriaPC.ps1. Auditoria de solo lectura: no se modifico el equipo.	Generated by AuditoriaPC.ps1. Read-only audit: the computer was not modified.
+Auditoria de equipo: {0}	Computer audit: {0}
+Auditoria {0}	Audit {0}
+{0} | Ejecutado como administrador: Si	{0} | Run as administrator: Yes
+{0} | Ejecutado como administrador: No (resultado parcial)	{0} | Run as administrator: No (partial result)
+Idioma cambiado. Se aplica al reiniciar PC Care.	Language changed. It applies when PC Care restarts.
+Reinicio pendiente	Pending restart
+No hay reinicios pendientes.	There are no pending restarts.
+Optimizar ahora	Optimize now
+Habilitado.	Enabled.
+Tiempo sin reiniciar	Time since last restart
+Unidad {0}: optimizada.	Drive {0}: optimized.
+Windows Update habilitado (inicio manual).	Windows Update enabled (manual start).
+Con ventana abierta	With open window
+Segundo plano	Background
+Acceso controlado a carpetas	Controlled folder access
+No configurado. Es opcional: protege tus carpetas personales contra ransomware.	Not configured. It is optional: it protects your personal folders against ransomware.
+Activo.	Active.
+Escritorio remoto (RDP)	Remote Desktop (RDP)
+Deshabilitado.	Disabled.
+Cifrado BitLocker	BitLocker encryption
+Protocolo SMB 1	SMB 1 protocol
+Equipo (32 bits)	Computer (32-bit)
+Carpeta Inicio (usuario)	Startup folder (user)
+Carpeta Inicio (equipo)	Startup folder (computer)
+No existe: 	Does not exist: 
+Sincronizado	Synced
+Solo lectura	Read-only
+En curso	Running
+Interrumpida	Interrupted
+Pendiente	Pending
+Cancelada	Cancelled
+Completada	Completed
+Descartada	Discarded
+Reanudada	Resumed
+Aprobado	Approved
+Aplicaciones marcadas: 	Checked applications: 
+Drivers marcados: 	Checked drivers: 
+Se puede repetir sin riesgo.	It can be repeated safely.
+Tareas reanudadas: {0}	Tasks resumed: {0}
+Inicio: 	Startup: 
+ERROR interno: 	Internal ERROR: 
+Analizando archivos basura	Analyzing junk files
+Limpiando archivos basura	Cleaning junk files
+Espacio liberado: 	Space freed: 
+Limpiar archivos basura	Clean junk files
+Analizando registro	Analyzing registry
+Limpiar registro	Clean registry
+Limpiando registro	Cleaning registry
+Diagnosticando problemas comunes	Diagnosing common problems
+Desactivando TurboPC	Turning off TurboPC
+Activando TurboPC	Turning on TurboPC
+Cerrar: 	Close: 
+Mantenimiento: 	Maintenance: 
+Buscando archivos grandes (puede tardar unos minutos)	Searching for large files (it can take a few minutes)
+Archivos grandes	Large files
+Duplicados	Duplicates
+Error: 	Error: 
+PID 	PID 
+Instalando 	Installing 
+Reinstalando 	Reinstalling 
+Actualizando 	Updating 
+Instalar herramienta	Install tool
+Instalar drivers	Install drivers
+Instalar 	Install 
+Analizando aplicaciones (winget)	Analyzing applications (winget)
+Analizando drivers (Windows Update, puede tardar unos minutos)	Analyzing drivers (Windows Update, it can take a few minutes)
+Aplicaciones ({0})	Applications ({0})
+Drivers ({0})	Drivers ({0})
+Aplicaciones detectadas: {0}	Applications detected: {0}
+Drivers pendientes: {0} (origen: {1}). Equipo: {2}	Pending drivers: {0} (source: {1}). Computer: {2}
+Instalando {0} drivers	Installing {0} drivers
+Informe generado: 	Report generated: 
+Diagnosticando... unos 30 a 60 segundos.	Diagnosing... about 30 to 60 seconds.
+Para deshacer: ejecuta como administrador 	To undo: run as administrator 
+Id truncado	Truncated Id
+Error 0x{0:X8}	Error 0x{0:X8}
+En cola	Queued
+No aplicado	Not applied
+Actualizado	Updated
+Ignorada	Ignored
+Reinstalar	Reinstall
+Instalado	Installed
+Simulado	Simulated
+Cancelado	Cancelled
+Terceros	Third-party
+Sin resultado (	No result (
+Drivers NVIDIA (sitio oficial)	NVIDIA drivers (official site)
+Drivers AMD (sitio oficial)	AMD drivers (official site)
+Respaldo	Backup
+Sin catálogo	No catalog
+Nunca	Never
+Sí	Yes
