@@ -20,7 +20,7 @@ $rutaTsv = Join-Path $raiz 'modulos\idioma\en.tsv'
 Assert-Prueba 'existe en.tsv' (Test-Path -LiteralPath $rutaTsv)
 $lineas = @(Get-Content -LiteralPath $rutaTsv -Encoding UTF8 | Where-Object { $_ -and -not $_.StartsWith('#') })
 Assert-Prueba 'diccionario con mas de 700 filas' ($lineas.Count -gt 700) ('filas: ' + $lineas.Count)
-$claves = @{}
+$claves = New-Object 'System.Collections.Generic.Dictionary[string,string]' ([System.StringComparer]::Ordinal)
 $malas = New-Object System.Collections.ArrayList
 $guion = [string][char]0x2014
 foreach ($l in $lineas) {
