@@ -88,3 +88,16 @@ jobs:
             salida/PCCare-Setup-*-x64.exe
             salida/PCCare-Setup-*-x64.exe.sha256
           retention-days: 7
+
+  lanzador:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Compilar PCCare.exe (lanzador)
+        shell: powershell
+        run: .\lanzador\compilar.ps1
+
+      - name: Probar el lanzador (obligatorio)
+        shell: powershell
+        run: .\lanzador\probar.ps1

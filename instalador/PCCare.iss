@@ -7,7 +7,6 @@
 #define AppName "PC Care"
 #define AppPublisher "NOVALTEK"
 #define AppURL "https://github.com/marcoadtup-cmd/PCCare"
-#define PowerShellExe "{sys}\WindowsPowerShell\v1.0\powershell.exe"
 
 [Setup]
 ; El AppId identifica a PC Care para las actualizaciones: no cambiarlo nunca.
@@ -46,6 +45,7 @@ Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 Name: "desktopicon"; Description: "Crear un acceso directo en el escritorio"; GroupDescription: "Accesos directos:"; Flags: unchecked
 
 [Files]
+Source: "..\lanzador\bin\PCCare.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\PCCare.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\modulos\*"; DestDir: "{app}\modulos"; Flags: ignoreversion recursesubdirs
 Source: "..\Autoprueba PC Care.cmd"; DestDir: "{app}"; Flags: ignoreversion
@@ -55,14 +55,14 @@ Source: "..\CHANGELOG.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\SECURITY.md"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-; PC Care pide permisos de administrador por si mismo al abrirse (UAC).
-Name: "{group}\PC Care"; Filename: "{#PowerShellExe}"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\PCCare.ps1"""; WorkingDir: "{app}"; Comment: "Mantenimiento de Windows"
+; PCCare.exe pide permisos de administrador (UAC) y abre PC Care sin ventana de consola.
+Name: "{group}\PC Care"; Filename: "{app}\PCCare.exe"; WorkingDir: "{app}"; Comment: "Mantenimiento de Windows"
 Name: "{group}\Autoprueba de PC Care"; Filename: "{app}\Autoprueba PC Care.cmd"; WorkingDir: "{app}"
 Name: "{group}\Desinstalar PC Care"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\PC Care"; Filename: "{#PowerShellExe}"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\PCCare.ps1"""; WorkingDir: "{app}"; Comment: "Mantenimiento de Windows"; Tasks: desktopicon
+Name: "{autodesktop}\PC Care"; Filename: "{app}\PCCare.exe"; WorkingDir: "{app}"; Comment: "Mantenimiento de Windows"; Tasks: desktopicon
 
 [Run]
-Filename: "{#PowerShellExe}"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\PCCare.ps1"""; WorkingDir: "{app}"; Description: "Abrir PC Care ahora"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\PCCare.exe"; WorkingDir: "{app}"; Description: "Abrir PC Care ahora"; Flags: nowait postinstall skipifsilent shellexec
 
 [UninstallDelete]
 ; Los datos del usuario (%LOCALAPPDATA%\PCCare y Documentos\PCCare) NO se borran al desinstalar.

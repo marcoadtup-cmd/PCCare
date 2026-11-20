@@ -5,7 +5,7 @@ Mantenimiento de Windows 11 de código abierto, todo en una sola ventana: limpie
 Es una alternativa libre a las suites de limpieza comerciales. No contiene código ni recursos de ninguna de ellas.
 
 - Gratis, sin publicidad, sin cuentas y sin enviar datos a ningún servidor.
-- Funciona con PowerShell que ya trae Windows. No instala nada.
+- Funciona con PowerShell que ya trae Windows. Se abre con `PCCare.exe`, sin ventana de consola.
 - Empieza en **modo simulación**: muestra qué haría sin tocar nada, hasta que tú lo desactives.
 - Si se cierra o se corta a mitad de una tarea, al abrirlo te ofrece continuar.
 
@@ -23,7 +23,7 @@ Las versiones nuevas se publican en la sección **Releases** de este repositorio
 
 1. Descarga `PCCare-X.Y.Z-portable.zip`.
 2. Clic derecho, **Extraer todo**. No ejecutes nada desde dentro del ZIP.
-3. Doble clic en **`Iniciar PC Care.cmd`** y acepta el aviso de administrador.
+3. Doble clic en **`PCCare.exe`** y acepta el aviso de administrador. (`Iniciar PC Care.cmd` hace lo mismo y sirve si tu antivirus bloquea el `.exe`.)
 
 Si Windows muestra "Windows protegió su PC" (SmartScreen), pulsa **Más información** y luego **Ejecutar de todas formas**. Aparece porque el instalador aún no está firmado digitalmente (ver **Firma digital**). Está compilado por GitHub Actions a partir del código público de este repositorio, y puedes comprobarlo con la verificación de más abajo.
 
@@ -47,7 +47,7 @@ Free code signing provided by [SignPath.io](https://signpath.io), certificate by
 
 | Tema | Regla |
 |---|---|
-| Qué se firma | Solo el instalador `PCCare-Setup-X.Y.Z-x64.exe`, compilado por GitHub Actions desde este repositorio. La versión portable (ZIP) no se firma: se verifica con su SHA256 y su attestation. |
+| Qué se firma | Por ahora solo el instalador `PCCare-Setup-X.Y.Z-x64.exe`, compilado por GitHub Actions desde este repositorio. El `PCCare.exe` que va dentro del instalador y del ZIP todavía no se firma por separado [POR CONFIRMAR: se añadirá cuando SignPath apruebe el proyecto]. La versión portable (ZIP) se verifica con su SHA256 y su attestation. |
 | Quién compila | Únicamente el flujo `publicar.yml` al crear una etiqueta `vX.Y.Z`. No se firma nada compilado en un equipo personal. |
 | Roles | Autor, revisor y aprobador: Marco, dueño del proyecto (NOVALTEK). Todo cambio de terceros entra por Pull Request revisado y aprobado por él. [POR CONFIRMAR: SignPath puede exigir roles distintos] |
 | Aprobación | Cada firma de una release se aprueba a mano en SignPath. Con la autenticación en dos pasos activa en SignPath y en GitHub. |
@@ -130,9 +130,9 @@ Si algo falla, adjunta ese archivo al abrir un Issue.
 
 | Síntoma | Qué hacer |
 |---|---|
-| No se abre y no muestra nada | Ejecuta `Iniciar PC Care.cmd` otra vez y acepta el aviso de administrador. Si sigue igual, usa la autoprueba y abre un Issue con el log. |
+| No se abre y no muestra nada | Abre `PCCare.exe` otra vez y acepta el aviso de administrador. Si falla, el cuadro de error y el archivo `%LOCALAPPDATA%\PCCare\lanzador.log` dicen por qué; adjúntalo en un Issue. Si tu antivirus bloquea el `.exe`, usa `Iniciar PC Care.cmd`. |
 | Dice que falta un archivo de `modulos` | Extrajiste solo `PCCare.ps1`. Extrae **toda** la carpeta del ZIP. |
-| "La ejecución de scripts está deshabilitada" | Abre PC Care con `Iniciar PC Care.cmd`, que ya usa el modo correcto, en vez de hacer doble clic en el `.ps1`. |
+| "La ejecución de scripts está deshabilitada" | Abre PC Care con `PCCare.exe` o `Iniciar PC Care.cmd`, que ya usan el modo correcto, en vez de hacer doble clic en el `.ps1`. |
 | Las aplicaciones no aparecen | Comprueba que `winget --version` funciona en una consola. Instala "App Installer" desde Microsoft Store si no existe. |
 | Aparece "PC Care ya está abierto" | Solo se permite una ventana a la vez. Búscala en la barra de tareas. |
 

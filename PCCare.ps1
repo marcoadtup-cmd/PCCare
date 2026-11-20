@@ -36,7 +36,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$VersionApp = '2.2.0'
+$VersionApp = '2.3.0'
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Xaml
 
 $esAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
@@ -2748,8 +2748,15 @@ $ui.cmbIdioma.Add_SelectionChanged({
         $r = [System.Windows.MessageBox]::Show("¿Reiniciar PC Care ahora para aplicar el idioma?`nRestart PC Care now to apply the language?", 'PC Care', 'YesNo', 'Question')
         if ($r -ne 'Yes') { return }
         try {
-            $exe = (Get-Process -Id $PID).Path
-            $orden = 'ping -n 3 127.0.0.1 >nul & start "" "{0}" -NoProfile -ExecutionPolicy Bypass -File "{1}"' -f $exe, $PSCommandPath
+            # Con el lanzador instalado se reabre por PCCare.exe (sin consola); sin el, como antes
+            $lanzador = Join-Path $RaizApp 'PCCare.exe'
+            if (Test-Path -LiteralPath $lanzador) {
+                $orden = 'ping -n 3 127.0.0.1 >nul & start "" "{0}"' -f $lanzador
+            }
+            else {
+                $exe = (Get-Process -Id $PID).Path
+                $orden = 'ping -n 3 127.0.0.1 >nul & start "" "{0}" -NoProfile -ExecutionPolicy Bypass -File "{1}"' -f $exe, $PSCommandPath
+            }
             Start-Process -FilePath 'cmd.exe' -ArgumentList @('/c', $orden) -WindowStyle Hidden
             $ventana.Close()
         }

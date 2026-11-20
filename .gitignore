@@ -14,3 +14,7 @@ Cola.json
 # Paquetes locales
 *.zip
 *.sha256
+
+# Lanzador compilado
+lanzador/bin/
+lanzador/obj/

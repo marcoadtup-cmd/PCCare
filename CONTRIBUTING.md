@@ -38,6 +38,7 @@ La validación automática comprueba la sintaxis de todos los `.ps1` en cada Pul
 
 | Archivo | Para qué sirve |
 |---|---|
+| `lanzador\Program.cs` | Código de `PCCare.exe` (C# 5, sin consola). Se compila con `lanzador\compilar.ps1` y se prueba con `lanzador\probar.ps1`. |
 | `PCCare.ps1` | Ventana principal, motor de cola, limpieza, rendimiento, monitor, seguridad y autoprueba. |
 | `modulos\Cola.ps1` | Registro persistente de tareas y políticas de reanudación. |
 | `modulos\Actualizaciones.ps1` | Motor en segundo plano de aplicaciones (winget) y drivers. |
