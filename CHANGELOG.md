@@ -36,6 +36,9 @@ Revisado por: NOVALTEK
 - Las notas de cada release indican si el instalador está firmado y, en ese caso, incluyen la atribución a SignPath. Están en español e inglés.
 - README y SECURITY: sección de firma digital, política de firma de código, roles y declaración de privacidad.
 
+### Correcciones
+- Las notas de la release mostraban tildes rotas ("VersiÃ³n"). El paso que las genera ahora corre en PowerShell 7, que lee el script en UTF-8.
+
 ### Actualizaciones
 - Versión 2.2.0.
 
