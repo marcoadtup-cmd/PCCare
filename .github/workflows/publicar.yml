@@ -80,7 +80,7 @@ jobs:
           $v = $env:ETIQUETA.TrimStart('v')
           $dest = "PCCare-$v-portable"
           New-Item -ItemType Directory -Path $dest | Out-Null
-          Copy-Item PCCare.ps1, 'Iniciar PC Care.cmd', 'Autoprueba PC Care.cmd', README.md, LICENSE, CHANGELOG.md, SECURITY.md -Destination $dest
+          Copy-Item lanzador\bin\PCCare.exe, PCCare.ps1, 'Iniciar PC Care.cmd', 'Autoprueba PC Care.cmd', README.md, LICENSE, CHANGELOG.md, SECURITY.md -Destination $dest
           Copy-Item modulos -Destination $dest -Recurse
           Compress-Archive -Path $dest -DestinationPath "salida\$dest.zip"
           $h = (Get-FileHash "salida\$dest.zip" -Algorithm SHA256).Hash.ToLower()

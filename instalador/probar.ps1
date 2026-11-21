@@ -24,28 +24,34 @@ if ($p.ExitCode -ne 0) {
     if (Test-Path -LiteralPath $log) { Get-Content -LiteralPath $log -Tail 40 }
     throw ('El instalador terminó con código ' + $p.ExitCode)
 }
-foreach ($f in 'PCCare.ps1', 'LICENSE', 'CHANGELOG.md', 'unins000.exe') {
+foreach ($f in 'PCCare.exe', 'PCCare.ps1', 'LICENSE', 'CHANGELOG.md', 'unins000.exe') {
     if (-not (Test-Path -LiteralPath (Join-Path $dir $f))) { throw ('Falta ' + $f + ' en la carpeta instalada') }
 }
 
 Write-Host '== 3. Cada archivo instalado debe ser idéntico al del repositorio'
 $rutas = New-Object System.Collections.Generic.List[string]
 $rutas.Add('PCCare.ps1')
+$rutas.Add('PCCare.exe')
 foreach ($m in Get-ChildItem -LiteralPath (Join-Path $raiz 'modulos') -File) { $rutas.Add('modulos\' + $m.Name) }
 foreach ($m in Get-ChildItem -LiteralPath (Join-Path $raiz 'modulos\idioma') -File) { $rutas.Add('modulos\idioma\' + $m.Name) }
 for ($i = 0; $i -lt $rutas.Count; $i++) {
     $rel = $rutas[$i]
     $rutaInst = Join-Path $dir $rel
     if (-not (Test-Path -LiteralPath $rutaInst)) { throw ('No se instaló ' + $rel) }
-    $a = (Get-FileHash -LiteralPath (Join-Path $raiz $rel) -Algorithm SHA256).Hash
+    $origen = if ($rel -eq 'PCCare.exe') { Join-Path $raiz 'lanzador\bin\PCCare.exe' } else { Join-Path $raiz $rel }
+    $a = (Get-FileHash -LiteralPath $origen -Algorithm SHA256).Hash
     $b = (Get-FileHash -LiteralPath $rutaInst -Algorithm SHA256).Hash
     if ($a -ne $b) { throw ('El archivo instalado difiere del repositorio: ' + $rel) }
 }
 Write-Host ('Archivos verificados: ' + $rutas.Count)
 
-Write-Host '== 4. Autoprueba desde la carpeta instalada'
-$ps = Join-Path $env:WINDIR 'System32\WindowsPowerShell\v1.0\powershell.exe'
-& $ps -NoProfile -ExecutionPolicy Bypass -File (Join-Path $dir 'PCCare.ps1') -AutoPrueba
+Write-Host '== 4. Autoprueba desde la carpeta instalada, abierta con PCCare.exe'
+# Se abre con el lanzador instalado (el mismo que usa el acceso directo), sin consola
+# (sin cuadros de aviso, para que un error no deje CI esperando; el código de salida es solo informativo)
+$env:PCCARE_LANZADOR_SIN_CUADROS = '1'
+$lanz = Start-Process -FilePath (Join-Path $dir 'PCCare.exe') -ArgumentList '-AutoPrueba' -Wait -PassThru
+Remove-Item Env:\PCCARE_LANZADOR_SIN_CUADROS -ErrorAction SilentlyContinue
+Write-Host ('PCCare.exe -AutoPrueba terminó con código ' + $lanz.ExitCode)
 $logs = @(Get-ChildItem -LiteralPath $dir -Filter 'PCCare_autoprueba_*.log')
 if ($logs.Count -eq 0) { throw 'La autoprueba instalada no dejó informe' }
 Get-Content -LiteralPath $logs[0].FullName

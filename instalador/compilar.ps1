@@ -14,6 +14,9 @@ if ($Version -and $Version -ne $versionApp) {
 }
 $Version = $versionApp
 
+# El lanzador PCCare.exe va dentro del instalador y del ZIP portable
+& (Join-Path $raiz 'lanzador\compilar.ps1') -Version $Version
+
 $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
 if (-not (Test-Path -LiteralPath $iscc)) {
     Write-Host 'Instalando Inno Setup...'

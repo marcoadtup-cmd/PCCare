@@ -19,6 +19,23 @@ Revisado por: quien aprobó el cambio
 
 Se omiten los apartados que no apliquen.
 
+## 2.3.0 - 2026-11-20 17:45 (hora de Lima)
+
+Autor: NOVALTEK
+Revisado por: NOVALTEK
+
+### Nuevos módulos
+- **`PCCare.exe`, lanzador sin ventana de consola.** Programa pequeño (C#, se compila con el `csc.exe` que ya trae Windows, no instala nada) que abre PC Care sin mostrar PowerShell ni ventanas negras. Pide permisos de administrador una sola vez (UAC), pasa los argumentos (`-Idioma`, `-AutoPrueba`, etc.) y, si PC Care termina con error, lo muestra en un cuadro y lo anota en `%LOCALAPPDATA%\PCCare\lanzador.log`. Antes ese texto salía en la consola. Código en `lanzador\Program.cs`. Es la fase 1 del paso a una aplicación compilada; el motor sigue siendo PowerShell.
+- El instalador y los accesos directos del menú Inicio y del escritorio abren ahora `PCCare.exe`. El ZIP portable lo incluye. `Iniciar PC Care.cmd` sigue funcionando y usa el lanzador si lo encuentra.
+
+### Mejoras
+- Al cambiar el idioma, PC Care se reabre por el lanzador (sin consola).
+- CI: nuevo trabajo **lanzador** (obligatorio) que compila `PCCare.exe` y comprueba: programa de ventana sin consola, producto y versión, permiso de administrador, paso de argumentos con espacios, código de salida, registro de errores y aviso cuando falta `PCCare.ps1`.
+- La prueba del instalador ahora instala `PCCare.exe`, lo compara con el compilado y abre la autoprueba con él.
+
+### Actualizaciones
+- Versión 2.3.0.
+
 ## 2.2.0 - 2026-11-20 08:33 (hora de Lima)
 
 Autor: NOVALTEK
