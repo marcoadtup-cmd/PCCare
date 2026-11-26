@@ -87,7 +87,7 @@ jobs:
           [System.IO.File]::WriteAllText("$PWD\salida\$dest.zip.sha256", "$h  $dest.zip`n", (New-Object System.Text.UTF8Encoding($false)))
 
       - name: Certificar el origen de los archivos (attestation)
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             salida/PCCare-Setup-*-x64.exe
