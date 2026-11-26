@@ -29,6 +29,10 @@ Si Windows muestra "Windows protegió su PC" (SmartScreen), pulsa **Más informa
 
 Requisitos: Windows 11 (probado) o Windows 10 (compatible, sin pruebas propias todavía), PowerShell 5.1 (viene incluido) y permisos de administrador. El instalador es solo para 64 bits; la versión portable funciona igual en el mismo sistema. Las actualizaciones de aplicaciones usan `winget`, que viene con Windows 11 y con las versiones recientes de Windows 10.
 
+## Tareas al abrir
+
+Al abrir PC Care aparece una ventana con la lista de tareas de revisión, todas marcadas y de solo lectura. Desmarca las que no quieras y pulsa **GO**: cada tarea muestra su estado (✓ Listo, ✖ Error) y el botón **Detalle** abre lo que hizo y su resultado. Si desmarcas "Mostrar esta ventana al abrir PC Care", las tareas se ejecutan solas como antes.
+
 ## Idioma / Language
 
 PC Care se ve en **español** o **inglés**. Cambia el idioma con la lista de la barra superior; PC Care ofrece reiniciarse para aplicarlo. Si no eliges, usa el idioma de Windows. Los informes HTML también salen en el idioma elegido.

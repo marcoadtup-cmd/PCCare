@@ -807,3 +807,47 @@ Respaldo	Backup
 Sin catálogo	No catalog
 Nunca	Never
 Sí	Yes
+Tareas al abrir	Startup tasks
+Tareas para revisar el equipo	Tasks to check this computer
+Marca lo que quieres ejecutar y pulsa GO. Todas son de solo lectura: analizan el equipo y no cambian nada.	Select what you want to run and press GO. All of them are read-only: they scan the computer and change nothing.
+Mostrar esta ventana al abrir PC Care (si la desmarcas, estas tareas se ejecutan solas)	Show this window when PC Care opens (if you clear it, these tasks run on their own)
+Marcar todas	Select all
+Ninguna	None
+Cerrar	Close
+Detalle de la tarea	Task details
+Detalle del error	Error details
+Marca al menos una tarea.	Select at least one task.
+Tareas al abrir: se ejecutan {0} de {1}.	Startup tasks: running {0} of {1}.
+Leer puntos de restauración	Read restore points
+Consulta el último punto de restauración de Windows.	Checks the latest Windows restore point.
+Analizar archivos basura	Scan junk files
+Mide temporales, cachés, informes de error y Papelera. No borra nada.	Measures temp files, caches, error reports and the Recycle Bin. Deletes nothing.
+Revisar la seguridad de Windows	Check Windows security
+Comprueba el estado de seguridad del equipo. Solo lectura.	Checks the security status of the computer. Read-only.
+Analizar programas de inicio	Scan startup programs
+Lista lo que se abre junto con Windows. No cambia nada.	Lists what opens together with Windows. Changes nothing.
+Diagnosticar problemas comunes	Diagnose common problems
+Detecta problemas de rendimiento y mantenimiento. No aplica correcciones.	Detects performance and maintenance problems. Applies no fixes.
+Listar programas en memoria	List programs in memory
+Muestra qué programas consumen memoria ahora.	Shows which programs are using memory now.
+Analizar el registro	Scan the registry
+Busca entradas inválidas del registro. No las limpia.	Looks for invalid registry entries. Does not clean them.
+En espera	Waiting
+En curso...	Running...
+✓ Listo	✓ Done
+Ya estaba en cola	Already queued
+{0} de {1} tareas terminadas	{0} of {1} tasks finished
+{0} de {1} tareas terminadas, {2} con error	{0} of {1} tasks finished, {2} with errors
+Terminado: {0} tareas, {1} con error.	Finished: {0} tasks, {1} with errors.
+Hora de inicio	Start time
+Hora de fin	End time
+Resultado	Result
+Mensajes durante la tarea	Messages during the task
+(sin datos todavía)	(no data yet)
+(sin mensajes)	(no messages)
+activo	enabled
+desactivado	disabled
+{0}: {1} archivos, {2}	{0}: {1} files, {2}
+{0} ({1} instancias, {2} MB)	{0} ({1} instances, {2} MB)
+... y {0} más	... and {0} more
+Entradas inválidas encontradas: {0}	Invalid entries found: {0}

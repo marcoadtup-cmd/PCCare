@@ -36,7 +36,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$VersionApp = '2.3.0'
+$VersionApp = '2.4.0'
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Xaml
 
 $esAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
@@ -871,7 +871,7 @@ $sbRestauracion = {
 # MODULOS: cola persistente, actualizaciones, informe y red (carpeta "modulos")
 # ===========================================================================
 $RaizApp = $PSScriptRoot
-foreach ($nombreMod in 'Idioma.ps1', 'Cola.ps1', 'Actualizaciones.ps1', 'Ejecutores.ps1') {
+foreach ($nombreMod in 'Idioma.ps1', 'Cola.ps1', 'Inicio.ps1', 'Actualizaciones.ps1', 'Ejecutores.ps1') {
     $rutaMod = Join-Path $RaizApp ('modulos\' + $nombreMod)
     if (-not (Test-Path -LiteralPath $rutaMod)) {
         [void][System.Windows.MessageBox]::Show((('Falta el archivo modulos\{0}.' -f $nombreMod) + "`n`nExtrae TODA la carpeta del ZIP (no solo PCCare.ps1) y vuelve a abrir PC Care.`n`nMissing file modulos\{0}. Extract the WHOLE ZIP folder (not just PCCare.ps1) and open PC Care again." -f $nombreMod), 'PC Care')
@@ -1967,6 +1967,30 @@ if ($AutoPrueba) {
         }
     }
 
+    Test-Paso 'Ventana de tareas al abrir (lista y estados)' {
+        $ids = @($script:TareasInicio | ForEach-Object { $_.Id })
+        if ($ids.Count -lt 5) { throw 'Lista de tareas al abrir demasiado corta' }
+        if (@($ids | Select-Object -Unique).Count -ne $ids.Count) { throw 'Ids repetidos en la lista de tareas al abrir' }
+        $codigo = Get-Content -LiteralPath $PSCommandPath -Raw -Encoding UTF8
+        foreach ($d in $script:TareasInicio) {
+            if ($codigo -notmatch ('(?m)^function ' + [regex]::Escape([string]$d.Funcion) + '\b')) { throw ('Falta la función ' + $d.Funcion) }
+        }
+        Assert-Igual (Get-EstadoFilaInicio -Regs @() -Iniciada $false).Codigo 'Pendiente' 'fila sin iniciar'
+        Assert-Igual (Get-EstadoFilaInicio -Regs @() -Iniciada $true).Codigo 'SinTarea' 'fila sin tareas nuevas'
+        $e1 = [pscustomobject]@{ Estado = 'Completada' }
+        $e2 = [pscustomobject]@{ Estado = 'En curso' }
+        $e3 = [pscustomobject]@{ Estado = 'Error' }
+        $e4 = [pscustomobject]@{ Estado = 'Pendiente' }
+        Assert-Igual (Get-EstadoFilaInicio -Regs @($e1) -Iniciada $true).Codigo 'Listo' 'completada'
+        Assert-Igual (Get-EstadoFilaInicio -Regs @($e2) -Iniciada $true).Codigo 'EnCurso' 'en curso'
+        Assert-Igual (Get-EstadoFilaInicio -Regs @($e4) -Iniciada $true).Codigo 'EnEspera' 'en espera'
+        Assert-Igual (Get-EstadoFilaInicio -Regs @($e3) -Iniciada $true).Final $true 'error es final'
+        Assert-Igual (Get-EstadoFilaInicio -Regs @($e1, $e2) -Iniciada $true).Final $false 'una sigue en curso'
+        $txt = New-TextoDetalleInicio -Nombre 'Prueba' -Que 'Texto' -Regs @([pscustomobject]@{ Estado = 'Completada'; Modo = 'Solo lectura'; Inicio = '2026-01-01 10:00:00'; Fin = '2026-01-01 10:00:05'; Detalle = '' }) -Resumen @('linea uno') -Mensajes @('[10:00:01] hola')
+        if ($txt -notmatch 'linea uno' -or $txt -notmatch 'hola' -or $txt -notmatch 'Prueba') { throw 'El texto de detalle no incluye resultado y mensajes' }
+        ('{0} tareas, estados y detalle' -f $ids.Count)
+    }
+
     $lineas.Add('')
     $lineas.Add(('RESULTADO: {0} errores. Ninguna prueba modifica el equipo (solo se escribe en la carpeta temporal).' -f $script:fallas))
     try { Set-Content -LiteralPath $rutaLog -Value $lineas -Encoding UTF8 }
@@ -2077,10 +2101,12 @@ function Confirm-Accion {
 }
 
 # Configuracion por equipo: la simulacion queda activa hasta que el usuario la quite en ESE equipo
+$script:MostrarVentanaInicio = $true
 try {
     if (Test-Path -LiteralPath $rutaConfig) {
         $cfg = Get-Content -LiteralPath $rutaConfig -Raw | ConvertFrom-Json
         if ($cfg.Simulacion -eq $false) { $ui.chkSimulacion.IsChecked = $false }
+        if ($cfg.VentanaInicio -eq $false) { $script:MostrarVentanaInicio = $false }
     }
 }
 catch { }
@@ -2102,7 +2128,8 @@ function Save-Config {
     try {
         New-Item -ItemType Directory -Path (Split-Path $rutaConfig) -Force | Out-Null
         $jsonSim = if (Test-Simulacion) { 'true' } else { 'false' }
-        ('{{"Simulacion": {0}, "Idioma": "{1}"}}' -f $jsonSim, $script:IdiomaElegido) | Set-Content -LiteralPath $rutaConfig -Encoding UTF8
+        $jsonIni = if ($script:MostrarVentanaInicio) { 'true' } else { 'false' }
+        ('{{"Simulacion": {0}, "Idioma": "{1}", "VentanaInicio": {2}}}' -f $jsonSim, $script:IdiomaElegido, $jsonIni) | Set-Content -LiteralPath $rutaConfig -Encoding UTF8
     }
     catch { }
 }
@@ -2947,6 +2974,252 @@ $clicDiag = [System.Windows.RoutedEventHandler] {
 }
 $ui.gridDiag.AddHandler([System.Windows.Controls.Primitives.ButtonBase]::ClickEvent, $clicDiag)
 
+# ===========================================================================
+# VENTANA DE TAREAS AL ABRIR
+# ===========================================================================
+function Get-ResumenInicio {
+    # Lo que dejo cada tarea, leido de las tablas ya llenas
+    param([string]$Id)
+    $l = New-Object System.Collections.Generic.List[string]
+    switch ($Id) {
+        'Restauracion' { if ($ui.txtChipRestauracion.Text) { $l.Add([string]$ui.txtChipRestauracion.Text) } }
+        'Basura' {
+            foreach ($f in $tBasura.Rows) { $l.Add(((T '{0}: {1} archivos, {2}') -f (T ([string]$f['Nombre'])), $f['Archivos'], $f['Tamano'])) }
+        }
+        'Seguridad' {
+            foreach ($f in $tSeg.Rows) { $l.Add(('[{0}] {1}: {2}' -f (T ([string]$f['Estado'])), (T ([string]$f['Titulo'])), (T ([string]$f['Detalle'])))) }
+        }
+        'Inicio' {
+            foreach ($f in $tInicio.Rows) {
+                $est = 'desactivado'
+                if ($f['Sel'] -eq $true) { $est = 'activo' }
+                $l.Add(('{0} ({1}): {2}' -f $f['Nombre'], $f['Origen'], (T $est)))
+            }
+        }
+        'Diagnostico' {
+            foreach ($f in $tDiag.Rows) { $l.Add(('[{0}] {1}: {2}' -f (T ([string]$f['Estado'])), (T ([string]$f['Titulo'])), (T ([string]$f['Detalle'])))) }
+        }
+        'Procesos' {
+            $n = 0
+            foreach ($f in $tProc.Rows) {
+                if ($n -ge 15) { break }
+                $l.Add(((T '{0} ({1} instancias, {2} MB)') -f $f['Proceso'], $f['Instancias'], $f['MemoriaMB']))
+                $n++
+            }
+            if ($tProc.Rows.Count -gt 15) { $l.Add(((T '... y {0} más') -f ($tProc.Rows.Count - 15))) }
+        }
+        'Registro' {
+            $l.Add(((T 'Entradas inválidas encontradas: {0}') -f $tReg.Rows.Count))
+            $n = 0
+            foreach ($f in $tReg.Rows) {
+                if ($n -ge 20) { break }
+                $l.Add(('{0}: {1}' -f $f['Tipo'], $f['Valor']))
+                $n++
+            }
+            if ($tReg.Rows.Count -gt 20) { $l.Add(((T '... y {0} más') -f ($tReg.Rows.Count - 20))) }
+        }
+    }
+    return $l.ToArray()
+}
+
+function Get-MensajesInicio {
+    # Lineas del registro de actividad escritas mientras corrio la tarea
+    param([object[]]$Regs)
+    $ini = ''
+    $fin = ''
+    foreach ($r in $Regs) {
+        if ($r.Inicio -and (-not $ini -or [string]$r.Inicio -lt $ini)) { $ini = [string]$r.Inicio }
+        if ([string]$r.Fin -gt $fin) { $fin = [string]$r.Fin }
+    }
+    $res = New-Object System.Collections.Generic.List[string]
+    if (-not $ini) { return $res.ToArray() }
+    $desde = $ini.Substring(11)
+    $hasta = '99:99:99'
+    if ($fin) { $hasta = $fin.Substring(11) }
+    foreach ($linea in ($ui.txtLog.Text -split "`r?`n")) {
+        $m = [regex]::Match($linea, '^\[(\d\d:\d\d:\d\d)\] ')
+        if ($m.Success -and $m.Groups[1].Value -ge $desde -and $m.Groups[1].Value -le $hasta) { $res.Add($linea) }
+    }
+    return $res.ToArray()
+}
+
+function Start-TareaInicio {
+    param($Fila)
+    $antes = New-Object System.Collections.Generic.HashSet[string]
+    foreach ($r in $script:registros) { [void]$antes.Add([string]$r.Id) }
+    try { & $Fila.Def.Funcion }
+    catch { Write-Registro ('ERROR al encolar "{0}": {1}' -f $Fila.Def.Nombre, $_.Exception.Message) }
+    $nuevos = New-Object System.Collections.Generic.List[object]
+    foreach ($r in $script:registros) { if (-not $antes.Contains([string]$r.Id)) { $nuevos.Add($r) } }
+    $Fila.Regs = $nuevos.ToArray()
+    $Fila.Iniciada = $true
+    $Fila.BtnDetalle.IsEnabled = $true
+}
+
+function Update-VentanaInicio {
+    $vi = $script:vi
+    if (-not $vi) { return }
+    $conv = New-Object System.Windows.Media.BrushConverter
+    $colores = @{ Listo = '#12805A'; Error = '#B42318'; EnCurso = '#1565C0'; EnEspera = '#6B7280'; Cancelada = '#6B7280'; Interrumpida = '#C2570C'; SinTarea = '#6B7280'; Pendiente = '#6B7280' }
+    $total = 0
+    $fin = 0
+    $err = 0
+    foreach ($f in $vi.Filas) {
+        if (-not $f.Iniciada) { continue }
+        $total++
+        $e = Get-EstadoFilaInicio -Regs $f.Regs -Iniciada $true
+        $f.Estado.Text = T $e.Texto
+        $f.Estado.Foreground = $conv.ConvertFromString($colores[[string]$e.Codigo])
+        if ($e.Final) { $fin++ }
+        if ($e.Codigo -eq 'Error') { $err++ }
+    }
+    if ($total -eq 0) { return }
+    $vi.Barra.Value = [double](100 * $fin / $total)
+    if ($fin -ge $total) {
+        $vi.Resumen.Text = (T 'Terminado: {0} tareas, {1} con error.') -f $total, $err
+        $vi.Timer.Stop()
+    }
+    elseif ($err -gt 0) { $vi.Resumen.Text = (T '{0} de {1} tareas terminadas, {2} con error') -f $fin, $total, $err }
+    else { $vi.Resumen.Text = (T '{0} de {1} tareas terminadas') -f $fin, $total }
+}
+
+function Show-DetalleInicio {
+    param([string]$Id)
+    $f = $null
+    foreach ($x in $script:vi.Filas) { if ($x.Def.Id -eq $Id) { $f = $x } }
+    if (-not $f) { return }
+    $texto = New-TextoDetalleInicio -Nombre $f.Def.Nombre -Que $f.Def.Que -Regs $f.Regs -Resumen (Get-ResumenInicio $Id) -Mensajes (Get-MensajesInicio $f.Regs)
+    $xml = @'
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="@TITULO@" Width="640" Height="460" WindowStartupLocation="CenterOwner" Background="#F5F7FA" FontFamily="Segoe UI" FontSize="13" ShowInTaskbar="False">
+  <Grid Margin="12">
+    <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <TextBox x:Name="txt" Grid.Row="0" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="12" Background="White" Padding="8"/>
+    <Button x:Name="btn" Grid.Row="1" Content="@CERRAR@" HorizontalAlignment="Right" Padding="18,6" Margin="0,10,0,0" IsCancel="True"/>
+  </Grid>
+</Window>
+'@
+    $xml = $xml.Replace('@TITULO@', [System.Security.SecurityElement]::Escape((T 'Detalle de la tarea'))).Replace('@CERRAR@', [System.Security.SecurityElement]::Escape((T 'Cerrar')))
+    $doc = New-Object System.Xml.XmlDocument
+    $doc.LoadXml($xml)
+    $w = [Windows.Markup.XamlReader]::Load((New-Object System.Xml.XmlNodeReader $doc))
+    $w.FindName('txt').Text = $texto
+    $w.FindName('btn').Add_Click({ param($s, $e) [System.Windows.Window]::GetWindow($s).Close() })
+    $w.Owner = $script:vi.Ventana
+    $w.Show()
+}
+
+function Show-VentanaInicio {
+    $xml = @'
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="@TITULO@" Width="660" Height="580" WindowStartupLocation="CenterOwner" Background="#F5F7FA" FontFamily="Segoe UI" FontSize="13" ShowInTaskbar="False">
+  <Grid Margin="16">
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <StackPanel Grid.Row="0" Margin="0,0,0,10">
+      <TextBlock Text="@ENC@" FontSize="18" FontWeight="SemiBold"/>
+      <TextBlock Text="@AYUDA@" TextWrapping="Wrap" Margin="0,4,0,0" Foreground="#4B5563"/>
+    </StackPanel>
+    <Border Grid.Row="1" Background="White" CornerRadius="8" BorderBrush="#DDE3EA" BorderThickness="1" Padding="8">
+      <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel x:Name="lista"/></ScrollViewer>
+    </Border>
+    <StackPanel Grid.Row="2" Margin="0,10,0,0">
+      <ProgressBar x:Name="barra" Height="8" Minimum="0" Maximum="100" Value="0"/>
+      <TextBlock x:Name="txtResumen" Margin="0,6,0,0" Foreground="#4B5563"/>
+      <CheckBox x:Name="chkMostrar" Margin="0,8,0,0" IsChecked="True" Content="@MOSTRAR@"/>
+    </StackPanel>
+    <DockPanel Grid.Row="3" Margin="0,12,0,0" LastChildFill="False">
+      <Button x:Name="btnCerrar" DockPanel.Dock="Right" Content="@CERRAR@" Padding="18,6" Margin="8,0,0,0"/>
+      <Button x:Name="btnGo" DockPanel.Dock="Right" Content="GO" Padding="30,6" FontWeight="Bold" Background="#1565C0" Foreground="White"/>
+      <Button x:Name="btnTodas" DockPanel.Dock="Left" Content="@TODAS@" Padding="12,6"/>
+      <Button x:Name="btnNinguna" DockPanel.Dock="Left" Content="@NINGUNA@" Padding="12,6" Margin="8,0,0,0"/>
+    </DockPanel>
+  </Grid>
+</Window>
+'@
+    $esc = { param($s) [System.Security.SecurityElement]::Escape((T $s)) }
+    $xml = $xml.Replace('@TITULO@', (& $esc 'Tareas al abrir')).Replace('@ENC@', (& $esc 'Tareas para revisar el equipo')).Replace('@CERRAR@', (& $esc 'Cerrar')).Replace('@TODAS@', (& $esc 'Marcar todas')).Replace('@NINGUNA@', (& $esc 'Ninguna'))
+    $xml = $xml.Replace('@AYUDA@', (& $esc 'Marca lo que quieres ejecutar y pulsa GO. Todas son de solo lectura: analizan el equipo y no cambian nada.')).Replace('@MOSTRAR@', (& $esc 'Mostrar esta ventana al abrir PC Care (si la desmarcas, estas tareas se ejecutan solas)'))
+    $doc = New-Object System.Xml.XmlDocument
+    $doc.LoadXml($xml)
+    $w = [Windows.Markup.XamlReader]::Load((New-Object System.Xml.XmlNodeReader $doc))
+    $lista = $w.FindName('lista')
+    $filas = New-Object System.Collections.Generic.List[object]
+    foreach ($def in $script:TareasInicio) {
+        $g = New-Object System.Windows.Controls.Grid
+        $g.Margin = New-Object System.Windows.Thickness(4, 6, 4, 6)
+        foreach ($ancho in @([System.Windows.GridLength]::Auto, (New-Object System.Windows.GridLength(1, [System.Windows.GridUnitType]::Star)), (New-Object System.Windows.GridLength(130)), [System.Windows.GridLength]::Auto)) {
+            $cd = New-Object System.Windows.Controls.ColumnDefinition
+            $cd.Width = $ancho
+            [void]$g.ColumnDefinitions.Add($cd)
+        }
+        $chk = New-Object System.Windows.Controls.CheckBox
+        $chk.IsChecked = $true
+        $chk.VerticalAlignment = 'Center'
+        $chk.Margin = New-Object System.Windows.Thickness(0, 0, 10, 0)
+        $sp = New-Object System.Windows.Controls.StackPanel
+        $tn = New-Object System.Windows.Controls.TextBlock
+        $tn.Text = T $def.Nombre
+        $tn.FontWeight = [System.Windows.FontWeights]::SemiBold
+        $tq = New-Object System.Windows.Controls.TextBlock
+        $tq.Text = T $def.Que
+        $tq.FontSize = 11.5
+        $tq.TextWrapping = 'Wrap'
+        $tq.Foreground = (New-Object System.Windows.Media.BrushConverter).ConvertFromString('#6B7280')
+        [void]$sp.Children.Add($tn)
+        [void]$sp.Children.Add($tq)
+        $te = New-Object System.Windows.Controls.TextBlock
+        $te.VerticalAlignment = 'Center'
+        $te.Margin = New-Object System.Windows.Thickness(8, 0, 8, 0)
+        $bd = New-Object System.Windows.Controls.Button
+        $bd.Content = T 'Detalle'
+        $bd.Padding = New-Object System.Windows.Thickness(10, 3, 10, 3)
+        $bd.VerticalAlignment = 'Center'
+        $bd.IsEnabled = $false
+        $bd.Tag = [string]$def.Id
+        $bd.Add_Click({ param($s, $e) Show-DetalleInicio ([string]$s.Tag) })
+        [System.Windows.Controls.Grid]::SetColumn($chk, 0)
+        [System.Windows.Controls.Grid]::SetColumn($sp, 1)
+        [System.Windows.Controls.Grid]::SetColumn($te, 2)
+        [System.Windows.Controls.Grid]::SetColumn($bd, 3)
+        foreach ($c in $chk, $sp, $te, $bd) { [void]$g.Children.Add($c) }
+        [void]$lista.Children.Add($g)
+        $filas.Add(@{ Def = $def; Check = $chk; Estado = $te; BtnDetalle = $bd; Regs = @(); Iniciada = $false })
+    }
+    $timer = New-Object System.Windows.Threading.DispatcherTimer
+    $timer.Interval = [TimeSpan]::FromMilliseconds(400)
+    $timer.Add_Tick({ Update-VentanaInicio })
+    $script:vi = @{
+        Ventana = $w; Filas = $filas; Timer = $timer; Iniciada = $false
+        Barra = $w.FindName('barra'); Resumen = $w.FindName('txtResumen'); Go = $w.FindName('btnGo')
+        Todas = $w.FindName('btnTodas'); Ninguna = $w.FindName('btnNinguna'); Mostrar = $w.FindName('chkMostrar')
+    }
+    $script:vi.Mostrar.IsChecked = [bool]$script:MostrarVentanaInicio
+    $script:vi.Mostrar.Add_Click({
+            $script:MostrarVentanaInicio = [bool]$script:vi.Mostrar.IsChecked
+            Save-Config
+        })
+    $script:vi.Todas.Add_Click({ foreach ($f in $script:vi.Filas) { if ($f.Check.IsEnabled) { $f.Check.IsChecked = $true } } })
+    $script:vi.Ninguna.Add_Click({ foreach ($f in $script:vi.Filas) { if ($f.Check.IsEnabled) { $f.Check.IsChecked = $false } } })
+    $w.FindName('btnCerrar').Add_Click({ $script:vi.Ventana.Close() })
+    $script:vi.Go.Add_Click({
+            $vi = $script:vi
+            if ($vi.Iniciada) { return }
+            $sel = New-Object System.Collections.Generic.List[object]
+            foreach ($f in $vi.Filas) { if ($f.Check.IsChecked -eq $true) { $sel.Add($f) } }
+            if ($sel.Count -eq 0) { [void][System.Windows.MessageBox]::Show((T 'Marca al menos una tarea.'), 'PC Care'); return }
+            $vi.Iniciada = $true
+            $vi.Go.IsEnabled = $false
+            $vi.Todas.IsEnabled = $false
+            $vi.Ninguna.IsEnabled = $false
+            foreach ($f in $vi.Filas) { $f.Check.IsEnabled = $false }
+            Write-Registro ('Tareas al abrir: se ejecutan {0} de {1}.' -f $sel.Count, $vi.Filas.Count)
+            foreach ($f in $sel) { Start-TareaInicio $f }
+            Update-VentanaInicio
+            $vi.Timer.Start()
+        })
+    $w.Add_Closed({ if ($script:vi) { $script:vi.Timer.Stop() } })
+    $w.Owner = $ventana
+    $w.Show()
+}
+
 $ventana.Add_ContentRendered({
         $reloj.Start()
         $relojSel.Start()
@@ -2958,8 +3231,11 @@ $ventana.Add_ContentRendered({
             Update-Interrumpidas
             $ui.navTareas.IsChecked = $true
         }
-        Start-LecturaRestauracion
-        Start-AnalisisGeneral
+        if ($script:MostrarVentanaInicio) { Show-VentanaInicio }
+        else {
+            Start-LecturaRestauracion
+            Start-AnalisisGeneral
+        }
     })
 $ventana.Add_Closing({
         param($origen, $e)
