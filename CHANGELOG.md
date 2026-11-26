@@ -19,6 +19,23 @@ Revisado por: quien aprobó el cambio
 
 Se omiten los apartados que no apliquen.
 
+## 2.4.0 - 2026-11-26 15:05 (hora de Lima)
+
+Autor: NOVALTEK
+Revisado por: NOVALTEK
+
+### Nuevos módulos
+- **Ventana de tareas al abrir.** Al abrir PC Care aparece una lista de tareas (restauración, basura, seguridad, programas de inicio, diagnóstico, programas en memoria y registro), todas marcadas y de solo lectura. Con **GO** se ejecutan solo las marcadas; cada fila muestra su estado (en espera, en curso, ✓ Listo, ✖ Error) y hay una barra de avance. El botón **Detalle** de cada fila abre una sub-ventana con cómo terminó la tarea, el resultado y los mensajes que dejó. Código de la lista y los estados en `modulos\Inicio.ps1`.
+
+### Mejoras
+- Antes, al abrir, el análisis se lanzaba solo sin avisar. Ahora tú decides qué ejecutar y cuándo.
+- La casilla "Mostrar esta ventana al abrir PC Care" se recuerda por equipo en `config.json`. Si la desmarcas, las tareas se ejecutan solas como en versiones anteriores.
+- Textos de la ventana traducidos al inglés.
+- La autoprueba comprueba la lista de tareas al abrir (ids únicos, que cada tarea exista) y la lógica de estados y de detalle.
+
+### Actualizaciones
+- Versión 2.4.0.
+
 ## 2.3.0 - 2026-11-20 17:45 (hora de Lima)
 
 Autor: NOVALTEK
