@@ -32,6 +32,7 @@ $script:PoliticaTipos = @{
     'Antivirus'           = 'Seguro'
     'Programas'           = 'Seguro'
     'ProgramasFallos'     = 'Seguro'
+    'AnalisisPrivacidad'  = 'Seguro'
     'Papelera'            = 'Confirmar'
     'AccionDiag'          = 'Confirmar'
     'ActualizarApp'       = 'Confirmar'
@@ -44,6 +45,7 @@ $script:PoliticaTipos = @{
     'RedReparar'          = 'No'
     'EscaneoDefender'     = 'No'
     'DesinstalarPrograma' = 'No'
+    'LimpiarPrivacidad'   = 'No'
 }
 
 function Get-PoliticaTarea {

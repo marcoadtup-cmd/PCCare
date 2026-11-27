@@ -36,7 +36,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$VersionApp = '2.6.0'
+$VersionApp = '2.7.0'
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Xaml
 
 $esAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
@@ -913,7 +913,7 @@ $sbRestauracion = {
 # MODULOS: cola persistente, actualizaciones, informe y red (carpeta "modulos")
 # ===========================================================================
 $RaizApp = $PSScriptRoot
-foreach ($nombreMod in 'Idioma.ps1', 'Cola.ps1', 'Inicio.ps1', 'Actualizaciones.ps1', 'Ejecutores.ps1', 'Proteccion.ps1', 'Resumen.ps1', 'Programas.ps1') {
+foreach ($nombreMod in 'Idioma.ps1', 'Cola.ps1', 'Inicio.ps1', 'Actualizaciones.ps1', 'Ejecutores.ps1', 'Proteccion.ps1', 'Resumen.ps1', 'Programas.ps1', 'Privacidad.ps1') {
     $rutaMod = Join-Path $RaizApp ('modulos\' + $nombreMod)
     if (-not (Test-Path -LiteralPath $rutaMod)) {
         [void][System.Windows.MessageBox]::Show((('Falta el archivo modulos\{0}.' -f $nombreMod) + "`n`nExtrae TODA la carpeta del ZIP (no solo PCCare.ps1) y vuelve a abrir PC Care.`n`nMissing file modulos\{0}. Extract the WHOLE ZIP folder (not just PCCare.ps1) and open PC Care again." -f $nombreMod), 'PC Care')
@@ -942,6 +942,7 @@ $mapaTipos = [ordered]@{
     Informe = $sbInformeAuditoria; RedDiagnostico = $sbRedDiagnostico; RedAplicar = $sbRedAplicar; RedReparar = $sbRedReparar
     Antivirus = $sbAntivirus; EscaneoDefender = $sbEscaneoDefender
     Programas = $sbProgramas; ProgramasFallos = $sbProgramasFallos; DesinstalarPrograma = $sbDesinstalarPrograma
+    AnalisisPrivacidad = $sbAnalizarPrivacidad; LimpiarPrivacidad = $sbLimpiarPrivacidad
 }
 foreach ($k in $mapaTipos.Keys) { $script:MetaTarea[$mapaTipos[$k]] = [string]$k }
 
@@ -1336,6 +1337,27 @@ if (-not $AutoPrueba) {
                 <TextBlock x:Name="txtBasuraTotal" VerticalAlignment="Center" FontWeight="SemiBold"/>
               </DockPanel>
               <CheckBox x:Name="chkBasuraPunto" Margin="0,8,0,0" IsChecked="False" Content="Crear punto de restauración antes de limpiar" ToolTip="Protege la configuración de Windows (registro y archivos del sistema). No recupera temporales ni cachés borrados: esos no se pueden restaurar."/>
+            </StackPanel>
+          </Border>
+          </StackPanel></TabItem>
+          <TabItem Header="Privacidad" FontSize="14" FontWeight="SemiBold"><StackPanel Margin="0,10,0,0">
+          <Border Style="{StaticResource Card}">
+            <StackPanel>
+              <TextBlock Text="Rastros de privacidad" Style="{StaticResource H2}"/>
+              <TextBlock Style="{StaticResource Mut}" Text="Archivos recientes, Jump Lists de la barra de tareas y recientes de Office. Las cookies van por navegador y desmarcadas: borrarlas cierra tu sesión en los sitios web, así que marca solo los navegadores que quieras limpiar y deja los demás como excepción. Respeta el modo simulación y nunca se ejecuta sola. Los recientes de Office guardados en el registro no se tocan."/>
+              <DataGrid x:Name="gridPrivacidad" Height="260">
+                <DataGrid.Columns>
+                  <DataGridTemplateColumn Width="36" CellTemplate="{StaticResource ChkSel}"/>
+                  <DataGridTextColumn Header="Categoría" Binding="{Binding Nombre}" Width="3*"/>
+                  <DataGridTextColumn Header="Archivos" Binding="{Binding Archivos}" Width="*"/>
+                  <DataGridTextColumn Header="Tamaño" Binding="{Binding Tamano}" SortMemberPath="Bytes" Width="*"/>
+                </DataGrid.Columns>
+              </DataGrid>
+              <DockPanel>
+                <Button x:Name="btnPrivLimpiar" DockPanel.Dock="Right" Style="{StaticResource Btn}" Content="Limpiar seleccionados" Margin="0"/>
+                <Button x:Name="btnPrivAnalizar" DockPanel.Dock="Right" Style="{StaticResource Btn2}" Content="Analizar"/>
+                <TextBlock x:Name="txtPrivTotal" VerticalAlignment="Center" FontWeight="SemiBold" Text="Pulsa Analizar."/>
+              </DockPanel>
             </StackPanel>
           </Border>
           </StackPanel></TabItem>
@@ -1952,9 +1974,10 @@ if ($script:IdiomaActual -eq 'en') {
 }
 function New-Ventana { return [Windows.Markup.XamlReader]::Load((New-Object System.Xml.XmlNodeReader $xaml)) }
 
-$textoAyuda = $ayuda.ToString() + "`r`n" + $ayudaActualizaciones.ToString()
+$textoAyuda = $ayuda.ToString() + "`r`n" + $ayudaActualizaciones.ToString() + "`r`n" + $ayudaPrivacidad.ToString()
 . $ayuda   # las mismas funciones quedan disponibles en el hilo de la interfaz
 . $ayudaActualizaciones
+. $ayudaPrivacidad
 
 # Enlaces de la pagina "Acerca de y ayuda": solo se abren direcciones del repositorio oficial.
 $script:UrlRepo = 'https://github.com/marcoadtup-cmd/PCCare'
@@ -2029,7 +2052,7 @@ if ($AutoPrueba) {
         'dotLimpieza', 'dotRend', 'dotSeg', 'dotAct', 'txtEqModelo', 'txtEqCpu', 'txtEqRam', 'txtEqSo', 'txtEqDisco', 'txtResHonesto', 'txtImpacto',
         'txtUltimoAnalisis', 'btnVerUltimo', 'txtAvEstado', 'btnScanRapido', 'btnScanCompleto', 'btnScanCarpeta', 'btnAvRevisar', 'gridAmenazas',
         'navProg', 'vProg', 'tabProg', 'gridProgramas', 'gridFallos', 'btnProgListar', 'btnProgDesinstalar', 'txtProgFiltro', 'txtProgRes', 'btnFallosAnalizar',
-        'txtFallosRes', 'chkBasuraPunto', 'cmbUnidad', 'btnDeshacerInicio', 'txtInicioUltimo'
+        'txtFallosRes', 'chkBasuraPunto', 'cmbUnidad', 'btnDeshacerInicio', 'txtInicioUltimo', 'gridPrivacidad', 'btnPrivLimpiar', 'btnPrivAnalizar', 'txtPrivTotal'
         foreach ($n in $claves) { if (-not $v.FindName($n)) { throw ('falta el control ' + $n) } }
         'carga correcta, {0} controles clave' -f @($claves).Count
     }
@@ -2098,7 +2121,7 @@ if ($AutoPrueba) {
     Test-Paso 'Todas las tareas tienen política' {
         $nombres = 'sbSeguridad', 'sbRestauracion', 'sbAnalizarBasura', 'sbLimpiarBasura', 'sbGrandes', 'sbDuplicados', 'sbPapelera', 'sbAnalizarRegistro',
         'sbLimpiarRegistro', 'sbInicio', 'sbDiagnostico', 'sbAccionDiag', 'sbProcesos', 'sbTurbo', 'sbAnalizarApps', 'sbActualizarApp',
-        'sbInstalarHerramienta', 'sbStore', 'sbAnalizarDrivers', 'sbInstalarDrivers', 'sbInformeAuditoria', 'sbRedDiagnostico', 'sbRedAplicar', 'sbRedReparar', 'sbAntivirus', 'sbEscaneoDefender', 'sbProgramas', 'sbProgramasFallos', 'sbDesinstalarPrograma'
+        'sbInstalarHerramienta', 'sbStore', 'sbAnalizarDrivers', 'sbInstalarDrivers', 'sbInformeAuditoria', 'sbRedDiagnostico', 'sbRedAplicar', 'sbRedReparar', 'sbAntivirus', 'sbEscaneoDefender', 'sbProgramas', 'sbProgramasFallos', 'sbDesinstalarPrograma', 'sbAnalizarPrivacidad', 'sbLimpiarPrivacidad'
         foreach ($nom in $nombres) {
             $b = Get-Variable -Name $nom -ValueOnly
             if (-not $script:MetaTarea.ContainsKey($b)) { throw ('sin tipo: ' + $nom) }
@@ -2281,6 +2304,27 @@ if ($AutoPrueba) {
         if (@($r.Mensajes | Where-Object { $_ -match 'Punto de restauración creado' }).Count -gt 0) { throw 'en simulación no se crea el punto' }
         if (@($r.Mensajes | Where-Object { $_ -match '^SIMULACIÓN: se pediría un punto' }).Count -ne 1) { throw 'falta el aviso de simulación' }
         'en simulación solo se informa'
+    }
+    Test-Paso 'Privacidad: análisis y limpieza simulada' {
+        $cats = @(Get-CategoriasPrivacidad)
+        foreach ($c in $cats) {
+            if ($c.Cookies -and $c.Marcar) { throw ('las cookies deben ir desmarcadas: ' + $c.Id) }
+            foreach ($k in $c.Carpetas) { if (([string]$k.Ruta).Length -lt 12) { throw ('carpeta demasiado corta: ' + $k.Ruta) } }
+        }
+        $a = @(& $sbAnalizarPrivacidad -Ayuda $textoAyuda)
+        $r = & $sbLimpiarPrivacidad -Ayuda $textoAyuda -Ids @($a | ForEach-Object { $_.Id }) -Simular $true
+        Assert-Igual ([bool]$r.Simulado) $true 'simulación'
+        $t = Join-Path $env:TEMP ('PCCare_priv_{0}' -f $PID)
+        try {
+            New-Item -ItemType Directory -Path (Join-Path $t 'sub') -Force | Out-Null
+            Set-Content -LiteralPath (Join-Path $t 'a.lnk') -Value 'x'
+            Set-Content -LiteralPath (Join-Path $t 'b.txt') -Value 'x'
+            Set-Content -LiteralPath (Join-Path $t 'sub\c.lnk') -Value 'x'
+            $f = @(Get-ArchivosPrivacidad @{ Carpetas = @(@{ Ruta = $t; Filtro = '*.lnk' }) })
+            if ($f.Count -ne 1) { throw ('se esperaba 1 archivo directo .lnk y se obtuvieron {0}: {1}' -f $f.Count, (($f | ForEach-Object { $_.FullName }) -join '; ')) }
+        }
+        finally { Remove-Item -LiteralPath $t -Recurse -Force -ErrorAction SilentlyContinue }
+        '{0} categorías, cookies desmarcadas, simulación sin borrar' -f $cats.Count
     }
     Test-Paso 'Ficha del equipo' {
         $f = Get-ResumenEquipo
@@ -3039,6 +3083,53 @@ $ui.btnDeshacerInicio.Add_Click({
         Update-DeshacerInicio
     })
 Update-DeshacerInicio
+
+# ===========================================================================
+# LIMPIEZA DE PRIVACIDAD (modulos\Privacidad.ps1)
+# ===========================================================================
+$tPriv = New-Tabla 'Id', 'Nombre', 'Archivos', 'Tamano', 'Bytes', 'Cookies'
+$ui.gridPrivacidad.ItemsSource = $tPriv.DefaultView
+function Update-TotalPrivacidad {
+    $n = 0; $b = [double]0
+    foreach ($f in (Get-Marcadas $tPriv)) { $n += [int]$f['Archivos']; $b += [double]$f['Bytes'] }
+    $ui.txtPrivTotal.Text = 'Seleccionado: {0} archivos, {1}' -f $n, (Format-Tamano $b)
+}
+function Start-AnalisisPrivacidad {
+    Add-Tarea 'Analizando rastros de privacidad' $sbAnalizarPrivacidad @{} {
+        param($res, $ctx, $fallo)
+        if ($fallo) { return }
+        $script:cargando = $true
+        $tPriv.Rows.Clear()
+        foreach ($c in $res) {
+            $nombre = [string]$c.Nombre
+            if ($c.Abierto) { $nombre += ' (navegador abierto)' }
+            [void]$tPriv.Rows.Add(([bool]$c.Marcar -and [int]$c.Archivos -gt 0), [string]$c.Id, $nombre, [string]$c.Archivos, (Format-Tamano ([double]$c.Bytes)), [double]$c.Bytes, [string][bool]$c.Cookies)
+        }
+        $script:cargando = $false
+        Update-TotalPrivacidad
+    }
+}
+$tPriv.Add_ColumnChanged({ param($o, $e) if (-not $script:cargando -and $e.Column.ColumnName -eq 'Sel') { Update-TotalPrivacidad } })
+$ui.btnPrivAnalizar.Add_Click({ Start-AnalisisPrivacidad })
+$ui.btnPrivLimpiar.Add_Click({
+        $filas = @(Get-Marcadas $tPriv)
+        if ($filas.Count -eq 0) { return }
+        $lista = ($filas | ForEach-Object { '  - {0}: {1} archivos, {2}' -f $_['Nombre'], $_['Archivos'], $_['Tamano'] }) -join "`n"
+        $txt = "Se borrarán de forma definitiva:`n`n" + $lista
+        if (@($filas | Where-Object { [string]$_['Cookies'] -eq 'True' }).Count -gt 0) {
+            $txt += "`n`nATENCIÓN: borrar cookies cierra tu sesión en los sitios web de ese navegador (correo, bancos, redes) y olvida preferencias como el idioma. Tendrás que volver a iniciar sesión. Si el navegador está abierto, sus cookies se omiten."
+        }
+        if (-not (Confirm-Accion ($txt + "`n`n¿Continuar?") 'Limpieza de privacidad')) { return }
+        $ids = [string[]]@($filas | ForEach-Object { [string]$_['Id'] })
+        Add-Tarea 'Limpiando rastros de privacidad' $sbLimpiarPrivacidad @{ Ids = $ids; Simular = (Test-Simulacion) } {
+            param($res, $ctx, $fallo)
+            if ($fallo -or -not $res) { return }
+            foreach ($m in $res[0].Mensajes) { Write-Registro ('   ' + $m) }
+            if (-not $res[0].Simulado -and [double]$res[0].Bytes -gt 0) { Add-ImpactoReal -Bytes ([double]$res[0].Bytes) -Acciones 1 }
+            $ui.expLog.IsExpanded = $true
+            Start-AnalisisPrivacidad
+        } -Opciones (($filas | ForEach-Object { [string]$_['Nombre'] }) -join ', ')
+    })
 
 # ===========================================================================
 # LIMPIEZA

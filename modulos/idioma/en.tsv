@@ -978,3 +978,24 @@ Punto de restauración creado.	Restore point created.
 Windows no creó un punto de restauración nuevo: por defecto permite uno cada 24 horas, o la Protección del sistema está desactivada. La limpieza continúa.	Windows did not create a new restore point: by default it allows one every 24 hours, or System Protection is turned off. Cleaning continues.
 AVISO: no se pudo crear el punto de restauración: {0}	WARNING: could not create the restore point: {0}
 {0}, {1} MB o más	{0}, {1} MB or more
+Privacidad	Privacy
+Rastros de privacidad	Privacy traces
+Archivos recientes, Jump Lists de la barra de tareas y recientes de Office. Las cookies van por navegador y desmarcadas: borrarlas cierra tu sesión en los sitios web, así que marca solo los navegadores que quieras limpiar y deja los demás como excepción. Respeta el modo simulación y nunca se ejecuta sola. Los recientes de Office guardados en el registro no se tocan.	Recent files, taskbar Jump Lists and Office recent items. Cookies are listed per browser and unchecked: deleting them signs you out of websites, so check only the browsers you want to clean and leave the rest as exceptions. Respects simulation mode and never runs on its own. Office recent items stored in the registry are not touched.
+Archivos recientes del Explorador	File Explorer recent files
+Listas de accesos rápidos (Jump Lists) de la barra de tareas	Taskbar Jump Lists
+Accesos recientes de Office (carpeta)	Office recent items (folder)
+Cookies de Microsoft Edge	Microsoft Edge cookies
+Cookies de Google Chrome	Google Chrome cookies
+Cookies de Brave	Brave cookies
+Cookies de Vivaldi	Vivaldi cookies
+Cookies de Mozilla Firefox	Mozilla Firefox cookies
+{0} (navegador abierto)	{0} (browser open)
+Seleccionado: {0} archivos, {1}	Selected: {0} files, {1}
+Analizando rastros de privacidad	Scanning privacy traces
+Limpiando rastros de privacidad	Cleaning privacy traces
+Se borrarán de forma definitiva:	These will be permanently deleted:
+ATENCIÓN: borrar cookies cierra tu sesión en los sitios web de ese navegador (correo, bancos, redes) y olvida preferencias como el idioma. Tendrás que volver a iniciar sesión. Si el navegador está abierto, sus cookies se omiten.	WARNING: deleting cookies signs you out of websites in that browser (email, banks, social networks) and forgets preferences such as language. You will need to sign in again. If the browser is open, its cookies are skipped.
+Limpieza de privacidad	Privacy cleanup
+{0}: omitidas porque el navegador está abierto. Ciérralo y repite.	{0}: skipped because the browser is open. Close it and try again.
+SIMULACIÓN: {0}: se borrarían {1} archivos ({2}).	SIMULATION: {0}: {1} files would be deleted ({2}).
+{0}: {1} archivos borrados ({2}); {3} en uso, omitidos.	{0}: {1} files deleted ({2}); {3} in use, skipped.

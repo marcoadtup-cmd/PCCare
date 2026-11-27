@@ -19,6 +19,32 @@ Revisado por: quien aprobó el cambio
 
 Se omiten los apartados que no apliquen.
 
+## 2.7.0 - 2026-11-27 12:53 (hora de Lima)
+
+Autor: NOVALTEK
+Revisado por: pendiente de revisión de NOVALTEK
+
+### Nuevos módulos
+- **Limpieza de privacidad** (`modulos\Privacidad.ps1`), pestaña nueva en Limpieza: archivos recientes del Explorador, Jump Lists de la barra de tareas, recientes de Office (carpeta) y cookies por navegador (Edge, Chrome, Brave, Vivaldi y Firefox). Reglas aplicadas:
+  - Las cookies van **desmarcadas** y con aviso de que cierran la sesión en los sitios web.
+  - Se eligen **por navegador**: el que no marques no se toca. Es la lista de excepciones de esta versión; excepciones por sitio web no se incluyen porque exigirían editar la base de datos del navegador.
+  - Si el navegador está abierto, sus cookies se omiten y se avisa.
+  - Muestra archivos y tamaño por categoría antes de limpiar, respeta el modo simulación y nunca se ejecuta sola: no está en la ventana de tareas al abrir ni en Cuidado inteligente.
+  - Solo borra archivos directos de cada carpeta, sin entrar a subcarpetas, y dentro de las guardas de ruta de PC Care.
+  - Los recientes de Office guardados en el **registro** no se tocan: sus claves cambian por versión de Office y quedan por confirmar.
+
+### Mejoras
+- README y SECURITY: sección **"Privacidad y transparencia"** con todas las conexiones que hace PC Care (destino, momento y motivo), según revisión del código, y los archivos que guarda en el equipo. Sin telemetría, sin publicidad, sin ofertas de otros productos y el desinstalador no abre páginas web.
+- Limpiar privacidad cuenta en el impacto acumulado del Panel.
+
+### Descartado
+- Mini monitor de RAM, CPU, disco y red (punto 20 del análisis): ya existe en el Panel ("En tiempo real") y en la página Monitor, y solo corre mientras PC Care está abierto. No se agrega otro.
+
+### Actualizaciones
+- Versión 2.7.0.
+- 21 textos nuevos en inglés.
+- Autoprueba: categorías de privacidad (cookies desmarcadas, rutas largas), análisis y limpieza simulada, y filtro de archivos sin subcarpetas.
+
 ## 2.6.0 - 2026-11-27 12:50 (hora de Lima)
 
 Autor: NOVALTEK

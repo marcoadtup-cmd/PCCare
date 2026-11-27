@@ -66,7 +66,7 @@ Free code signing provided by [SignPath.io](https://signpath.io), certificate by
 | Página | Qué hace |
 |---|---|
 | Panel | Ficha del equipo (modelo, procesador, RAM, Windows y disco), resumen honesto del análisis (riesgos reales, espacio recuperable y actualizaciones por separado), lo que PC Care ya hizo en modo real y el último análisis guardado. Botón **Cuidado inteligente** (limpia, vacía la caché DNS y optimiza la unidad). |
-| Limpieza | Basura de Windows, navegadores y Papelera, con punto de restauración opcional. Archivos grandes y duplicados en el disco que elijas (van a la Papelera, no se borran). Entradas inválidas del registro con respaldo `.reg` previo. |
+| Limpieza | Basura de Windows, navegadores y Papelera, con punto de restauración opcional. Rastros de privacidad (recientes, Jump Lists, recientes de Office y cookies por navegador, desmarcadas). Archivos grandes y duplicados en el disco que elijas (van a la Papelera, no se borran). Entradas inválidas del registro con respaldo `.reg` previo. |
 | Rendimiento | Programas de inicio (con botón para deshacer el último cambio), diagnóstico de problemas comunes y TurboPC (alto rendimiento solo cerrando lo que tú marques). |
 | Monitor | CPU, memoria, red, temperatura y salud de discos en tiempo real. |
 | Seguridad | Antivirus, Defender, firewall, BitLocker, TPM, Secure Boot y más, en solo lectura. Detecta qué antivirus está activo y, si Microsoft Defender puede, ofrece escaneo rápido, completo o de una carpeta (solo en modo real). |
@@ -101,6 +101,31 @@ Una tarea guardada como simulación nunca se repite en modo real.
 
 Limitación conocida: si cancelas o cierras mientras `winget` o el generador de informe ya están corriendo, ese programa externo puede terminar por su cuenta unos segundos.
 
+## Privacidad y transparencia
+
+PC Care no tiene telemetría: no envía datos de uso ni del equipo a NOVALTEK ni a terceros. No muestra publicidad, no ofrece otros productos y el desinstalador no abre páginas web ni encuestas.
+
+Revisión del código del 2026-11-27, versión 2.7.0. Estas son todas las conexiones que hace PC Care y cuándo:
+
+| Cuándo | Destino | Para qué |
+|---|---|---|
+| Actualizaciones: al analizar o actualizar aplicaciones | Fuentes de `winget` y Microsoft Store (Microsoft) | Buscar e instalar versiones nuevas |
+| Actualizaciones: drivers | Windows Update (Microsoft) | Buscar drivers firmados |
+| Al elegir un driver de NVIDIA o AMD | Página oficial del fabricante, en tu navegador | Descarga manual |
+| Red: "Diagnosticar la conexión" | Ping y consultas DNS a 1.1.1.1, 8.8.8.8 y 9.9.9.9, a tu router, y `www.msftconnecttest.com` | Medir latencia, DNS y conectividad |
+| Red: solo si marcas medir la velocidad | `speed.cloudflare.com` o `speedtest.tele2.net` (unos 9 MB) | Velocidad de descarga |
+| Informe del equipo | Windows Update (si no omites los parches) y fuentes de `winget` | Parches y aplicaciones pendientes |
+| Acerca de: al pulsar un botón | `github.com/marcoadtup-cmd/PCCare`, en tu navegador | Versiones, reportes y política de seguridad |
+
+Escanear con Microsoft Defender no usa conexiones propias de PC Care: Defender aplica su propia configuración, que puede incluir la protección en la nube de Microsoft.
+
+Archivos que PC Care guarda en tu equipo:
+
+| Carpeta | Archivos |
+|---|---|
+| `%LOCALAPPDATA%\PCCare` | `config.json`, `Cola.json`, `impacto.json`, `ultimo_analisis.json`, `cambios_arranque.json`, `lanzador.log` |
+| `Documentos\PCCare` | `Historial.log`, respaldos del registro y de drivers, informes |
+
 ## Seguridad: qué hace y qué no
 
 - Arranca en modo simulación. Para aplicar cambios de verdad hay que desactivarlo arriba a la derecha y confirmar.
@@ -108,7 +133,7 @@ Limitación conocida: si cancelas o cierras mientras `winget` o el generador de 
 - No toca Windows, Program Files, ProgramData ni AppData al buscar archivos grandes o duplicados.
 - No usa repositorios de drivers de terceros: solo Windows Update, winget y las herramientas oficiales del fabricante.
 - Antes de limpiar el registro exporta un respaldo, y antes de instalar drivers puede crear un punto de restauración.
-- No envía información fuera del equipo. Las únicas conexiones son las de winget, Windows Update y las pruebas de red que tú inicias.
+- No envía información fuera del equipo. Las conexiones están listadas en "Privacidad y transparencia".
 - Los datos propios se guardan en `%LOCALAPPDATA%\PCCare` (cola, configuración) y en `Documentos\PCCare` (historial, respaldos, informes).
 
 Más detalle y cómo reportar un problema de seguridad en [SECURITY.md](SECURITY.md).

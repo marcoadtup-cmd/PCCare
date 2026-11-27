@@ -45,6 +45,7 @@ La validación automática comprueba la sintaxis de todos los `.ps1` en cada Pul
 | `modulos\Proteccion.ps1` | Antivirus activo (SecurityCenter2 y Defender) y escaneo con Microsoft Defender. Decisión de escaneo probada en la autoprueba. |
 | `modulos\Resumen.ps1` | Resumen honesto del análisis, puntos de color del menú, impacto acumulado, último análisis guardado y ficha del equipo. |
 | `modulos\Programas.ps1` | Programas instalados, desinstalación interactiva con guardas, programas con fallos y registro de cambios del arranque para deshacer. |
+| `modulos\Privacidad.ps1` | Limpieza de privacidad: recientes, Jump Lists, recientes de Office y cookies por navegador. Sus funciones de ayuda se suman al texto de ayuda de las tareas en segundo plano. |
 | `modulos\Actualizaciones.ps1` | Motor en segundo plano de aplicaciones (winget) y drivers. |
 | `modulos\UI_Actualizaciones.ps1` | Página Actualizaciones. |
 | `modulos\Ejecutores.ps1` | Tareas que lanzan el informe de auditoría y la optimización de red. |
