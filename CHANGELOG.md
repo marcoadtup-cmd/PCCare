@@ -19,6 +19,32 @@ Revisado por: quien aprobó el cambio
 
 Se omiten los apartados que no apliquen.
 
+## 2.5.0 - 2026-11-27 12:45 (hora de Lima)
+
+Autor: NOVALTEK
+Revisado por: pendiente de revisión de NOVALTEK
+
+### Nuevos módulos
+- **Antivirus activo y escaneo con Microsoft Defender** (`modulos\Proteccion.ps1`). En Seguridad, PC Care detecta qué antivirus protege el equipo (SecurityCenter2) y el estado de Defender (activo, desactivado o en modo pasivo). Si Defender puede escanear, ofrece escaneo rápido, completo o de una carpeta. Si la protección la administra otro antivirus (por ejemplo Kaspersky o ESET), lo dice y no intenta escanear con Defender. El escaneo solo corre en modo real, porque Defender aplica su propia configuración (cuarentena); las amenazas detectadas se listan en la misma tarjeta.
+- **Resumen honesto, impacto y último análisis** (`modulos\Resumen.ps1`). En el Panel: riesgos reales, espacio recuperable y actualizaciones disponibles se muestran por separado, sin sumarlos en una sola cifra de "problemas". El registro va aparte y se aclara que limpiarlo no acelera el equipo.
+
+### Mejoras
+- Ficha del equipo en el Panel: modelo, procesador, memoria RAM, versión de Windows y espacio del disco del sistema.
+- Puntos de color en el menú (Limpieza, Rendimiento, Seguridad y Actualizaciones) en dos niveles: rojo para riesgos críticos y ámbar para lo mejorable. El espacio recuperable nunca es rojo.
+- "Lo que PC Care ya hizo aquí": suma real de espacio liberado y acciones aplicadas en modo real (limpieza, Papelera, registro, arranque y acciones de diagnóstico). Se guarda en `%LOCALAPPDATA%\PCCare\impacto.json`. Las simulaciones no cuentan.
+- Último análisis guardado en `%LOCALAPPDATA%\PCCare\ultimo_analisis.json`, con botón para ver sus resultados al abrir PC Care sin volver a analizar. Solo se guarda cuando hay riesgos y basura analizados, para no pisar un análisis completo con uno parcial.
+- La ventana de tareas al abrir muestra el tiempo aproximado de cada tarea.
+- La tarea de seguridad al abrir también detecta el antivirus activo.
+- El análisis por categoría y el análisis de todo juntos ya existían (ventana de tareas al abrir con casillas y botón "Analizar todo"); se mantienen.
+
+### Correcciones
+- Seguridad marcaba "Crítico: la protección en tiempo real está desactivada" en equipos protegidos por otro antivirus. Ahora, si hay otro antivirus activo, la fila de Defender queda "Al día" con el nombre de quien protege, y no se evalúa la antigüedad de las firmas de Defender.
+
+### Actualizaciones
+- Versión 2.5.0.
+- 76 textos nuevos en inglés en `modulos\idioma\en.tsv`.
+- Autoprueba: antivirus activo (solo lectura), decisión de escaneo, escaneo en simulación (no se inicia), resumen separado, niveles de color, impacto acumulado, último análisis (incluido archivo dañado) y ficha del equipo.
+
 ## 2.4.0 - 2026-11-26 15:05 (hora de Lima)
 
 Autor: NOVALTEK

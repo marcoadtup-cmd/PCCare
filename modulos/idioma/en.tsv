@@ -851,3 +851,79 @@ desactivado	disabled
 {0} ({1} instancias, {2} MB)	{0} ({1} instances, {2} MB)
 ... y {0} más	... and {0} more
 Entradas inválidas encontradas: {0}	Invalid entries found: {0}
+Equipo	Computer
+Procesador	Processor
+Memoria RAM	RAM
+Disco del sistema	System drive
+Resumen del análisis, sin cifras infladas	Scan summary, no inflated numbers
+Cada cosa por separado: los riesgos reales no se mezclan con el espacio recuperable ni con las actualizaciones.	Each item on its own: real risks are not mixed with recoverable space or updates.
+Sin analizar todavía.	Not scanned yet.
+Lo que PC Care ya hizo aquí	What PC Care has done here
+Último análisis guardado	Last saved scan
+Ninguno todavía.	None yet.
+Ver resultados del último análisis	View last scan results
+Antivirus activo y escaneo con Microsoft Defender	Active antivirus and Microsoft Defender scan
+Antes de escanear, PC Care detecta qué antivirus protege el equipo. Si es otro (por ejemplo Kaspersky o ESET), Defender queda desactivado o en modo pasivo y lo correcto es usar el escaneo de ese antivirus. El escaneo solo se ejecuta en modo real porque Defender aplica su propia configuración, como poner archivos en cuarentena.	Before scanning, PC Care detects which antivirus protects the computer. If it is another one (for example Kaspersky or ESET), Defender is turned off or in passive mode and the right thing is to use that antivirus scan. The scan only runs in real mode because Defender applies its own settings, such as quarantining files.
+Sin revisar todavía.	Not checked yet.
+Escaneo rápido	Quick scan
+Escaneo completo	Full scan
+Escanear una carpeta	Scan a folder
+Escaneo de una carpeta	Folder scan
+Volver a detectar	Detect again
+Amenaza detectada	Detected threat
+Revisa las zonas donde suele esconderse el malware. Tarda de 2 a 10 minutos.	Checks the places where malware usually hides. Takes 2 to 10 minutes.
+Revisa todos los archivos. Puede tardar de 30 minutos a varias horas.	Checks every file. It can take from 30 minutes to several hours.
+Revisa solo la carpeta que elijas, por ejemplo Descargas. Tarda según su tamaño.	Checks only the folder you choose, for example Downloads. Time depends on its size.
+Tiempo aprox.: {0}	Approx. time: {0}
+menos de 5 s	under 5 s
+10 a 60 s	10 to 60 s
+5 a 20 s	5 to 20 s
+20 a 90 s	20 to 90 s
+Comprueba el estado de seguridad del equipo y qué antivirus está activo. Solo lectura.	Checks the computer security status and which antivirus is active. Read only.
+Detectando el antivirus activo	Detecting the active antivirus
+Antivirus activo: {0}	Active antivirus: {0}
+Antivirus activo	Active antivirus
+Windows no informa antivirus registrados. En Windows Server es normal.	Windows reports no registered antivirus. This is normal on Windows Server.
+Ningún antivirus registrado está activo.	No registered antivirus is active.
+La protección la administra {0}. Microsoft Defender no está disponible en este equipo: usa el escaneo de ese antivirus.	Protection is managed by {0}. Microsoft Defender is not available on this computer: use that antivirus scan.
+No se detectó ningún antivirus activo ni se pudo consultar Microsoft Defender.	No active antivirus was detected and Microsoft Defender could not be queried.
+La protección la administra {0}. Microsoft Defender está desactivado y no puede escanear: usa el escaneo de ese antivirus.	Protection is managed by {0}. Microsoft Defender is turned off and cannot scan: use that antivirus scan.
+Microsoft Defender está desactivado y no se detectó otro antivirus activo. Revisa Seguridad de Windows.	Microsoft Defender is turned off and no other active antivirus was detected. Check Windows Security.
+Microsoft Defender está en modo pasivo porque la protección la administra {0}. Puede escanear, pero lo que encuentre lo debe resolver ese antivirus.	Microsoft Defender is in passive mode because protection is managed by {0}. It can scan, but what it finds must be handled by that antivirus.
+Microsoft Defender está activo y puede escanear.	Microsoft Defender is active and can scan.
+Último escaneo rápido de Defender: {0}	Last Defender quick scan: {0}
+Último escaneo completo de Defender: {0}	Last Defender full scan: {0}
+No se detectó ningún antivirus activo. Revisa Seguridad de Windows.	No active antivirus was detected. Check Windows Security.
+Primero pulsa "Volver a detectar" para saber qué antivirus protege el equipo.	First press "Detect again" to find out which antivirus protects the computer.
+El escaneo con Microsoft Defender solo se ejecuta en modo real, porque Defender aplica su propia configuración (por ejemplo, pone archivos en cuarentena).\n\nPara escanear, pasa a modo real con el botón verde de arriba a la derecha.	The Microsoft Defender scan only runs in real mode, because Defender applies its own settings (for example, it quarantines files).\n\nTo scan, switch to real mode with the green button at the top right.
+Escaneo rápido con Microsoft Defender	Quick scan with Microsoft Defender
+Escaneo completo con Microsoft Defender	Full scan with Microsoft Defender
+Escaneo de una carpeta con Microsoft Defender	Folder scan with Microsoft Defender
+Suele tardar de 2 a 10 minutos.	It usually takes 2 to 10 minutes.
+Puede tardar de 30 minutos a varias horas y hace más lento el equipo mientras dura.	It can take from 30 minutes to several hours and slows the computer down while it runs.
+Tarda según el tamaño de la carpeta.	Time depends on the folder size.
+Lo que Defender encuentre lo trata según su propia configuración. Las demás tareas esperan en la cola hasta que termine.	Whatever Defender finds is handled according to its own settings. Other tasks wait in the queue until it finishes.
+Carpeta: {0}	Folder: {0}
+¿Iniciar?	Start?
+Elige la carpeta que quieres escanear con Microsoft Defender	Choose the folder you want to scan with Microsoft Defender
+No se pudo abrir el selector de carpetas: {0}	Could not open the folder picker: {0}
+SIMULACIÓN: no se inicia el escaneo. Microsoft Defender actúa según su propia configuración (por ejemplo, pone archivos en cuarentena), así que solo se ejecuta en modo real.	SIMULATION: the scan is not started. Microsoft Defender acts according to its own settings (for example, it quarantines files), so it only runs in real mode.
+La carpeta no existe: {0}	The folder does not exist: {0}
+Escaneo terminado en {0} s. Defender no detectó amenazas.	Scan finished in {0} s. Defender found no threats.
+Escaneo terminado en {0} s. Defender detectó {1} amenazas y las trató según su configuración. Revisa Seguridad de Windows, Historial de protección.	Scan finished in {0} s. Defender found {1} threats and handled them according to its settings. Check Windows Security, Protection history.
+No se pudo leer el historial de detecciones de Defender.	Could not read the Defender detection history.
+Riesgos reales: {0} ({1} críticos, {2} alertas) en seguridad y diagnóstico.	Real risks: {0} ({1} critical, {2} warnings) in security and diagnostics.
+Riesgos reales: sin analizar.	Real risks: not scanned.
+Espacio recuperable: {0} en temporales y cachés. No es un problema: es espacio que puedes liberar.	Recoverable space: {0} in temporary files and caches. It is not a problem: it is space you can free up.
+Espacio recuperable: sin analizar.	Recoverable space: not scanned.
+Actualizaciones disponibles: {0} aplicaciones y {1} drivers.	Available updates: {0} apps and {1} drivers.
+Actualizaciones disponibles: sin revisar (página Actualizaciones).	Available updates: not checked (Updates page).
+Registro: {0} entradas inválidas. Se informan aparte porque limpiarlas ordena pero no acelera el equipo.	Registry: {0} invalid entries. Reported separately because cleaning them tidies up but does not speed up the computer.
+Todavía no se aplicó ningún cambio en modo real en este equipo.	No change has been applied in real mode on this computer yet.
+Desde {0}: {1} liberados y {2} acciones aplicadas en modo real.	Since {0}: {1} freed and {2} actions applied in real mode.
+Guardado el {0}	Saved on {0}
+Último análisis guardado: {0}	Last saved scan: {0}
+{0} ({1} núcleos)	{0} ({1} cores)
+{0} (compilación {1})	{0} (build {1})
+{0} libres de {1} en {2}	{0} free of {1} on {2}
+Desactivado porque la protección la administra {0}. Es lo normal con otro antivirus.	Turned off because protection is managed by {0}. This is normal with another antivirus.

@@ -3,13 +3,13 @@
 
 # Todas son de solo lectura: analizan el equipo y no cambian nada.
 $script:TareasInicio = @(
-    [pscustomobject]@{ Id = 'Restauracion'; Funcion = 'Start-LecturaRestauracion'; Nombre = 'Leer puntos de restauración'; Que = 'Consulta el último punto de restauración de Windows.' }
-    [pscustomobject]@{ Id = 'Basura'; Funcion = 'Start-AnalisisBasura'; Nombre = 'Analizar archivos basura'; Que = 'Mide temporales, cachés, informes de error y Papelera. No borra nada.' }
-    [pscustomobject]@{ Id = 'Seguridad'; Funcion = 'Start-Seguridad'; Nombre = 'Revisar la seguridad de Windows'; Que = 'Comprueba el estado de seguridad del equipo. Solo lectura.' }
-    [pscustomobject]@{ Id = 'Inicio'; Funcion = 'Start-AnalisisInicio'; Nombre = 'Analizar programas de inicio'; Que = 'Lista lo que se abre junto con Windows. No cambia nada.' }
-    [pscustomobject]@{ Id = 'Diagnostico'; Funcion = 'Start-Diagnostico'; Nombre = 'Diagnosticar problemas comunes'; Que = 'Detecta problemas de rendimiento y mantenimiento. No aplica correcciones.' }
-    [pscustomobject]@{ Id = 'Procesos'; Funcion = 'Start-Procesos'; Nombre = 'Listar programas en memoria'; Que = 'Muestra qué programas consumen memoria ahora.' }
-    [pscustomobject]@{ Id = 'Registro'; Funcion = 'Start-AnalisisRegistro'; Nombre = 'Analizar el registro'; Que = 'Busca entradas inválidas del registro. No las limpia.' }
+    [pscustomobject]@{ Id = 'Restauracion'; Funcion = 'Start-LecturaRestauracion'; Nombre = 'Leer puntos de restauración'; Que = 'Consulta el último punto de restauración de Windows.'; Tiempo = 'menos de 5 s' }
+    [pscustomobject]@{ Id = 'Basura'; Funcion = 'Start-AnalisisBasura'; Nombre = 'Analizar archivos basura'; Que = 'Mide temporales, cachés, informes de error y Papelera. No borra nada.'; Tiempo = '10 a 60 s' }
+    [pscustomobject]@{ Id = 'Seguridad'; Funcion = 'Start-Seguridad'; Nombre = 'Revisar la seguridad de Windows'; Que = 'Comprueba el estado de seguridad del equipo y qué antivirus está activo. Solo lectura.'; Tiempo = '5 a 20 s' }
+    [pscustomobject]@{ Id = 'Inicio'; Funcion = 'Start-AnalisisInicio'; Nombre = 'Analizar programas de inicio'; Que = 'Lista lo que se abre junto con Windows. No cambia nada.'; Tiempo = 'menos de 5 s' }
+    [pscustomobject]@{ Id = 'Diagnostico'; Funcion = 'Start-Diagnostico'; Nombre = 'Diagnosticar problemas comunes'; Que = 'Detecta problemas de rendimiento y mantenimiento. No aplica correcciones.'; Tiempo = '20 a 90 s' }
+    [pscustomobject]@{ Id = 'Procesos'; Funcion = 'Start-Procesos'; Nombre = 'Listar programas en memoria'; Que = 'Muestra qué programas consumen memoria ahora.'; Tiempo = 'menos de 5 s' }
+    [pscustomobject]@{ Id = 'Registro'; Funcion = 'Start-AnalisisRegistro'; Nombre = 'Analizar el registro'; Que = 'Busca entradas inválidas del registro. No las limpia.'; Tiempo = '5 a 20 s' }
 )
 
 function Get-EstadoFilaInicio {

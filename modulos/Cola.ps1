@@ -29,6 +29,7 @@ $script:PoliticaTipos = @{
     'AnalisisDrivers'     = 'Seguro'
     'Informe'             = 'Seguro'
     'RedDiagnostico'      = 'Seguro'
+    'Antivirus'           = 'Seguro'
     'Papelera'            = 'Confirmar'
     'AccionDiag'          = 'Confirmar'
     'ActualizarApp'       = 'Confirmar'
@@ -39,6 +40,7 @@ $script:PoliticaTipos = @{
     'Turbo'               = 'No'
     'InstalarHerramienta' = 'No'
     'RedReparar'          = 'No'
+    'EscaneoDefender'     = 'No'
 }
 
 function Get-PoliticaTarea {
