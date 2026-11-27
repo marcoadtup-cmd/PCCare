@@ -2321,7 +2321,7 @@ if ($AutoPrueba) {
             Set-Content -LiteralPath (Join-Path $t 'b.txt') -Value 'x'
             Set-Content -LiteralPath (Join-Path $t 'sub\c.lnk') -Value 'x'
             $f = @(Get-ArchivosPrivacidad @{ Carpetas = @(@{ Ruta = $t; Filtro = '*.lnk' }) })
-            Assert-Igual $f.Count 1 'solo archivos directos con el filtro, sin subcarpetas'
+            if ($f.Count -ne 1) { throw ('se esperaba 1 archivo directo .lnk y se obtuvieron {0}: {1}' -f $f.Count, (($f | ForEach-Object { $_.FullName }) -join '; ')) }
         }
         finally { Remove-Item -LiteralPath $t -Recurse -Force -ErrorAction SilentlyContinue }
         '{0} categorías, cookies desmarcadas, simulación sin borrar' -f $cats.Count

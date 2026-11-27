@@ -56,9 +56,14 @@ $ayudaPrivacidad = {
         param([hashtable]$Categoria)
         foreach ($c in $Categoria.Carpetas) {
             if (-not $c.Ruta -or -not (Test-Path -LiteralPath $c.Ruta -PathType Container)) { continue }
-            foreach ($f in @(Get-ChildItem -LiteralPath $c.Ruta -File -Force -Filter $c.Filtro -ErrorAction SilentlyContinue)) {
+            $archivos = @()
+            try {
+                $dir = New-Object System.IO.DirectoryInfo ([System.IO.Path]::GetFullPath([string]$c.Ruta))
+                $archivos = @($dir.GetFiles([string]$c.Filtro, [System.IO.SearchOption]::TopDirectoryOnly))
+            }
+            catch { continue }
+            foreach ($f in $archivos) {
                 if ($f.Attributes -band [System.IO.FileAttributes]::ReparsePoint) { continue }
-                if ($f.DirectoryName.TrimEnd('\') -ne ([string]$c.Ruta).TrimEnd('\')) { continue }
                 if ($f.Name -eq 'desktop.ini') { continue }
                 $f
             }
