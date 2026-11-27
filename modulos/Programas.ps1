@@ -71,18 +71,20 @@ function Group-FallosProgramas {
                 Modulo   = $(if ($mod.Count -gt 0) { [string]$mod[0].Name } else { '' })
             })
     }
-    return , @($salida | Sort-Object Total, Ultimo -Descending)
+    # se devuelve desplegado: quien llama usa @() para tener siempre una lista
+    $salida | Sort-Object Total, Ultimo -Descending
 }
 
 # --- Arranque: registro de cambios para deshacer ------------------------------
 function Get-LotesCambiosInicio {
     param([string]$Ruta)
-    if (-not $Ruta -or -not (Test-Path -LiteralPath $Ruta)) { return , @() }
+    # Devuelve los lotes desplegados (nada si no hay): quien llama usa @()
+    if (-not $Ruta -or -not (Test-Path -LiteralPath $Ruta)) { return }
     try {
         $j = Get-Content -LiteralPath $Ruta -Raw -Encoding UTF8 | ConvertFrom-Json
-        return , @($j)
+        foreach ($l in @($j)) { if ($l) { $l } }
     }
-    catch { return , @() }
+    catch { return }
 }
 
 function Save-LotesCambiosInicio {
