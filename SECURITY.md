@@ -21,7 +21,10 @@ Si no puedes usar esa opción, escribe a **marcoadtup@gmail.com** con el asunto 
 - Registro: solo tres tipos de entrada comprobada, con respaldo `.reg` antes de borrar.
 - Drivers: solo Windows Update y herramientas oficiales del fabricante. Punto de restauración y respaldo previos.
 - La cola guardada (`%LOCALAPPDATA%\PCCare\Cola.json`) no contiene contraseñas. Solo guarda nombres, opciones marcadas y parámetros de la tarea.
-- Sin telemetría. No hay conexiones salvo las de winget, Windows Update y las pruebas de red que inicia el usuario.
+- Sin telemetría, sin publicidad y sin ofertas de otros productos. El desinstalador no abre páginas web.
+- Conexiones: solo las de `winget`, Microsoft Store, Windows Update, las pruebas de red que inicia el usuario y los enlaces que el usuario abre en su navegador. La lista completa, con destinos y momento, está en la sección "Privacidad y transparencia" del README.
+- Limpieza de privacidad: las cookies van desmarcadas, se eligen por navegador y se omiten si el navegador está abierto. Nunca se ejecuta sola.
+- Desinstalación de programas: siempre el desinstalador interactivo del fabricante, uno a la vez, con el comando leído del registro en el momento. PC Care no se desinstala a sí mismo.
 
 ## Qué verificar antes de ejecutar una versión
 
