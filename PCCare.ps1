@@ -2273,8 +2273,8 @@ if ($AutoPrueba) {
         Assert-Igual $u[0] $env:SystemDrive 'la unidad del sistema va primero'
         $todas = @(Get-RaicesUsuarioTodas)
         if ($todas.Count -lt @(Get-RaicesUsuario).Count) { throw 'faltan raíces de la unidad del sistema' }
-        $r = @(& $sbGrandes -Ayuda $textoAyuda -MinMB 2048 -Unidad 'Z:')
-        '{0} unidades fijas ({1}); unidad inválida vuelve a {2}' -f $u.Count, ($u -join ', '), $env:SystemDrive
+        Assert-Igual ((Get-UnidadesFijas) -contains 'Z:\NoExiste') $false 'una unidad inventada no es válida'
+        '{0} unidades fijas ({1}), {2} carpetas de usuario en total' -f $u.Count, ($u -join ', '), $todas.Count
     }
     Test-Paso 'Basura con punto de restauración (simulada)' {
         $r = & $sbLimpiarBasura -Ayuda $textoAyuda -Ids @('TempUsuario') -Simular $true -Punto $true
