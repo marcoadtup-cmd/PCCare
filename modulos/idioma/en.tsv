@@ -927,3 +927,54 @@ Guardado el {0}	Saved on {0}
 {0} (compilación {1})	{0} (build {1})
 {0} libres de {1} en {2}	{0} free of {1} on {2}
 Desactivado porque la protección la administra {0}. Es lo normal con otro antivirus.	Turned off because protection is managed by {0}. This is normal with another antivirus.
+Programas	Programs
+Programas instalados y los que fallan con frecuencia. PC Care no desinstala nada por su cuenta: abre el desinstalador del fabricante, uno a la vez, y tú decides en esa ventana.	Installed programs and the ones that fail often. PC Care never uninstalls anything on its own: it opens the vendor uninstaller, one at a time, and you decide in that window.
+Instalados	Installed
+Con fallos	With failures
+Desinstalar el seleccionado	Uninstall selected
+Buscar:	Search:
+Pulsa Actualizar lista.	Press Refresh list.
+Analizar	Scan
+Programas que fallaron o se colgaron en los últimos 30 días	Programs that crashed or hung in the last 30 days
+Se lee del Visor de eventos de Windows, en solo lectura. Un programa con muchos fallos conviene actualizarlo o reinstalarlo. La columna Módulo indica qué parte falló: si es un archivo de Windows o de un driver, el problema puede no estar en el programa.	Read from the Windows Event Viewer, read only. A program that fails often should be updated or reinstalled. The Module column shows which part failed: if it is a Windows or driver file, the problem may not be in the program.
+Pulsa Analizar.	Press Scan.
+Fallos	Crashes
+Cuelgues	Hangs
+Último	Last
+Módulo	Module
+Protege la configuración de Windows (registro y archivos del sistema). No recupera temporales ni cachés borrados: esos no se pueden restaurar.	Protects Windows settings (registry and system files). It does not recover deleted temporary files or caches: those cannot be restored.
+Archivos grandes y duplicados	Large and duplicate files
+Unidad:	Drive:
+Deshacer el último cambio	Undo last change
+Sin cambios registrados.	No changes recorded.
+Listando programas instalados	Listing installed programs
+{0} programas instalados. Selecciona uno para desinstalarlo.	{0} installed programs. Select one to uninstall it.
+Buscando programas con fallos (últimos 30 días)	Looking for programs with failures (last 30 days)
+No hay fallos ni cuelgues de programas registrados en los últimos 30 días.	No program crashes or hangs recorded in the last 30 days.
+{0} programas con fallos o cuelgues en los últimos 30 días.	{0} programs with crashes or hangs in the last 30 days.
+PC Care no se desinstala desde sí mismo. Usa Configuración de Windows, Aplicaciones instaladas.	PC Care does not uninstall itself. Use Windows Settings, Installed apps.
+El programa ya no figura en el registro. Pulsa "Actualizar lista".	The program is no longer in the registry. Press "Refresh list".
+No se pudo interpretar el desinstalador de {0}. Desinstálalo desde Configuración de Windows, Aplicaciones instaladas.	Could not read the uninstaller of {0}. Uninstall it from Windows Settings, Installed apps.
+Se abrirá el desinstalador de {0}.	The uninstaller of {0} will open.
+Comando: {0}	Command: {0}
+Sigue los pasos en esa ventana; puedes cancelar allí. Las demás tareas esperan en la cola mientras esté abierto.	Follow the steps in that window; you can cancel there. Other tasks wait in the queue while it is open.
+ATENCIÓN: {0}	WARNING: {0}
+¿Continuar?	Continue?
+Desinstalar programa	Uninstall program
+Desinstalando {0}	Uninstalling {0}
+Es un componente que usan otros programas. Si lo quitas, alguno puede dejar de abrir.	It is a component used by other programs. If you remove it, some may stop opening.
+Parece un driver o software del fabricante del equipo. Quitarlo puede afectar sonido, video, touchpad o red.	It looks like a driver or software from the computer maker. Removing it can affect sound, video, touchpad or network.
+SIMULACIÓN: se abriría el desinstalador de {0}: {1} {2}	SIMULATION: the uninstaller of {0} would open: {1} {2}
+El programa ya no figura como instalado: {0}	The program is no longer listed as installed: {0}
+No existe el desinstalador: {0}	The uninstaller does not exist: {0}
+{0} se desinstaló (código {1}).	{0} was uninstalled (code {1}).
+{0} sigue instalado (código {1}). Si cancelaste, no pasa nada. Si el desinstalador sigue abierto, termina allí y pulsa "Actualizar lista".	{0} is still installed (code {1}). If you cancelled, nothing happened. If the uninstaller is still open, finish there and press "Refresh list".
+Último cambio aplicado: {0}, {1} programas.	Last change applied: {0}, {1} programs.
+volverá a iniciar con Windows	will start with Windows again
+Se deshará el cambio del {0}:	The change from {0} will be undone:
+{0} cambios deshechos. Rigen desde el próximo inicio de sesión.	{0} changes undone. They apply from the next sign-in.
+SIMULACIÓN: se pediría un punto de restauración antes de limpiar.	SIMULATION: a restore point would be requested before cleaning.
+Punto de restauración creado.	Restore point created.
+Windows no creó un punto de restauración nuevo: por defecto permite uno cada 24 horas, o la Protección del sistema está desactivada. La limpieza continúa.	Windows did not create a new restore point: by default it allows one every 24 hours, or System Protection is turned off. Cleaning continues.
+AVISO: no se pudo crear el punto de restauración: {0}	WARNING: could not create the restore point: {0}
+{0}, {1} MB o más	{0}, {1} MB or more
