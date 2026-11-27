@@ -36,7 +36,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$VersionApp = '2.5.0'
+$VersionApp = '2.7.0'
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Xaml
 
 $esAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
@@ -80,14 +80,15 @@ $ayuda = {
     }
 
     function Get-RaicesUsuario {
-        # Carpetas de primer nivel de la unidad del sistema donde vive informacion del usuario.
+        # Carpetas de primer nivel de una unidad (por defecto la del sistema) donde vive informacion del usuario.
+        param([string]$Unidad = $env:SystemDrive)
         $prohibidas = @('Windows', 'Program Files', 'Program Files (x86)', 'ProgramData', '$Recycle.Bin', 'System Volume Information',
             'Recovery', 'PerfLogs', 'Documents and Settings', 'MSOCache', 'Config.Msi', '$WinREAgent', '$Windows.~BT', '$Windows.~WS',
             'Windows.old', '$SysReset', 'OneDriveTemp', 'Intel', 'AMD', 'NVIDIA', 'Drivers', 'eSupport', 'inetpub')
         $oculto = [System.IO.FileAttributes]::Hidden -bor [System.IO.FileAttributes]::System
         $salida = @()
         try {
-            foreach ($d in (New-Object System.IO.DirectoryInfo ($env:SystemDrive + '\')).GetDirectories()) {
+            foreach ($d in (New-Object System.IO.DirectoryInfo ($Unidad.TrimEnd('\') + '\')).GetDirectories()) {
                 if ($prohibidas -contains $d.Name) { continue }
                 if ($d.Attributes -band [System.IO.FileAttributes]::ReparsePoint) { continue }
                 if (($d.Attributes -band $oculto) -eq $oculto) { continue }
@@ -96,6 +97,20 @@ $ayuda = {
         }
         catch { }
         return $salida
+    }
+
+    function Get-UnidadesFijas {
+        # Discos fijos listos (C:, D:...). La unidad del sistema siempre va primero.
+        $l = @()
+        try { foreach ($d in [System.IO.DriveInfo]::GetDrives()) { if ([string]$d.DriveType -eq 'Fixed' -and $d.IsReady) { $l += $d.Name.TrimEnd('\') } } } catch { }
+        $l = @($l | Where-Object { $_ -ne $env:SystemDrive })
+        return (@($env:SystemDrive) + $l)
+    }
+
+    function Get-RaicesUsuarioTodas {
+        $r = @()
+        foreach ($u in (Get-UnidadesFijas)) { $r += @(Get-RaicesUsuario $u) }
+        return $r
     }
 
     function Test-ArchivoUsuarioSeguro {
@@ -366,10 +381,20 @@ $sbAnalizarBasura = {
 }
 
 $sbLimpiarBasura = {
-    param([string]$Ayuda, [string[]]$Ids, [bool]$Simular)
+    param([string]$Ayuda, [string[]]$Ids, [bool]$Simular, [bool]$Punto = $false)
     . ([scriptblock]::Create($Ayuda))
     $mensajes = New-Object System.Collections.Generic.List[string]
     $total = [double]0
+    if ($Punto -and $Simular) { $mensajes.Add('SIMULACIÓN: se pediría un punto de restauración antes de limpiar.') }
+    if ($Punto -and -not $Simular) {
+        $antes = $null; $despues = $null
+        try { $antes = (@(Get-ComputerRestorePoint -ErrorAction Stop | Sort-Object SequenceNumber) | Select-Object -Last 1).SequenceNumber } catch { }
+        try { Checkpoint-Computer -Description 'PC Care antes de limpiar basura' -RestorePointType 'MODIFY_SETTINGS' -ErrorAction Stop -WarningAction SilentlyContinue }
+        catch { $mensajes.Add('AVISO: no se pudo crear el punto de restauración: ' + $_.Exception.Message) }
+        try { $despues = (@(Get-ComputerRestorePoint -ErrorAction Stop | Sort-Object SequenceNumber) | Select-Object -Last 1).SequenceNumber } catch { }
+        if ($despues -and $despues -ne $antes) { $mensajes.Add('Punto de restauración creado.') }
+        else { $mensajes.Add('Windows no creó un punto de restauración nuevo: por defecto permite uno cada 24 horas, o la Protección del sistema está desactivada. La limpieza continúa.') }
+    }
     foreach ($c in (Get-CategoriasBasura)) {
         if ($Ids -notcontains $c.Id) { continue }
         $liberado = [double]0; $borrados = 0; $omitidos = 0
@@ -411,11 +436,13 @@ $sbLimpiarBasura = {
 }
 
 $sbGrandes = {
-    param([string]$Ayuda, [int]$MinMB)
+    param([string]$Ayuda, [int]$MinMB, [string]$Unidad = '')
     . ([scriptblock]::Create($Ayuda))
+    $u = $env:SystemDrive
+    if ($Unidad -and (Get-UnidadesFijas) -contains $Unidad) { $u = $Unidad }
     $nube = Get-RaicesNube
     $soloNube = 0x00441000   # Offline, RecallOnOpen, RecallOnDataAccess: el archivo no ocupa disco local
-    $lista = foreach ($raiz in (Get-RaicesUsuario)) {
+    $lista = foreach ($raiz in (Get-RaicesUsuario $u)) {
         foreach ($f in (Get-ArchivosSeguros -Raiz $raiz -ExcluirNombres @('AppData') -MinBytes ([long]$MinMB * 1MB))) {
             if (([int]$f.Attributes -band $soloNube) -ne 0) { continue }
             [pscustomobject]@{
@@ -428,7 +455,7 @@ $sbGrandes = {
 }
 
 $sbDuplicados = {
-    param([string]$Ayuda, [int]$MinMB)
+    param([string]$Ayuda, [int]$MinMB, [string]$Unidad = '')
     . ([scriptblock]::Create($Ayuda))
     function Get-HashArchivo {
         param([string]$Ruta, [int]$MaxBytes = 0)
@@ -446,9 +473,11 @@ $sbDuplicados = {
         catch { return $null }
         finally { if ($fs) { $fs.Dispose() }; $sha.Dispose() }
     }
+    $u = $env:SystemDrive
+    if ($Unidad -and (Get-UnidadesFijas) -contains $Unidad) { $u = $Unidad }
     $nube = Get-RaicesNube
     $soloNube = 0x00441000
-    $todos = foreach ($raiz in (Get-RaicesUsuario)) {
+    $todos = foreach ($raiz in (Get-RaicesUsuario $u)) {
         foreach ($f in (Get-ArchivosSeguros -Raiz $raiz -ExcluirNombres @('AppData') -MinBytes ([long]$MinMB * 1MB))) {
             if (([int]$f.Attributes -band $soloNube) -eq 0) { $f }
         }
@@ -479,7 +508,7 @@ $sbPapelera = {
     param([string]$Ayuda, [string[]]$Rutas, [bool]$Simular)
     . ([scriptblock]::Create($Ayuda))
     Add-Type -AssemblyName Microsoft.VisualBasic
-    $raices = Get-RaicesUsuario
+    $raices = Get-RaicesUsuarioTodas
     $hechos = New-Object System.Collections.Generic.List[string]
     $mensajes = New-Object System.Collections.Generic.List[string]
     $bytes = [double]0
@@ -884,7 +913,7 @@ $sbRestauracion = {
 # MODULOS: cola persistente, actualizaciones, informe y red (carpeta "modulos")
 # ===========================================================================
 $RaizApp = $PSScriptRoot
-foreach ($nombreMod in 'Idioma.ps1', 'Cola.ps1', 'Inicio.ps1', 'Actualizaciones.ps1', 'Ejecutores.ps1', 'Proteccion.ps1', 'Resumen.ps1') {
+foreach ($nombreMod in 'Idioma.ps1', 'Cola.ps1', 'Inicio.ps1', 'Actualizaciones.ps1', 'Ejecutores.ps1', 'Proteccion.ps1', 'Resumen.ps1', 'Programas.ps1', 'Privacidad.ps1') {
     $rutaMod = Join-Path $RaizApp ('modulos\' + $nombreMod)
     if (-not (Test-Path -LiteralPath $rutaMod)) {
         [void][System.Windows.MessageBox]::Show((('Falta el archivo modulos\{0}.' -f $nombreMod) + "`n`nExtrae TODA la carpeta del ZIP (no solo PCCare.ps1) y vuelve a abrir PC Care.`n`nMissing file modulos\{0}. Extract the WHOLE ZIP folder (not just PCCare.ps1) and open PC Care again." -f $nombreMod), 'PC Care')
@@ -912,6 +941,8 @@ $mapaTipos = [ordered]@{
     Store = $sbStore; AnalisisDrivers = $sbAnalizarDrivers; InstalarDrivers = $sbInstalarDrivers
     Informe = $sbInformeAuditoria; RedDiagnostico = $sbRedDiagnostico; RedAplicar = $sbRedAplicar; RedReparar = $sbRedReparar
     Antivirus = $sbAntivirus; EscaneoDefender = $sbEscaneoDefender
+    Programas = $sbProgramas; ProgramasFallos = $sbProgramasFallos; DesinstalarPrograma = $sbDesinstalarPrograma
+    AnalisisPrivacidad = $sbAnalizarPrivacidad; LimpiarPrivacidad = $sbLimpiarPrivacidad
 }
 foreach ($k in $mapaTipos.Keys) { $script:MetaTarea[$mapaTipos[$k]] = [string]$k }
 
@@ -1112,6 +1143,7 @@ if (-not $AutoPrueba) {
             <RadioButton x:Name="navAct" GroupName="nav" Style="{StaticResource Nav}" Content="Actualizaciones"/>
             <Ellipse x:Name="dotAct" Width="9" Height="9" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,4" IsHitTestVisible="False" Visibility="Collapsed" Fill="#F2A33A"/>
           </Grid>
+          <RadioButton x:Name="navProg" GroupName="nav" Style="{StaticResource Nav}" Content="Programas"/>
           <RadioButton x:Name="navRed" GroupName="nav" Style="{StaticResource Nav}" Content="Red"/>
           <RadioButton x:Name="navInforme" GroupName="nav" Style="{StaticResource Nav}" Content="Informe del equipo"/>
           <TextBlock Text="ACTIVIDAD" Foreground="#8AA0BB" FontSize="11" Margin="8,14,0,6"/>
@@ -1304,15 +1336,39 @@ if (-not $AutoPrueba) {
                 <Button x:Name="btnAnalizarBasura" DockPanel.Dock="Right" Style="{StaticResource Btn2}" Content="Volver a analizar"/>
                 <TextBlock x:Name="txtBasuraTotal" VerticalAlignment="Center" FontWeight="SemiBold"/>
               </DockPanel>
+              <CheckBox x:Name="chkBasuraPunto" Margin="0,8,0,0" IsChecked="False" Content="Crear punto de restauración antes de limpiar" ToolTip="Protege la configuración de Windows (registro y archivos del sistema). No recupera temporales ni cachés borrados: esos no se pueden restaurar."/>
+            </StackPanel>
+          </Border>
+          </StackPanel></TabItem>
+          <TabItem Header="Privacidad" FontSize="14" FontWeight="SemiBold"><StackPanel Margin="0,10,0,0">
+          <Border Style="{StaticResource Card}">
+            <StackPanel>
+              <TextBlock Text="Rastros de privacidad" Style="{StaticResource H2}"/>
+              <TextBlock Style="{StaticResource Mut}" Text="Archivos recientes, Jump Lists de la barra de tareas y recientes de Office. Las cookies van por navegador y desmarcadas: borrarlas cierra tu sesión en los sitios web, así que marca solo los navegadores que quieras limpiar y deja los demás como excepción. Respeta el modo simulación y nunca se ejecuta sola. Los recientes de Office guardados en el registro no se tocan."/>
+              <DataGrid x:Name="gridPrivacidad" Height="260">
+                <DataGrid.Columns>
+                  <DataGridTemplateColumn Width="36" CellTemplate="{StaticResource ChkSel}"/>
+                  <DataGridTextColumn Header="Categoría" Binding="{Binding Nombre}" Width="3*"/>
+                  <DataGridTextColumn Header="Archivos" Binding="{Binding Archivos}" Width="*"/>
+                  <DataGridTextColumn Header="Tamaño" Binding="{Binding Tamano}" SortMemberPath="Bytes" Width="*"/>
+                </DataGrid.Columns>
+              </DataGrid>
+              <DockPanel>
+                <Button x:Name="btnPrivLimpiar" DockPanel.Dock="Right" Style="{StaticResource Btn}" Content="Limpiar seleccionados" Margin="0"/>
+                <Button x:Name="btnPrivAnalizar" DockPanel.Dock="Right" Style="{StaticResource Btn2}" Content="Analizar"/>
+                <TextBlock x:Name="txtPrivTotal" VerticalAlignment="Center" FontWeight="SemiBold" Text="Pulsa Analizar."/>
+              </DockPanel>
             </StackPanel>
           </Border>
           </StackPanel></TabItem>
           <TabItem Header="Grandes y duplicados" FontSize="14" FontWeight="SemiBold"><StackPanel Margin="0,10,0,0">
           <Border Style="{StaticResource Card}">
             <StackPanel>
-              <TextBlock Text="Archivos grandes y duplicados en la unidad del sistema" Style="{StaticResource H2}"/>
+              <TextBlock Text="Archivos grandes y duplicados" Style="{StaticResource H2}"/>
               <TextBlock Style="{StaticResource Mut}" Text="Busca en carpetas de usuario. No entra a Windows, Archivos de programa ni AppData. Los duplicados se comparan por contenido. Lo que elijas va a la Papelera, así se puede recuperar."/>
               <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <TextBlock Text="Unidad:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <ComboBox x:Name="cmbUnidad" Width="70" VerticalAlignment="Center" Margin="0,0,12,0"/>
                 <TextBlock Text="Tamaño mínimo:" VerticalAlignment="Center" Margin="0,0,8,0"/>
                 <ComboBox x:Name="cmbMin" Width="100" SelectedIndex="1" VerticalAlignment="Center" Margin="0,0,12,0">
                   <ComboBoxItem Content="5 MB"/><ComboBoxItem Content="100 MB"/><ComboBoxItem Content="500 MB"/><ComboBoxItem Content="1 GB"/>
@@ -1414,6 +1470,10 @@ if (-not $AutoPrueba) {
               <DockPanel>
                 <Button x:Name="btnAplicarInicio" DockPanel.Dock="Right" Style="{StaticResource Btn}" Content="Aplicar cambios" Margin="0"/>
                 <TextBlock x:Name="txtInicioCambios" VerticalAlignment="Center" Style="{StaticResource Mut}"/>
+              </DockPanel>
+              <DockPanel Margin="0,8,0,0">
+                <Button x:Name="btnDeshacerInicio" DockPanel.Dock="Right" Style="{StaticResource Btn2}" Content="Deshacer el último cambio" Margin="0" IsEnabled="False"/>
+                <TextBlock x:Name="txtInicioUltimo" VerticalAlignment="Center" Style="{StaticResource Mut}" Text="Sin cambios registrados."/>
               </DockPanel>
             </StackPanel>
           </Border>
@@ -1695,6 +1755,60 @@ if (-not $AutoPrueba) {
         </StackPanel>
       </ScrollViewer>
 
+      <!-- ============ PROGRAMAS ============ -->
+      <ScrollViewer x:Name="vProg" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+        <StackPanel Margin="24,20,10,10">
+          <TextBlock Text="Programas" Style="{StaticResource H1}" Margin="0,0,0,6"/>
+          <TextBlock Style="{StaticResource Mut}" Margin="0,0,0,14" Text="Programas instalados y los que fallan con frecuencia. PC Care no desinstala nada por su cuenta: abre el desinstalador del fabricante, uno a la vez, y tú decides en esa ventana."/>
+          <TabControl x:Name="tabProg" BorderThickness="0" Background="Transparent" Padding="0">
+            <TabItem Header="Instalados" FontSize="14" FontWeight="SemiBold"><StackPanel Margin="0,10,0,0">
+              <Border Style="{StaticResource Card}">
+                <StackPanel>
+                  <WrapPanel>
+                    <Button x:Name="btnProgListar" Style="{StaticResource Btn2}" Content="Actualizar lista"/>
+                    <Button x:Name="btnProgDesinstalar" Style="{StaticResource Btn}" Content="Desinstalar el seleccionado" IsEnabled="False"/>
+                    <TextBlock Text="Buscar:" VerticalAlignment="Center" Margin="8,0,6,0"/>
+                    <TextBox x:Name="txtProgFiltro" Width="220" VerticalAlignment="Center" Padding="4,3"/>
+                  </WrapPanel>
+                  <TextBlock x:Name="txtProgRes" Style="{StaticResource Mut}" Margin="0,8,0,0" Text="Pulsa Actualizar lista."/>
+                  <DataGrid x:Name="gridProgramas" Height="430">
+                    <DataGrid.Columns>
+                      <DataGridTextColumn Header="Programa" Binding="{Binding Nombre}" Width="3*"/>
+                      <DataGridTextColumn Header="Versión" Binding="{Binding Version}" Width="110"/>
+                      <DataGridTextColumn Header="Editor" Binding="{Binding Editor}" Width="2*"/>
+                      <DataGridTextColumn Header="Instalado" Binding="{Binding Fecha}" Width="95"/>
+                      <DataGridTextColumn Header="MB" Binding="{Binding TamanoMB}" Width="60"/>
+                      <DataGridTextColumn Header="Origen" Binding="{Binding Origen}" Width="130"/>
+                    </DataGrid.Columns>
+                  </DataGrid>
+                </StackPanel>
+              </Border>
+            </StackPanel></TabItem>
+            <TabItem Header="Con fallos" FontSize="14" FontWeight="SemiBold"><StackPanel Margin="0,10,0,0">
+              <Border Style="{StaticResource Card}">
+                <StackPanel>
+                  <DockPanel>
+                    <Button x:Name="btnFallosAnalizar" DockPanel.Dock="Right" Style="{StaticResource Btn2}" Content="Analizar" Margin="0"/>
+                    <TextBlock Text="Programas que fallaron o se colgaron en los últimos 30 días" Style="{StaticResource H2}"/>
+                  </DockPanel>
+                  <TextBlock Style="{StaticResource Mut}" Text="Se lee del Visor de eventos de Windows, en solo lectura. Un programa con muchos fallos conviene actualizarlo o reinstalarlo. La columna Módulo indica qué parte falló: si es un archivo de Windows o de un driver, el problema puede no estar en el programa."/>
+                  <TextBlock x:Name="txtFallosRes" Style="{StaticResource Mut}" Margin="0,8,0,0" Text="Pulsa Analizar."/>
+                  <DataGrid x:Name="gridFallos" Height="380">
+                    <DataGrid.Columns>
+                      <DataGridTextColumn Header="Programa" Binding="{Binding Programa}" Width="3*"/>
+                      <DataGridTextColumn Header="Fallos" Binding="{Binding Fallos}" Width="70"/>
+                      <DataGridTextColumn Header="Cuelgues" Binding="{Binding Cuelgues}" Width="80"/>
+                      <DataGridTextColumn Header="Último" Binding="{Binding Ultimo}" Width="130"/>
+                      <DataGridTextColumn Header="Módulo" Binding="{Binding Modulo}" Width="2*"/>
+                    </DataGrid.Columns>
+                  </DataGrid>
+                </StackPanel>
+              </Border>
+            </StackPanel></TabItem>
+          </TabControl>
+        </StackPanel>
+      </ScrollViewer>
+
       <!-- ============ RED ============ -->
       <ScrollViewer x:Name="vRed" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
         <StackPanel Margin="24,20,10,10">
@@ -1860,9 +1974,10 @@ if ($script:IdiomaActual -eq 'en') {
 }
 function New-Ventana { return [Windows.Markup.XamlReader]::Load((New-Object System.Xml.XmlNodeReader $xaml)) }
 
-$textoAyuda = $ayuda.ToString() + "`r`n" + $ayudaActualizaciones.ToString()
+$textoAyuda = $ayuda.ToString() + "`r`n" + $ayudaActualizaciones.ToString() + "`r`n" + $ayudaPrivacidad.ToString()
 . $ayuda   # las mismas funciones quedan disponibles en el hilo de la interfaz
 . $ayudaActualizaciones
+. $ayudaPrivacidad
 
 # Enlaces de la pagina "Acerca de y ayuda": solo se abren direcciones del repositorio oficial.
 $script:UrlRepo = 'https://github.com/marcoadtup-cmd/PCCare'
@@ -1935,7 +2050,9 @@ if ($AutoPrueba) {
         'chkRedDescarga', 'btnRedDiag', 'btnRedCarpeta', 'txtRedInforme', 'gridRedCambios', 'btnRedAplicar', 'btnRedReparar', 'txtRedAviso', 'txtRedRevertir',
         'cmbIdioma', 'navAcerca', 'vAcerca', 'txtAcercaVersion', 'txtAcercaSistema', 'btnAcercaUltima', 'btnAcercaVersiones', 'btnAcercaCopiar', 'btnAcercaIssues', 'btnAcercaSeguridad',
         'dotLimpieza', 'dotRend', 'dotSeg', 'dotAct', 'txtEqModelo', 'txtEqCpu', 'txtEqRam', 'txtEqSo', 'txtEqDisco', 'txtResHonesto', 'txtImpacto',
-        'txtUltimoAnalisis', 'btnVerUltimo', 'txtAvEstado', 'btnScanRapido', 'btnScanCompleto', 'btnScanCarpeta', 'btnAvRevisar', 'gridAmenazas'
+        'txtUltimoAnalisis', 'btnVerUltimo', 'txtAvEstado', 'btnScanRapido', 'btnScanCompleto', 'btnScanCarpeta', 'btnAvRevisar', 'gridAmenazas',
+        'navProg', 'vProg', 'tabProg', 'gridProgramas', 'gridFallos', 'btnProgListar', 'btnProgDesinstalar', 'txtProgFiltro', 'txtProgRes', 'btnFallosAnalizar',
+        'txtFallosRes', 'chkBasuraPunto', 'cmbUnidad', 'btnDeshacerInicio', 'txtInicioUltimo', 'gridPrivacidad', 'btnPrivLimpiar', 'btnPrivAnalizar', 'txtPrivTotal'
         foreach ($n in $claves) { if (-not $v.FindName($n)) { throw ('falta el control ' + $n) } }
         'carga correcta, {0} controles clave' -f @($claves).Count
     }
@@ -2004,7 +2121,7 @@ if ($AutoPrueba) {
     Test-Paso 'Todas las tareas tienen política' {
         $nombres = 'sbSeguridad', 'sbRestauracion', 'sbAnalizarBasura', 'sbLimpiarBasura', 'sbGrandes', 'sbDuplicados', 'sbPapelera', 'sbAnalizarRegistro',
         'sbLimpiarRegistro', 'sbInicio', 'sbDiagnostico', 'sbAccionDiag', 'sbProcesos', 'sbTurbo', 'sbAnalizarApps', 'sbActualizarApp',
-        'sbInstalarHerramienta', 'sbStore', 'sbAnalizarDrivers', 'sbInstalarDrivers', 'sbInformeAuditoria', 'sbRedDiagnostico', 'sbRedAplicar', 'sbRedReparar', 'sbAntivirus', 'sbEscaneoDefender'
+        'sbInstalarHerramienta', 'sbStore', 'sbAnalizarDrivers', 'sbInstalarDrivers', 'sbInformeAuditoria', 'sbRedDiagnostico', 'sbRedAplicar', 'sbRedReparar', 'sbAntivirus', 'sbEscaneoDefender', 'sbProgramas', 'sbProgramasFallos', 'sbDesinstalarPrograma', 'sbAnalizarPrivacidad', 'sbLimpiarPrivacidad'
         foreach ($nom in $nombres) {
             $b = Get-Variable -Name $nom -ValueOnly
             if (-not $script:MetaTarea.ContainsKey($b)) { throw ('sin tipo: ' + $nom) }
@@ -2114,6 +2231,100 @@ if ($AutoPrueba) {
         }
         finally { Remove-Item -LiteralPath $tmp, $tmp2 -Force -ErrorAction SilentlyContinue }
         'resumen separado, dos niveles de color, impacto y último análisis: correcto'
+    }
+    Test-Paso 'Programas instalados (solo lectura)' {
+        $r = @(& $sbProgramas -Ayuda $textoAyuda)
+        foreach ($p in $r) { if (-not (Test-ClaveDesinstalarPermitida $p.Clave)) { throw ('clave fuera de Uninstall: ' + $p.Clave) } }
+        '{0} programas, todas las claves dentro de Uninstall' -f $r.Count
+    }
+    Test-Paso 'Desinstalador: interpretación y guardas' {
+        $g = '{12345678-ABCD-1234-ABCD-123456789012}'
+        $c = Get-ComandoDesinstalar ('MsiExec.exe /I' + $g)
+        Assert-Igual $c.Archivo 'msiexec.exe' 'MSI usa msiexec'
+        Assert-Igual $c.Argumentos ('/x ' + $g) 'MSI se desinstala con /x interactivo'
+        $c = Get-ComandoDesinstalar '"C:\Program Files\App X\unins000.exe" /LANG=es'
+        Assert-Igual $c.Archivo 'C:\Program Files\App X\unins000.exe' 'ruta entre comillas'
+        Assert-Igual $c.Argumentos '/LANG=es' 'argumentos'
+        Assert-Igual (Get-ComandoDesinstalar 'C:\Apps\quitar.exe').Archivo 'C:\Apps\quitar.exe' 'ruta sin comillas'
+        Assert-Igual ($null -eq (Get-ComandoDesinstalar 'rundll32.exe algo')) $true 'sin ruta absoluta se rechaza'
+        Assert-Igual ($null -eq (Get-ComandoDesinstalar '')) $true 'vacío se rechaza'
+        Assert-Igual (Test-ClaveDesinstalarPermitida 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall') $false 'la raíz misma'
+        Assert-Igual (Test-ClaveDesinstalarPermitida 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\App') $true 'clave de un programa'
+        Assert-Igual (Test-ClaveDesinstalarPermitida 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\App\Sub') $false 'subclave'
+        Assert-Igual (Test-ClaveDesinstalarPermitida 'HKLM:\SYSTEM\CurrentControlSet\Services\x') $false 'otra rama'
+        Assert-Igual (Get-AvisoPrograma 'PC Care 2.6.0') 'Bloqueado' 'PC Care no se desinstala a sí mismo'
+        Assert-Igual ((Get-AvisoPrograma 'Microsoft Visual C++ 2015-2022 Redistributable') -ne '') $true 'aviso en componentes compartidos'
+        Assert-Igual (Get-AvisoPrograma '7-Zip 24.08') '' '7-Zip sin aviso'
+        '14 comprobaciones'
+    }
+    Test-Paso 'Programas con fallos (Visor de eventos)' {
+        $ev = @(& $sbProgramasFallos -Ayuda $textoAyuda -Dias 30)
+        $g = @(Group-FallosProgramas -Eventos $ev)
+        $h = Get-Date
+        $sint = @(
+            [pscustomobject]@{ Tipo = 'Fallo'; App = 'a.exe'; Modulo = 'x.dll'; Fecha = $h.AddDays(-2) },
+            [pscustomobject]@{ Tipo = 'Fallo'; App = 'A.EXE'; Modulo = 'x.dll'; Fecha = $h.AddDays(-1) },
+            [pscustomobject]@{ Tipo = 'Cuelgue'; App = 'b.exe'; Modulo = ''; Fecha = $h }
+        )
+        $s = @(Group-FallosProgramas -Eventos $sint)
+        Assert-Igual $s.Count 2 'agrupa sin distinguir mayúsculas'
+        Assert-Igual $s[0].Total 2 'el de más fallos primero'
+        Assert-Igual $s[0].Modulo 'x.dll' 'módulo más frecuente'
+        '{0} eventos, {1} programas con fallos en este equipo' -f $ev.Count, $g.Count
+    }
+    Test-Paso 'Arranque: registro para deshacer' {
+        $tmp = Join-Path $env:TEMP ('PCCare_arranque_prueba_{0}.json' -f $PID)
+        try {
+            Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue
+            Assert-Igual @(Get-LotesCambiosInicio $tmp).Count 0 'sin archivo'
+            Add-LoteCambiosInicio -Ruta $tmp -Cambios @([pscustomobject]@{ Nombre = 'A'; Aprobado = 'HKCU:\x\Run'; Antes = $true; Despues = $false })
+            Add-LoteCambiosInicio -Ruta $tmp -Cambios @([pscustomobject]@{ Nombre = 'B'; Aprobado = 'HKCU:\x\Run'; Antes = $false; Despues = $true }, [pscustomobject]@{ Nombre = 'C'; Aprobado = 'HKCU:\x\Run'; Antes = $true; Despues = $false })
+            $l = @(Get-LotesCambiosInicio $tmp)
+            Assert-Igual $l.Count 2 'dos lotes'
+            Assert-Igual @($l[1].Cambios).Count 2 'el último lote trae dos cambios'
+            Assert-Igual ([bool]@($l[0].Cambios)[0].Antes) $true 'guarda el estado anterior'
+            Remove-UltimoLoteInicio $tmp
+            Assert-Igual @(Get-LotesCambiosInicio $tmp).Count 1 'deshacer quita el último lote'
+            Remove-UltimoLoteInicio $tmp
+            Assert-Igual @(Get-LotesCambiosInicio $tmp).Count 0 'sin lotes'
+        }
+        finally { Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue }
+        'guardar, leer y deshacer lotes: correcto'
+    }
+    Test-Paso 'Unidades para grandes y duplicados' {
+        $u = @(Get-UnidadesFijas)
+        Assert-Igual $u[0] $env:SystemDrive 'la unidad del sistema va primero'
+        $todas = @(Get-RaicesUsuarioTodas)
+        if ($todas.Count -lt @(Get-RaicesUsuario).Count) { throw 'faltan raíces de la unidad del sistema' }
+        Assert-Igual ((Get-UnidadesFijas) -contains 'Z:\NoExiste') $false 'una unidad inventada no es válida'
+        '{0} unidades fijas ({1}), {2} carpetas de usuario en total' -f $u.Count, ($u -join ', '), $todas.Count
+    }
+    Test-Paso 'Basura con punto de restauración (simulada)' {
+        $r = & $sbLimpiarBasura -Ayuda $textoAyuda -Ids @('TempUsuario') -Simular $true -Punto $true
+        if (@($r.Mensajes | Where-Object { $_ -match 'Punto de restauración creado' }).Count -gt 0) { throw 'en simulación no se crea el punto' }
+        if (@($r.Mensajes | Where-Object { $_ -match '^SIMULACIÓN: se pediría un punto' }).Count -ne 1) { throw 'falta el aviso de simulación' }
+        'en simulación solo se informa'
+    }
+    Test-Paso 'Privacidad: análisis y limpieza simulada' {
+        $cats = @(Get-CategoriasPrivacidad)
+        foreach ($c in $cats) {
+            if ($c.Cookies -and $c.Marcar) { throw ('las cookies deben ir desmarcadas: ' + $c.Id) }
+            foreach ($k in $c.Carpetas) { if (([string]$k.Ruta).Length -lt 12) { throw ('carpeta demasiado corta: ' + $k.Ruta) } }
+        }
+        $a = @(& $sbAnalizarPrivacidad -Ayuda $textoAyuda)
+        $r = & $sbLimpiarPrivacidad -Ayuda $textoAyuda -Ids @($a | ForEach-Object { $_.Id }) -Simular $true
+        Assert-Igual ([bool]$r.Simulado) $true 'simulación'
+        $t = Join-Path $env:TEMP ('PCCare_priv_{0}' -f $PID)
+        try {
+            New-Item -ItemType Directory -Path (Join-Path $t 'sub') -Force | Out-Null
+            Set-Content -LiteralPath (Join-Path $t 'a.lnk') -Value 'x'
+            Set-Content -LiteralPath (Join-Path $t 'b.txt') -Value 'x'
+            Set-Content -LiteralPath (Join-Path $t 'sub\c.lnk') -Value 'x'
+            $f = @(Get-ArchivosPrivacidad @{ Carpetas = @(@{ Ruta = $t; Filtro = '*.lnk' }) })
+            if ($f.Count -ne 1) { throw ('se esperaba 1 archivo directo .lnk y se obtuvieron {0}: {1}' -f $f.Count, (($f | ForEach-Object { $_.FullName }) -join '; ')) }
+        }
+        finally { Remove-Item -LiteralPath $t -Recurse -Force -ErrorAction SilentlyContinue }
+        '{0} categorías, cookies desmarcadas, simulación sin borrar' -f $cats.Count
     }
     Test-Paso 'Ficha del equipo' {
         $f = Get-ResumenEquipo
@@ -2758,6 +2969,169 @@ Update-Impacto
 Update-UltimoAnalisisPanel
 
 # ===========================================================================
+# PROGRAMAS INSTALADOS, PROGRAMAS CON FALLOS Y DESHACER ARRANQUE (modulos\Programas.ps1)
+# ===========================================================================
+$tProgramas = New-Tabla 'Nombre', 'Version', 'Editor', 'Fecha', 'TamanoMB', 'Origen', 'Clave'
+$tFallos = New-Tabla 'Programa', 'Fallos', 'Cuelgues', 'Ultimo', 'Modulo'
+$ui.gridProgramas.ItemsSource = $tProgramas.DefaultView
+$ui.gridFallos.ItemsSource = $tFallos.DefaultView
+$rutaCambiosInicio = Join-Path $env:LOCALAPPDATA 'PCCare\cambios_arranque.json'
+
+function Update-FiltroProgramas {
+    $t = ([string]$ui.txtProgFiltro.Text).Trim()
+    if (-not $t) { $tProgramas.DefaultView.RowFilter = ''; return }
+    $e = ($t.Replace("'", "''")) -replace '([\[\]\*%])', '[$1]'
+    $tProgramas.DefaultView.RowFilter = ("Nombre LIKE '%{0}%' OR Editor LIKE '%{0}%'" -f $e)
+}
+function Start-Programas {
+    Add-Tarea 'Listando programas instalados' $sbProgramas @{} {
+        param($res, $ctx, $fallo)
+        if ($fallo) { return }
+        $tProgramas.Rows.Clear()
+        foreach ($p in @($res | Sort-Object Nombre)) {
+            [void]$tProgramas.Rows.Add($false, [string]$p.Nombre, [string]$p.Version, [string]$p.Editor, [string]$p.Fecha, [string]$p.TamanoMB, [string]$p.Origen, [string]$p.Clave)
+        }
+        $ui.txtProgRes.Text = '{0} programas instalados. Selecciona uno para desinstalarlo.' -f $tProgramas.Rows.Count
+        Update-FiltroProgramas
+    }
+}
+function Start-ProgramasFallos {
+    Add-Tarea 'Buscando programas con fallos (últimos 30 días)' $sbProgramasFallos @{ Dias = 30 } {
+        param($res, $ctx, $fallo)
+        if ($fallo) { return }
+        $g = @(Group-FallosProgramas -Eventos @($res))
+        $tFallos.Rows.Clear()
+        foreach ($x in $g) { [void]$tFallos.Rows.Add($false, [string]$x.Programa, [string]$x.Fallos, [string]$x.Cuelgues, [string]$x.Ultimo, [string]$x.Modulo) }
+        if ($tFallos.Rows.Count -eq 0) { $ui.txtFallosRes.Text = 'No hay fallos ni cuelgues de programas registrados en los últimos 30 días.' }
+        else { $ui.txtFallosRes.Text = '{0} programas con fallos o cuelgues en los últimos 30 días.' -f $tFallos.Rows.Count }
+    }
+}
+$ui.btnProgListar.Add_Click({ Start-Programas })
+$ui.btnFallosAnalizar.Add_Click({ Start-ProgramasFallos })
+$ui.txtProgFiltro.Add_TextChanged({ try { Update-FiltroProgramas } catch { } })
+$ui.gridProgramas.Add_SelectionChanged({ $ui.btnProgDesinstalar.IsEnabled = ($ui.gridProgramas.SelectedItem -is [System.Data.DataRowView]) })
+$ui.btnProgDesinstalar.Add_Click({
+        $it = $ui.gridProgramas.SelectedItem
+        if ($it -isnot [System.Data.DataRowView]) { return }
+        $f = $it.Row
+        $nombre = [string]$f['Nombre']
+        $clave = [string]$f['Clave']
+        $aviso = Get-AvisoPrograma $nombre
+        if ($aviso -eq 'Bloqueado') {
+            [void][System.Windows.MessageBox]::Show((T 'PC Care no se desinstala desde sí mismo. Usa Configuración de Windows, Aplicaciones instaladas.'), 'PC Care')
+            return
+        }
+        if (-not (Test-ClaveDesinstalarPermitida $clave) -or -not (Test-Path -LiteralPath $clave)) {
+            [void][System.Windows.MessageBox]::Show((T 'El programa ya no figura en el registro. Pulsa "Actualizar lista".'), 'PC Care')
+            return
+        }
+        # el comando se lee del registro ahora, no de la tabla
+        $cadena = ''
+        try { $cadena = [string](Get-ItemProperty -LiteralPath $clave -Name UninstallString -ErrorAction Stop).UninstallString } catch { }
+        $cmd = Get-ComandoDesinstalar $cadena
+        if (-not $cmd) {
+            [void][System.Windows.MessageBox]::Show(((T 'No se pudo interpretar el desinstalador de {0}. Desinstálalo desde Configuración de Windows, Aplicaciones instaladas.') -f $nombre), 'PC Care')
+            return
+        }
+        $txt = ("Se abrirá el desinstalador de {0}.`n`nComando: {1} {2}`n`nSigue los pasos en esa ventana; puedes cancelar allí. Las demás tareas esperan en la cola mientras esté abierto." -f $nombre, $cmd.Archivo, $cmd.Argumentos)
+        if ($aviso) { $txt += "`n`nATENCIÓN: " + $aviso }
+        if (-not (Confirm-Accion ($txt + "`n`n¿Continuar?") 'Desinstalar programa')) { return }
+        Add-Tarea ('Desinstalando ' + $nombre) $sbDesinstalarPrograma @{ Nombre = $nombre; Clave = $clave; Archivo = [string]$cmd.Archivo; Argumentos = [string]$cmd.Argumentos; Simular = (Test-Simulacion) } {
+            param($res, $ctx, $fallo)
+            if ($fallo -or -not $res) { return }
+            foreach ($m in $res[0].Mensajes) { Write-Registro ('   ' + $m) }
+            if ($res[0].Quitado -and -not $res[0].Simulado) { Add-ImpactoReal -Acciones 1 }
+            $ui.expLog.IsExpanded = $true
+            if (-not $res[0].Simulado) { Start-Programas }
+        } -Opciones $nombre
+    })
+
+function Update-DeshacerInicio {
+    $lotes = @(Get-LotesCambiosInicio $rutaCambiosInicio)
+    if ($lotes.Count -eq 0) {
+        $ui.txtInicioUltimo.Text = 'Sin cambios registrados.'
+        $ui.btnDeshacerInicio.IsEnabled = $false
+        return
+    }
+    $u = $lotes[$lotes.Count - 1]
+    $ui.txtInicioUltimo.Text = 'Último cambio aplicado: {0}, {1} programas.' -f $u.Fecha, @($u.Cambios).Count
+    $ui.btnDeshacerInicio.IsEnabled = $true
+}
+$ui.btnDeshacerInicio.Add_Click({
+        $lotes = @(Get-LotesCambiosInicio $rutaCambiosInicio)
+        if ($lotes.Count -eq 0) { return }
+        $u = $lotes[$lotes.Count - 1]
+        $lista = (@($u.Cambios) | ForEach-Object { '  - {0}: {1}' -f $_.Nombre, $(if ([bool]$_.Antes) { 'volverá a iniciar con Windows' } else { 'dejará de iniciar con Windows' }) }) -join "`n"
+        if (-not (Confirm-Accion ("Se deshará el cambio del {0}:`n`n{1}`n`n¿Continuar?" -f $u.Fecha, $lista) 'Arranque de Windows')) { return }
+        $n = 0
+        foreach ($c in @($u.Cambios)) {
+            try {
+                if (Test-Simulacion) { Write-Registro ('SIMULACIÓN: {0} -> inicia = {1}' -f $c.Nombre, [bool]$c.Antes) }
+                else {
+                    Set-InicioActivo ([string]$c.Aprobado) ([string]$c.Nombre) ([bool]$c.Antes)
+                    Write-Registro ('Arranque: {0} -> inicia = {1}' -f $c.Nombre, [bool]$c.Antes)
+                    $n++
+                }
+            }
+            catch { Write-Registro ('No se pudo cambiar {0}: {1}' -f $c.Nombre, $_.Exception.Message) }
+        }
+        if (-not (Test-Simulacion)) {
+            Remove-UltimoLoteInicio $rutaCambiosInicio
+            $ui.txtInicioCambios.Text = '{0} cambios deshechos. Rigen desde el próximo inicio de sesión.' -f $n
+            Start-AnalisisInicio
+        }
+        Update-DeshacerInicio
+    })
+Update-DeshacerInicio
+
+# ===========================================================================
+# LIMPIEZA DE PRIVACIDAD (modulos\Privacidad.ps1)
+# ===========================================================================
+$tPriv = New-Tabla 'Id', 'Nombre', 'Archivos', 'Tamano', 'Bytes', 'Cookies'
+$ui.gridPrivacidad.ItemsSource = $tPriv.DefaultView
+function Update-TotalPrivacidad {
+    $n = 0; $b = [double]0
+    foreach ($f in (Get-Marcadas $tPriv)) { $n += [int]$f['Archivos']; $b += [double]$f['Bytes'] }
+    $ui.txtPrivTotal.Text = 'Seleccionado: {0} archivos, {1}' -f $n, (Format-Tamano $b)
+}
+function Start-AnalisisPrivacidad {
+    Add-Tarea 'Analizando rastros de privacidad' $sbAnalizarPrivacidad @{} {
+        param($res, $ctx, $fallo)
+        if ($fallo) { return }
+        $script:cargando = $true
+        $tPriv.Rows.Clear()
+        foreach ($c in $res) {
+            $nombre = [string]$c.Nombre
+            if ($c.Abierto) { $nombre += ' (navegador abierto)' }
+            [void]$tPriv.Rows.Add(([bool]$c.Marcar -and [int]$c.Archivos -gt 0), [string]$c.Id, $nombre, [string]$c.Archivos, (Format-Tamano ([double]$c.Bytes)), [double]$c.Bytes, [string][bool]$c.Cookies)
+        }
+        $script:cargando = $false
+        Update-TotalPrivacidad
+    }
+}
+$tPriv.Add_ColumnChanged({ param($o, $e) if (-not $script:cargando -and $e.Column.ColumnName -eq 'Sel') { Update-TotalPrivacidad } })
+$ui.btnPrivAnalizar.Add_Click({ Start-AnalisisPrivacidad })
+$ui.btnPrivLimpiar.Add_Click({
+        $filas = @(Get-Marcadas $tPriv)
+        if ($filas.Count -eq 0) { return }
+        $lista = ($filas | ForEach-Object { '  - {0}: {1} archivos, {2}' -f $_['Nombre'], $_['Archivos'], $_['Tamano'] }) -join "`n"
+        $txt = "Se borrarán de forma definitiva:`n`n" + $lista
+        if (@($filas | Where-Object { [string]$_['Cookies'] -eq 'True' }).Count -gt 0) {
+            $txt += "`n`nATENCIÓN: borrar cookies cierra tu sesión en los sitios web de ese navegador (correo, bancos, redes) y olvida preferencias como el idioma. Tendrás que volver a iniciar sesión. Si el navegador está abierto, sus cookies se omiten."
+        }
+        if (-not (Confirm-Accion ($txt + "`n`n¿Continuar?") 'Limpieza de privacidad')) { return }
+        $ids = [string[]]@($filas | ForEach-Object { [string]$_['Id'] })
+        Add-Tarea 'Limpiando rastros de privacidad' $sbLimpiarPrivacidad @{ Ids = $ids; Simular = (Test-Simulacion) } {
+            param($res, $ctx, $fallo)
+            if ($fallo -or -not $res) { return }
+            foreach ($m in $res[0].Mensajes) { Write-Registro ('   ' + $m) }
+            if (-not $res[0].Simulado -and [double]$res[0].Bytes -gt 0) { Add-ImpactoReal -Bytes ([double]$res[0].Bytes) -Acciones 1 }
+            $ui.expLog.IsExpanded = $true
+            Start-AnalisisPrivacidad
+        } -Opciones (($filas | ForEach-Object { [string]$_['Nombre'] }) -join ', ')
+    })
+
+# ===========================================================================
 # LIMPIEZA
 # ===========================================================================
 function Update-TotalBasura {
@@ -2787,7 +3161,7 @@ function Start-AnalisisBasura {
 }
 function Add-TareaLimpiezaBasura {
     param([string[]]$Ids, [string]$Opciones)
-    Add-Tarea 'Limpiando archivos basura' $sbLimpiarBasura @{ Ids = [string[]]$Ids; Simular = (Test-Simulacion) } {
+    Add-Tarea 'Limpiando archivos basura' $sbLimpiarBasura @{ Ids = [string[]]$Ids; Simular = (Test-Simulacion); Punto = [bool]$ui.chkBasuraPunto.IsChecked } {
         param($res, $ctx, $fallo)
         if ($fallo -or -not $res) { return }
         foreach ($m in $res[0].Mensajes) { Write-Registro ('   ' + $m) }
@@ -2820,6 +3194,13 @@ function Update-SeleccionArch {
     foreach ($f in (Get-Marcadas $tArch)) { $n++; $b += [double]$f['Bytes'] }
     $ui.txtArchSel.Text = '{0} archivos en lista. Seleccionados: {1} ({2}).' -f $tArch.Rows.Count, $n, (Format-Tamano $b)
 }
+function Get-UnidadSel {
+    $u = [string]$ui.cmbUnidad.SelectedItem
+    if (-not $u) { $u = $env:SystemDrive }
+    return $u
+}
+foreach ($unidadFija in (Get-UnidadesFijas)) { [void]$ui.cmbUnidad.Items.Add([string]$unidadFija) }
+if ($ui.cmbUnidad.Items.Count -gt 0) { $ui.cmbUnidad.SelectedIndex = 0 }
 function Get-MinMB {
     switch ($ui.cmbMin.SelectedIndex) { 0 { return 5 } 2 { return 500 } 3 { return 1024 } default { return 100 } }
 }
@@ -3051,12 +3432,13 @@ function Update-Acerca {
 }
 function Show-Vista {
     param([string]$Nombre)
-    foreach ($v in 'vPanel', 'vLimpieza', 'vRend', 'vMonitor', 'vSeg', 'vAct', 'vRed', 'vInforme', 'vTareas', 'vHist', 'vAcerca') {
+    foreach ($v in 'vPanel', 'vLimpieza', 'vRend', 'vMonitor', 'vSeg', 'vAct', 'vProg', 'vRed', 'vInforme', 'vTareas', 'vHist', 'vAcerca') {
         if ($v -eq $Nombre) { $ui[$v].Visibility = 'Visible' } else { $ui[$v].Visibility = 'Collapsed' }
     }
-    $titulos = @{ vPanel = 'Panel'; vLimpieza = 'Limpieza'; vRend = 'Rendimiento'; vMonitor = 'Monitor'; vSeg = 'Seguridad'; vAct = 'Actualizaciones'; vRed = 'Red'; vInforme = 'Informe del equipo'; vTareas = 'Tareas'; vHist = 'Historial'; vAcerca = 'Acerca de y ayuda' }
+    $titulos = @{ vProg = 'Programas'; vPanel = 'Panel'; vLimpieza = 'Limpieza'; vRend = 'Rendimiento'; vMonitor = 'Monitor'; vSeg = 'Seguridad'; vAct = 'Actualizaciones'; vRed = 'Red'; vInforme = 'Informe del equipo'; vTareas = 'Tareas'; vHist = 'Historial'; vAcerca = 'Acerca de y ayuda' }
     $ui.txtMigas.Text = 'PC Care  /  ' + (T $titulos[$Nombre])
     if ($Nombre -eq 'vHist') { Update-Historial }
+    if ($Nombre -eq 'vProg' -and $tProgramas.Rows.Count -eq 0) { Start-Programas }
     if ($Nombre -eq 'vAcerca') { Update-Acerca }
     if ($Nombre -eq 'vTareas') { Update-TablaTareas; Update-ResumenSeleccion; Update-Interrumpidas }
 }
@@ -3066,6 +3448,7 @@ $ui.navRend.Add_Checked({ Show-Vista 'vRend' })
 $ui.navMonitor.Add_Checked({ Show-Vista 'vMonitor' })
 $ui.navSeg.Add_Checked({ Show-Vista 'vSeg' })
 $ui.navAct.Add_Checked({ Show-Vista 'vAct' })
+$ui.navProg.Add_Checked({ Show-Vista 'vProg' })
 $ui.navRed.Add_Checked({ Show-Vista 'vRed' })
 $ui.navInforme.Add_Checked({ Show-Vista 'vInforme' })
 $ui.navTareas.Add_Checked({ Show-Vista 'vTareas' })
@@ -3201,10 +3584,10 @@ $tArch.Add_ColumnChanged({ param($o, $e) if (-not $script:cargando -and $e.Colum
 $ui.btnAnalizarBasura.Add_Click({ Start-AnalisisBasura })
 $ui.btnLimpiarBasura.Add_Click({ Start-LimpiezaBasura })
 $ui.btnGrandes.Add_Click({
-        Add-Tarea 'Buscando archivos grandes (puede tardar unos minutos)' $sbGrandes @{ MinMB = (Get-MinMB) } $alLlenarArchivos 'Archivos grandes' -Opciones ('{0} MB o más' -f (Get-MinMB))
+        Add-Tarea 'Buscando archivos grandes (puede tardar unos minutos)' $sbGrandes @{ MinMB = (Get-MinMB); Unidad = (Get-UnidadSel) } $alLlenarArchivos 'Archivos grandes' -Opciones ('{0}, {1} MB o más' -f (Get-UnidadSel), (Get-MinMB))
     })
 $ui.btnDuplicados.Add_Click({
-        Add-Tarea 'Buscando duplicados por contenido (puede tardar varios minutos)' $sbDuplicados @{ MinMB = (Get-MinMB) } $alLlenarArchivos 'Duplicados' -Opciones ('{0} MB o más' -f (Get-MinMB))
+        Add-Tarea 'Buscando duplicados por contenido (puede tardar varios minutos)' $sbDuplicados @{ MinMB = (Get-MinMB); Unidad = (Get-UnidadSel) } $alLlenarArchivos 'Duplicados' -Opciones ('{0}, {1} MB o más' -f (Get-UnidadSel), (Get-MinMB))
     })
 $ui.btnMarcarCopias.Add_Click({
         $vistos = @{}
@@ -3272,11 +3655,14 @@ $ui.btnAplicarInicio.Add_Click({
         $lista = ($cambios | ForEach-Object { '  - {0}: {1}' -f $_['Nombre'], $(if ($_['Sel'] -eq $true) { 'iniciará con Windows' } else { 'dejará de iniciar con Windows' }) }) -join "`n"
         if (-not (Confirm-Accion ("Cambios en el arranque:`n`n{0}`n`nSe puede revertir aquí mismo o en el Administrador de tareas. ¿Aplicar?" -f $lista) 'Arranque de Windows')) { return }
         $hechos = 0
+        $lote = New-Object System.Collections.Generic.List[object]
         foreach ($f in $cambios) {
             try {
                 if (Test-Simulacion) { Write-Registro ('SIMULACIÓN: {0} -> inicia = {1}' -f $f['Nombre'], [bool]$f['Sel']) }
                 else {
+                    $antesActivo = ([string]$f['Original'] -eq 'True')
                     Set-InicioActivo ([string]$f['Aprobado']) ([string]$f['Nombre']) ([bool]$f['Sel'])
+                    $lote.Add([pscustomobject]@{ Nombre = [string]$f['Nombre']; Aprobado = [string]$f['Aprobado']; Antes = $antesActivo; Despues = [bool]$f['Sel'] })
                     $f['Original'] = [string][bool]$f['Sel']
                     Write-Registro ('Arranque: {0} -> inicia = {1}' -f $f['Nombre'], [bool]$f['Sel'])
                 }
@@ -3286,6 +3672,7 @@ $ui.btnAplicarInicio.Add_Click({
         }
         $ui.txtInicioCambios.Text = '{0} cambios aplicados. Rigen desde el próximo inicio de sesión.' -f $hechos
         if (-not (Test-Simulacion)) { Add-ImpactoReal -Acciones $hechos }
+        if ($lote.Count -gt 0) { Add-LoteCambiosInicio -Ruta $rutaCambiosInicio -Cambios $lote.ToArray(); Update-DeshacerInicio }
         if (Test-Simulacion) { $ui.txtInicioCambios.Text = 'Simulación: {0} cambios registrados, ninguno aplicado.' -f $hechos }
     })
 

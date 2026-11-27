@@ -19,6 +19,55 @@ Revisado por: quien aprobó el cambio
 
 Se omiten los apartados que no apliquen.
 
+## 2.7.0 - 2026-11-27 12:53 (hora de Lima)
+
+Autor: NOVALTEK
+Revisado por: pendiente de revisión de NOVALTEK
+
+### Nuevos módulos
+- **Limpieza de privacidad** (`modulos\Privacidad.ps1`), pestaña nueva en Limpieza: archivos recientes del Explorador, Jump Lists de la barra de tareas, recientes de Office (carpeta) y cookies por navegador (Edge, Chrome, Brave, Vivaldi y Firefox). Reglas aplicadas:
+  - Las cookies van **desmarcadas** y con aviso de que cierran la sesión en los sitios web.
+  - Se eligen **por navegador**: el que no marques no se toca. Es la lista de excepciones de esta versión; excepciones por sitio web no se incluyen porque exigirían editar la base de datos del navegador.
+  - Si el navegador está abierto, sus cookies se omiten y se avisa.
+  - Muestra archivos y tamaño por categoría antes de limpiar, respeta el modo simulación y nunca se ejecuta sola: no está en la ventana de tareas al abrir ni en Cuidado inteligente.
+  - Solo borra archivos directos de cada carpeta, sin entrar a subcarpetas, y dentro de las guardas de ruta de PC Care.
+  - Los recientes de Office guardados en el **registro** no se tocan: sus claves cambian por versión de Office y quedan por confirmar.
+
+### Mejoras
+- README y SECURITY: sección **"Privacidad y transparencia"** con todas las conexiones que hace PC Care (destino, momento y motivo), según revisión del código, y los archivos que guarda en el equipo. Sin telemetría, sin publicidad, sin ofertas de otros productos y el desinstalador no abre páginas web.
+- Limpiar privacidad cuenta en el impacto acumulado del Panel.
+
+### Descartado
+- Mini monitor de RAM, CPU, disco y red (punto 20 del análisis): ya existe en el Panel ("En tiempo real") y en la página Monitor, y solo corre mientras PC Care está abierto. No se agrega otro.
+
+### Actualizaciones
+- Versión 2.7.0.
+- 21 textos nuevos en inglés.
+- Autoprueba: categorías de privacidad (cookies desmarcadas, rutas largas), análisis y limpieza simulada, y filtro de archivos sin subcarpetas.
+
+## 2.6.0 - 2026-11-27 12:50 (hora de Lima)
+
+Nota 2026-11-27 13:50: no tiene release propia. Sus cambios se publican dentro de 2.7.0, porque llegaron a `main` en el mismo Pull Request.
+
+Autor: NOVALTEK
+Revisado por: pendiente de revisión de NOVALTEK
+
+### Nuevos módulos
+- **Página Programas** (`modulos\Programas.ps1`), con dos pestañas:
+  - **Instalados**: lista completa desde el registro (equipo, 32 bits y usuario), con buscador. Desinstala uno a la vez abriendo el desinstalador **interactivo del fabricante**, previa confirmación. El comando se lee del registro en ese momento, nunca de la tabla; los MSI se abren con `msiexec /x` interactivo. PC Care no se desinstala a sí mismo y avisa antes de quitar componentes compartidos (Visual C++, .NET) o software del fabricante del equipo.
+  - **Con fallos**: programas que fallaron (evento 1000) o se colgaron (evento 1002) en los últimos 30 días, con el módulo que más falló. Solo lectura.
+
+### Mejoras
+- Archivos grandes y duplicados: selector de **unidad** (C:, D: y demás discos fijos). Antes solo revisaba la unidad del sistema. La Papelera acepta archivos de carpetas de usuario de cualquier disco fijo, con las mismas guardas (nunca Windows, Archivos de programa, ProgramData ni AppData).
+- Limpieza de basura: casilla opcional, desmarcada, **"Crear punto de restauración antes de limpiar"**. Comprueba si Windows realmente lo creó (por defecto permite uno cada 24 horas) y lo informa. Aviso honesto en la casilla: protege la configuración de Windows, no recupera temporales ni cachés borrados.
+- Arranque de Windows: cada cambio aplicado en modo real queda registrado en `%LOCALAPPDATA%\PCCare\cambios_arranque.json` (últimos 20) y el botón **"Deshacer el último cambio"** lo revierte con un clic.
+- Desinstalar un programa cuenta en el impacto acumulado del Panel.
+
+### Actualizaciones
+- Versión 2.6.0.
+- 51 textos nuevos en inglés.
+- Autoprueba: programas instalados (todas las claves dentro de Uninstall), interpretación del desinstalador y guardas, programas con fallos y su agrupación, registro para deshacer el arranque, unidades fijas y punto de restauración en simulación.
+
 ## 2.5.0 - 2026-11-27 12:45 (hora de Lima)
 
 Autor: NOVALTEK
