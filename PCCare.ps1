@@ -2955,7 +2955,7 @@ function Start-ProgramasFallos {
     Add-Tarea 'Buscando programas con fallos (últimos 30 días)' $sbProgramasFallos @{ Dias = 30 } {
         param($res, $ctx, $fallo)
         if ($fallo) { return }
-        $g = Group-FallosProgramas -Eventos @($res)
+        $g = @(Group-FallosProgramas -Eventos @($res))
         $tFallos.Rows.Clear()
         foreach ($x in $g) { [void]$tFallos.Rows.Add($false, [string]$x.Programa, [string]$x.Fallos, [string]$x.Cuelgues, [string]$x.Ultimo, [string]$x.Modulo) }
         if ($tFallos.Rows.Count -eq 0) { $ui.txtFallosRes.Text = 'No hay fallos ni cuelgues de programas registrados en los últimos 30 días.' }
