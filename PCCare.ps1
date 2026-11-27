@@ -36,7 +36,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$VersionApp = '2.4.0'
+$VersionApp = '2.5.0'
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Xaml
 
 $esAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
@@ -798,13 +798,26 @@ $sbSeguridad = {
     . ([scriptblock]::Create($Ayuda))
     function Fila { param($Estado, $Nombre, $Detalle) [pscustomobject]@{ Estado = $Estado; Nombre = $Nombre; Detalle = $Detalle } }
 
+    # Otro antivirus activo (Kaspersky, ESET, etc.): Defender queda apagado y eso es lo normal, no un fallo
+    $otrosAv = @()
+    try {
+        foreach ($p in @(Get-CimInstance -Namespace 'root/SecurityCenter2' -ClassName AntiVirusProduct -ErrorAction Stop)) {
+            $hex = '{0:X6}' -f [int]$p.productState
+            $activo = (@('10', '11') -contains $hex.Substring($hex.Length - 4, 2))
+            if ($activo -and [string]$p.displayName -notmatch 'Defender|Windows Security|Seguridad de Windows') { $otrosAv += [string]$p.displayName }
+        }
+    }
+    catch { }
     try {
         $mp = Get-MpComputerStatus
         if ($mp.RealTimeProtectionEnabled) { Fila 'Al día' 'Microsoft Defender Antivirus' 'Protección en tiempo real activa.' }
+        elseif ($otrosAv.Count -gt 0) { Fila 'Al día' 'Microsoft Defender Antivirus' ('Desactivado porque la protección la administra {0}. Es lo normal con otro antivirus.' -f ($otrosAv -join ', ')) }
         else { Fila 'Crítico' 'Microsoft Defender Antivirus' 'La protección en tiempo real está desactivada. Actívala en Seguridad de Windows.' }
-        $edad = [int64]$mp.AntivirusSignatureAge
-        if ($edad -gt 7) { Fila 'Alerta' 'Definiciones del antivirus' ('Tienen {0} días. Ejecuta Windows Update.' -f $edad) }
-        else { Fila 'Al día' 'Definiciones del antivirus' ('Actualizadas hace {0} día(s).' -f $edad) }
+        if ($mp.RealTimeProtectionEnabled -or $otrosAv.Count -eq 0) {
+            $edad = [int64]$mp.AntivirusSignatureAge
+            if ($edad -gt 7) { Fila 'Alerta' 'Definiciones del antivirus' ('Tienen {0} días. Ejecuta Windows Update.' -f $edad) }
+            else { Fila 'Al día' 'Definiciones del antivirus' ('Actualizadas hace {0} día(s).' -f $edad) }
+        }
     }
     catch { Fila 'Info' 'Microsoft Defender Antivirus' 'No se pudo leer el estado. Puede haber otro antivirus instalado y administrando la protección.' }
 
@@ -871,7 +884,7 @@ $sbRestauracion = {
 # MODULOS: cola persistente, actualizaciones, informe y red (carpeta "modulos")
 # ===========================================================================
 $RaizApp = $PSScriptRoot
-foreach ($nombreMod in 'Idioma.ps1', 'Cola.ps1', 'Inicio.ps1', 'Actualizaciones.ps1', 'Ejecutores.ps1') {
+foreach ($nombreMod in 'Idioma.ps1', 'Cola.ps1', 'Inicio.ps1', 'Actualizaciones.ps1', 'Ejecutores.ps1', 'Proteccion.ps1', 'Resumen.ps1') {
     $rutaMod = Join-Path $RaizApp ('modulos\' + $nombreMod)
     if (-not (Test-Path -LiteralPath $rutaMod)) {
         [void][System.Windows.MessageBox]::Show((('Falta el archivo modulos\{0}.' -f $nombreMod) + "`n`nExtrae TODA la carpeta del ZIP (no solo PCCare.ps1) y vuelve a abrir PC Care.`n`nMissing file modulos\{0}. Extract the WHOLE ZIP folder (not just PCCare.ps1) and open PC Care again." -f $nombreMod), 'PC Care')
@@ -898,6 +911,7 @@ $mapaTipos = [ordered]@{
     AnalisisApps = $sbAnalizarApps; ActualizarApp = $sbActualizarApp; InstalarHerramienta = $sbInstalarHerramienta
     Store = $sbStore; AnalisisDrivers = $sbAnalizarDrivers; InstalarDrivers = $sbInstalarDrivers
     Informe = $sbInformeAuditoria; RedDiagnostico = $sbRedDiagnostico; RedAplicar = $sbRedAplicar; RedReparar = $sbRedReparar
+    Antivirus = $sbAntivirus; EscaneoDefender = $sbEscaneoDefender
 }
 foreach ($k in $mapaTipos.Keys) { $script:MetaTarea[$mapaTipos[$k]] = [string]$k }
 
@@ -1080,12 +1094,24 @@ if (-not $AutoPrueba) {
           <TextBlock Text="Mantenimiento de Windows" Foreground="#AFC0D1" FontSize="12" Margin="6,0,0,18"/>
           <TextBlock Text="GENERAL" Foreground="#8AA0BB" FontSize="11" Margin="8,0,0,6"/>
           <RadioButton x:Name="navPanel" GroupName="nav" Style="{StaticResource Nav}" Content="Panel" IsChecked="True"/>
-          <RadioButton x:Name="navLimpieza" GroupName="nav" Style="{StaticResource Nav}" Content="Limpieza"/>
-          <RadioButton x:Name="navRend" GroupName="nav" Style="{StaticResource Nav}" Content="Rendimiento"/>
+          <Grid>
+            <RadioButton x:Name="navLimpieza" GroupName="nav" Style="{StaticResource Nav}" Content="Limpieza"/>
+            <Ellipse x:Name="dotLimpieza" Width="9" Height="9" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,4" IsHitTestVisible="False" Visibility="Collapsed" Fill="#F2A33A"/>
+          </Grid>
+          <Grid>
+            <RadioButton x:Name="navRend" GroupName="nav" Style="{StaticResource Nav}" Content="Rendimiento"/>
+            <Ellipse x:Name="dotRend" Width="9" Height="9" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,4" IsHitTestVisible="False" Visibility="Collapsed" Fill="#F2A33A"/>
+          </Grid>
           <RadioButton x:Name="navMonitor" GroupName="nav" Style="{StaticResource Nav}" Content="Monitor"/>
           <TextBlock Text="MANTENIMIENTO" Foreground="#8AA0BB" FontSize="11" Margin="8,14,0,6"/>
-          <RadioButton x:Name="navSeg" GroupName="nav" Style="{StaticResource Nav}" Content="Seguridad"/>
-          <RadioButton x:Name="navAct" GroupName="nav" Style="{StaticResource Nav}" Content="Actualizaciones"/>
+          <Grid>
+            <RadioButton x:Name="navSeg" GroupName="nav" Style="{StaticResource Nav}" Content="Seguridad"/>
+            <Ellipse x:Name="dotSeg" Width="9" Height="9" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,4" IsHitTestVisible="False" Visibility="Collapsed" Fill="#F2A33A"/>
+          </Grid>
+          <Grid>
+            <RadioButton x:Name="navAct" GroupName="nav" Style="{StaticResource Nav}" Content="Actualizaciones"/>
+            <Ellipse x:Name="dotAct" Width="9" Height="9" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,4" IsHitTestVisible="False" Visibility="Collapsed" Fill="#F2A33A"/>
+          </Grid>
           <RadioButton x:Name="navRed" GroupName="nav" Style="{StaticResource Nav}" Content="Red"/>
           <RadioButton x:Name="navInforme" GroupName="nav" Style="{StaticResource Nav}" Content="Informe del equipo"/>
           <TextBlock Text="ACTIVIDAD" Foreground="#8AA0BB" FontSize="11" Margin="8,14,0,6"/>
@@ -1144,7 +1170,16 @@ if (-not $AutoPrueba) {
       <ScrollViewer x:Name="vPanel" VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="24,20,10,10">
           <TextBlock Text="Panel" Style="{StaticResource H1}"/>
-          <TextBlock x:Name="txtEquipo" Style="{StaticResource Mut}" Margin="0,0,0,14"/>
+          <TextBlock x:Name="txtEquipo" Style="{StaticResource Mut}" Margin="0,0,0,10"/>
+          <Border Style="{StaticResource Card}" Padding="16,12">
+            <UniformGrid Columns="5">
+              <StackPanel Margin="0,0,12,0"><TextBlock Text="Equipo" Style="{StaticResource Mut}"/><TextBlock x:Name="txtEqModelo" Text="--" FontWeight="SemiBold" TextWrapping="Wrap"/></StackPanel>
+              <StackPanel Margin="0,0,12,0"><TextBlock Text="Procesador" Style="{StaticResource Mut}"/><TextBlock x:Name="txtEqCpu" Text="--" FontWeight="SemiBold" TextWrapping="Wrap"/></StackPanel>
+              <StackPanel Margin="0,0,12,0"><TextBlock Text="Memoria RAM" Style="{StaticResource Mut}"/><TextBlock x:Name="txtEqRam" Text="--" FontWeight="SemiBold" TextWrapping="Wrap"/></StackPanel>
+              <StackPanel Margin="0,0,12,0"><TextBlock Text="Windows" Style="{StaticResource Mut}"/><TextBlock x:Name="txtEqSo" Text="--" FontWeight="SemiBold" TextWrapping="Wrap"/></StackPanel>
+              <StackPanel><TextBlock Text="Disco del sistema" Style="{StaticResource Mut}"/><TextBlock x:Name="txtEqDisco" Text="--" FontWeight="SemiBold" TextWrapping="Wrap"/></StackPanel>
+            </UniformGrid>
+          </Border>
           <Grid>
             <Grid.ColumnDefinitions><ColumnDefinition Width="2*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
             <Border Style="{StaticResource Card}">
@@ -1195,6 +1230,25 @@ if (-not $AutoPrueba) {
               <TextBlock x:Name="txtTProblemasD" Style="{StaticResource Mut}" Text="Sin analizar"/>
             </StackPanel></Border>
           </UniformGrid>
+          <Grid>
+            <Grid.ColumnDefinitions><ColumnDefinition Width="3*"/><ColumnDefinition Width="2*"/></Grid.ColumnDefinitions>
+            <Border Style="{StaticResource Card}">
+              <StackPanel>
+                <TextBlock Text="Resumen del análisis, sin cifras infladas" Style="{StaticResource H2}"/>
+                <TextBlock Style="{StaticResource Mut}" Margin="0,0,0,6" Text="Cada cosa por separado: los riesgos reales no se mezclan con el espacio recuperable ni con las actualizaciones."/>
+                <TextBlock x:Name="txtResHonesto" TextWrapping="Wrap" LineHeight="20" Text="Sin analizar todavía."/>
+              </StackPanel>
+            </Border>
+            <Border Grid.Column="1" Style="{StaticResource Card}">
+              <StackPanel>
+                <TextBlock Text="Lo que PC Care ya hizo aquí" Style="{StaticResource H2}"/>
+                <TextBlock x:Name="txtImpacto" TextWrapping="Wrap" Margin="0,0,0,10" Text="--"/>
+                <TextBlock Text="Último análisis guardado" Style="{StaticResource Mut}"/>
+                <TextBlock x:Name="txtUltimoAnalisis" TextWrapping="Wrap" Margin="0,0,0,8" Text="Ninguno todavía."/>
+                <Button x:Name="btnVerUltimo" Style="{StaticResource Btn2}" Content="Ver resultados del último análisis" HorizontalAlignment="Left" IsEnabled="False"/>
+              </StackPanel>
+            </Border>
+          </Grid>
           <Border Style="{StaticResource Card}">
             <StackPanel>
               <TextBlock Text="En tiempo real" Style="{StaticResource H2}"/>
@@ -1485,6 +1539,26 @@ if (-not $AutoPrueba) {
                   <DataGridTemplateColumn Header="Estado" Width="90" CellTemplate="{StaticResource TagEstado}"/>
                   <DataGridTextColumn Header="Revisión" Binding="{Binding Titulo}" Width="2*"/>
                   <DataGridTextColumn Header="Detalle" Binding="{Binding Detalle}" Width="5*"/>
+                </DataGrid.Columns>
+              </DataGrid>
+            </StackPanel>
+          </Border>
+          <Border Style="{StaticResource Card}">
+            <StackPanel>
+              <TextBlock Text="Antivirus activo y escaneo con Microsoft Defender" Style="{StaticResource H2}"/>
+              <TextBlock Style="{StaticResource Mut}" Text="Antes de escanear, PC Care detecta qué antivirus protege el equipo. Si es otro (por ejemplo Kaspersky o ESET), Defender queda desactivado o en modo pasivo y lo correcto es usar el escaneo de ese antivirus. El escaneo solo se ejecuta en modo real porque Defender aplica su propia configuración, como poner archivos en cuarentena."/>
+              <TextBlock x:Name="txtAvEstado" TextWrapping="Wrap" Margin="0,10,0,10" FontWeight="SemiBold" Text="Sin revisar todavía."/>
+              <WrapPanel>
+                <Button x:Name="btnScanRapido" Style="{StaticResource Btn}" Content="Escaneo rápido" IsEnabled="False" ToolTip="Revisa las zonas donde suele esconderse el malware. Tarda de 2 a 10 minutos."/>
+                <Button x:Name="btnScanCompleto" Style="{StaticResource Btn2}" Content="Escaneo completo" IsEnabled="False" ToolTip="Revisa todos los archivos. Puede tardar de 30 minutos a varias horas."/>
+                <Button x:Name="btnScanCarpeta" Style="{StaticResource Btn2}" Content="Escanear una carpeta" IsEnabled="False" ToolTip="Revisa solo la carpeta que elijas, por ejemplo Descargas. Tarda según su tamaño."/>
+                <Button x:Name="btnAvRevisar" Style="{StaticResource Btn2}" Content="Volver a detectar"/>
+              </WrapPanel>
+              <DataGrid x:Name="gridAmenazas" Height="120">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="Amenaza detectada" Binding="{Binding Nombre}" Width="2*"/>
+                  <DataGridTextColumn Header="Archivos" Binding="{Binding Archivos}" Width="4*"/>
+                  <DataGridTextColumn Header="Fecha" Binding="{Binding Fecha}" Width="130"/>
                 </DataGrid.Columns>
               </DataGrid>
             </StackPanel>
@@ -1859,7 +1933,9 @@ if ($AutoPrueba) {
         'btnAppsIgnorar', 'btnStore', 'chkTerceros', 'chkSoloPend', 'txtResApps', 'txtResDrv', 'txtFabricante', 'panelHerr', 'btnDrvTodo', 'btnDrvSel',
         'chkDrvPunto', 'chkDrvRespaldo', 'chkInfSinWU', 'btnInfGenerar', 'btnInfAbrir', 'btnInfCarpeta', 'txtInfEstado',
         'chkRedDescarga', 'btnRedDiag', 'btnRedCarpeta', 'txtRedInforme', 'gridRedCambios', 'btnRedAplicar', 'btnRedReparar', 'txtRedAviso', 'txtRedRevertir',
-        'cmbIdioma', 'navAcerca', 'vAcerca', 'txtAcercaVersion', 'txtAcercaSistema', 'btnAcercaUltima', 'btnAcercaVersiones', 'btnAcercaCopiar', 'btnAcercaIssues', 'btnAcercaSeguridad'
+        'cmbIdioma', 'navAcerca', 'vAcerca', 'txtAcercaVersion', 'txtAcercaSistema', 'btnAcercaUltima', 'btnAcercaVersiones', 'btnAcercaCopiar', 'btnAcercaIssues', 'btnAcercaSeguridad',
+        'dotLimpieza', 'dotRend', 'dotSeg', 'dotAct', 'txtEqModelo', 'txtEqCpu', 'txtEqRam', 'txtEqSo', 'txtEqDisco', 'txtResHonesto', 'txtImpacto',
+        'txtUltimoAnalisis', 'btnVerUltimo', 'txtAvEstado', 'btnScanRapido', 'btnScanCompleto', 'btnScanCarpeta', 'btnAvRevisar', 'gridAmenazas'
         foreach ($n in $claves) { if (-not $v.FindName($n)) { throw ('falta el control ' + $n) } }
         'carga correcta, {0} controles clave' -f @($claves).Count
     }
@@ -1928,7 +2004,7 @@ if ($AutoPrueba) {
     Test-Paso 'Todas las tareas tienen política' {
         $nombres = 'sbSeguridad', 'sbRestauracion', 'sbAnalizarBasura', 'sbLimpiarBasura', 'sbGrandes', 'sbDuplicados', 'sbPapelera', 'sbAnalizarRegistro',
         'sbLimpiarRegistro', 'sbInicio', 'sbDiagnostico', 'sbAccionDiag', 'sbProcesos', 'sbTurbo', 'sbAnalizarApps', 'sbActualizarApp',
-        'sbInstalarHerramienta', 'sbStore', 'sbAnalizarDrivers', 'sbInstalarDrivers', 'sbInformeAuditoria', 'sbRedDiagnostico', 'sbRedAplicar', 'sbRedReparar'
+        'sbInstalarHerramienta', 'sbStore', 'sbAnalizarDrivers', 'sbInstalarDrivers', 'sbInformeAuditoria', 'sbRedDiagnostico', 'sbRedAplicar', 'sbRedReparar', 'sbAntivirus', 'sbEscaneoDefender'
         foreach ($nom in $nombres) {
             $b = Get-Variable -Name $nom -ValueOnly
             if (-not $script:MetaTarea.ContainsKey($b)) { throw ('sin tipo: ' + $nom) }
@@ -1991,6 +2067,60 @@ if ($AutoPrueba) {
         ('{0} tareas, estados y detalle' -f $ids.Count)
     }
 
+    Test-Paso 'Antivirus activo (solo lectura)' {
+        $r = @(& $sbAntivirus -Ayuda $textoAyuda)[0]
+        $act = @($r.Productos | Where-Object { $_.Activo } | ForEach-Object { $_.Nombre })
+        'Defender disponible: {0}, modo: {1}; antivirus activos: {2}' -f $r.Defender.Disponible, $r.Defender.Modo, $(if ($act.Count -gt 0) { $act -join ', ' } else { 'ninguno informado' })
+    }
+    Test-Paso 'Decisión de escaneo y estado de antivirus' {
+        Assert-Igual (ConvertFrom-EstadoProductoAV 397568).Activo $true '0x061100 activo'
+        Assert-Igual (ConvertFrom-EstadoProductoAV 397568).AlDia $true '0x061100 al día'
+        Assert-Igual (ConvertFrom-EstadoProductoAV 393472).Activo $false '0x060100 inactivo'
+        Assert-Igual (ConvertFrom-EstadoProductoAV 266256).AlDia $false '0x041010 desactualizado'
+        Assert-Igual (Get-DecisionEscaneo -DefenderDisponible $true -AntivirusHabilitado $true -Modo 'Normal' -OtrosActivos @()).Permitido $true 'Defender normal'
+        Assert-Igual (Get-DecisionEscaneo -DefenderDisponible $true -AntivirusHabilitado $false -Modo '' -OtrosActivos @('Kaspersky')).Permitido $false 'Defender apagado con Kaspersky'
+        Assert-Igual (Get-DecisionEscaneo -DefenderDisponible $true -AntivirusHabilitado $false -Modo '' -OtrosActivos @('Kaspersky')).Nivel 'Info' 'otro antivirus no es un fallo'
+        Assert-Igual (Get-DecisionEscaneo -DefenderDisponible $true -AntivirusHabilitado $true -Modo 'Passive Mode' -OtrosActivos @('ESET')).Permitido $true 'modo pasivo permite escanear'
+        Assert-Igual (Get-DecisionEscaneo -DefenderDisponible $false -AntivirusHabilitado $false -Modo '' -OtrosActivos @()).Nivel 'Crítico' 'sin antivirus'
+        $s = & $sbEscaneoDefender -Ayuda $textoAyuda -Tipo 'Rapido' -Ruta '' -Simular $true
+        Assert-Igual ([bool]$s.Simulado) $true 'en simulación no se inicia el escaneo'
+        '10 comprobaciones; en simulación no se escanea'
+    }
+    Test-Paso 'Resumen honesto, puntos e impacto' {
+        $l = Get-ResumenHonesto -BytesBasura (3GB) -Criticos 1 -Alertas 2 -AppsPendientes 4 -DriversPendientes 0 -EntradasRegistro 7
+        Assert-Igual @($l).Count 4 'cuatro líneas separadas'
+        if ($l[0] -notmatch '^Riesgos reales: 3 ') { throw 'los riesgos no se cuentan aparte' }
+        if (($l -join ' ') -match '3\.?\d* *GB.*problemas') { throw 'el espacio se presenta como problema' }
+        $l2 = Get-ResumenHonesto
+        if ($l2[0] -notmatch 'sin analizar') { throw 'sin datos debe decir sin analizar' }
+        Assert-Igual (Get-NivelPunto 1 0) 'Rojo' 'crítico es rojo'
+        Assert-Igual (Get-NivelPunto 0 3) 'Ambar' 'alerta es ámbar'
+        Assert-Igual (Get-NivelPunto 0 0) '' 'sin hallazgos no hay punto'
+        Assert-Igual (Get-NivelEspacio (5GB)) 'Ambar' 'espacio grande es ámbar'
+        Assert-Igual (Get-NivelEspacio (500MB)) '' 'espacio chico sin punto'
+        $tmp = Join-Path $env:TEMP ('PCCare_impacto_prueba_{0}.json' -f $PID)
+        $tmp2 = Join-Path $env:TEMP ('PCCare_ultimo_prueba_{0}.json' -f $PID)
+        try {
+            Remove-Item -LiteralPath $tmp, $tmp2 -Force -ErrorAction SilentlyContinue
+            Assert-Igual (Get-Impacto $tmp).Acciones 0 'impacto vacío'
+            [void](Add-Impacto -Ruta $tmp -Bytes (1GB) -Acciones 1)
+            $i = Add-Impacto -Ruta $tmp -Bytes (512MB) -Acciones 2
+            Assert-Igual $i.Acciones 3 'acciones acumuladas'
+            Assert-Igual ([long](Get-Impacto $tmp).Bytes) ([long](1.5GB)) 'bytes acumulados'
+            Assert-Igual (Save-UltimoAnalisis -Ruta $tmp2 -Lineas @('uno', 'dos')) $true 'guardar último análisis'
+            Assert-Igual @((Get-UltimoAnalisis $tmp2).Lineas).Count 2 'leer último análisis'
+            Set-Content -LiteralPath $tmp2 -Value '{ no es json' -Encoding UTF8
+            Assert-Igual ($null -eq (Get-UltimoAnalisis $tmp2)) $true 'archivo dañado no rompe'
+        }
+        finally { Remove-Item -LiteralPath $tmp, $tmp2 -Force -ErrorAction SilentlyContinue }
+        'resumen separado, dos niveles de color, impacto y último análisis: correcto'
+    }
+    Test-Paso 'Ficha del equipo' {
+        $f = Get-ResumenEquipo
+        if (-not $f.Windows) { throw 'no se leyó la versión de Windows' }
+        '{0} | {1} | {2} | {3}' -f $f.Modelo, $f.Procesador, $f.Memoria, $f.Disco
+    }
+
     $lineas.Add('')
     $lineas.Add(('RESULTADO: {0} errores. Ninguna prueba modifica el equipo (solo se escribe en la carpeta temporal).' -f $script:fallas))
     try { Set-Content -LiteralPath $rutaLog -Value $lineas -Encoding UTF8 }
@@ -2015,6 +2145,15 @@ $so = Get-CimInstance Win32_OperatingSystem
 $equipo = Get-CimInstance Win32_ComputerSystem
 $ui.txtEquipo.Text = '{0}  |  {1} {2}  |  {3}' -f $env:COMPUTERNAME, $equipo.Manufacturer, $equipo.Model, $so.Caption
 $ui.txtVersion.Text = 'Versión ' + $VersionApp
+try {
+    $fichaEquipo = Get-ResumenEquipo
+    if ($fichaEquipo.Modelo) { $ui.txtEqModelo.Text = $fichaEquipo.Modelo }
+    if ($fichaEquipo.Procesador) { $ui.txtEqCpu.Text = $fichaEquipo.Procesador }
+    if ($fichaEquipo.Memoria) { $ui.txtEqRam.Text = $fichaEquipo.Memoria }
+    if ($fichaEquipo.Windows) { $ui.txtEqSo.Text = $fichaEquipo.Windows }
+    if ($fichaEquipo.Disco) { $ui.txtEqDisco.Text = $fichaEquipo.Disco }
+}
+catch { }
 Register-TraduccionVisual -Ventana $ventana -Controles $ui
 $script:idiomaListo = $false
 foreach ($it in $ui.cmbIdioma.Items) { if ([string]$it.Tag -eq $script:IdiomaActual) { $ui.cmbIdioma.SelectedItem = $it } }
@@ -2386,7 +2525,10 @@ $reloj.Add_Tick({
 
 $relojSel = New-Object System.Windows.Threading.DispatcherTimer
 $relojSel.Interval = [TimeSpan]::FromSeconds(2)
-$relojSel.Add_Tick({ try { if ($ui.vTareas.Visibility -eq 'Visible') { Update-ResumenSeleccion } } catch { } })
+$relojSel.Add_Tick({
+        try { if ($ui.vTareas.Visibility -eq 'Visible') { Update-ResumenSeleccion } } catch { }
+        try { Update-PuntosMenu; Update-ResumenPanel } catch { }
+    })
 
 
 # ===========================================================================
@@ -2421,8 +2563,10 @@ function Start-Seguridad {
         if ($fallo) { return }
         $tSeg.Rows.Clear()
         foreach ($s in $res) { [void]$tSeg.Rows.Add($false, [string]$s.Estado, [string]$s.Nombre, [string]$s.Detalle) }
+        Add-FilaAntivirus
         Update-Puntaje
     }
+    Start-Antivirus
 }
 function Start-LecturaRestauracion {
     Add-Tarea 'Leyendo puntos de restauración' $sbRestauracion @{} {
@@ -2431,6 +2575,187 @@ function Start-LecturaRestauracion {
         else { $ui.txtChipRestauracion.Text = 'Sin puntos de restauración' }
     }
 }
+
+# ===========================================================================
+# ANTIVIRUS ACTIVO Y ESCANEO CON MICROSOFT DEFENDER (modulos\Proteccion.ps1)
+# ===========================================================================
+$tAmenazas = New-Tabla 'Nombre', 'Archivos', 'Fecha'
+$ui.gridAmenazas.ItemsSource = $tAmenazas.DefaultView
+$script:decisionEscaneo = $null
+$script:filaAntivirus = $null
+function Set-BotonesEscaneo {
+    param([bool]$Activos)
+    foreach ($b in $ui.btnScanRapido, $ui.btnScanCompleto, $ui.btnScanCarpeta) { $b.IsEnabled = $Activos }
+}
+function Add-FilaAntivirus {
+    # La fila "Antivirus activo" cuenta en el puntaje y en el punto del menu de Seguridad
+    if (-not $script:filaAntivirus) { return }
+    foreach ($f in @($tSeg.Rows)) { if ([string]$f['Titulo'] -eq 'Antivirus activo') { $tSeg.Rows.Remove($f) } }
+    [void]$tSeg.Rows.Add($false, [string]$script:filaAntivirus.Estado, 'Antivirus activo', [string]$script:filaAntivirus.Detalle)
+}
+function Start-Antivirus {
+    Add-Tarea 'Detectando el antivirus activo' $sbAntivirus @{} {
+        param($res, $ctx, $fallo)
+        if ($fallo -or -not $res) { return }
+        $r = $res[0]
+        $d = $r.Defender
+        $activos = @($r.Productos | Where-Object { $_.Activo } | ForEach-Object { [string]$_.Nombre })
+        $otros = @($r.Productos | Where-Object { $_.Activo -and -not $_.EsDefender } | ForEach-Object { [string]$_.Nombre })
+        $dec = Get-DecisionEscaneo -DefenderDisponible ([bool]$d.Disponible) -AntivirusHabilitado ([bool]$d.Habilitado) -Modo ([string]$d.Modo) -OtrosActivos ([string[]]$otros)
+        $script:decisionEscaneo = $dec
+        $l = New-Object System.Collections.Generic.List[string]
+        if ($activos.Count -gt 0) { $l.Add('Antivirus activo: ' + ($activos -join ', ')) }
+        elseif (@($r.Productos).Count -eq 0) { $l.Add('Windows no informa antivirus registrados. En Windows Server es normal.') }
+        else { $l.Add('Ningún antivirus registrado está activo.') }
+        $l.Add([string]$dec.Motivo)
+        if ($d.UltimoRapido) { $l.Add('Último escaneo rápido de Defender: ' + [string]$d.UltimoRapido) }
+        if ($d.UltimoCompleto) { $l.Add('Último escaneo completo de Defender: ' + [string]$d.UltimoCompleto) }
+        $ui.txtAvEstado.Text = ($l -join "`n")
+        Set-BotonesEscaneo ([bool]$dec.Permitido)
+        $protegido = ($activos.Count -gt 0 -or [bool]$d.Habilitado)
+        if ($protegido) { $script:filaAntivirus = @{ Estado = 'Al día'; Detalle = [string]$l[0] } }
+        else { $script:filaAntivirus = @{ Estado = 'Crítico'; Detalle = 'No se detectó ningún antivirus activo. Revisa Seguridad de Windows.' } }
+        Add-FilaAntivirus
+        Update-Puntaje
+    }
+}
+function Start-EscaneoDefender {
+    param([string]$Tipo, [string]$Ruta = '')
+    $dec = $script:decisionEscaneo
+    if (-not $dec) { [void][System.Windows.MessageBox]::Show((T 'Primero pulsa "Volver a detectar" para saber qué antivirus protege el equipo.'), 'PC Care'); return }
+    if (-not $dec.Permitido) { [void][System.Windows.MessageBox]::Show((T ([string]$dec.Motivo)), 'PC Care'); return }
+    if (Test-Simulacion) {
+        [void][System.Windows.MessageBox]::Show((T "El escaneo con Microsoft Defender solo se ejecuta en modo real, porque Defender aplica su propia configuración (por ejemplo, pone archivos en cuarentena).`n`nPara escanear, pasa a modo real con el botón verde de arriba a la derecha."), 'PC Care')
+        return
+    }
+    switch ($Tipo) {
+        'Rapido' { $nombre = 'Escaneo rápido con Microsoft Defender'; $dura = 'Suele tardar de 2 a 10 minutos.' }
+        'Completo' { $nombre = 'Escaneo completo con Microsoft Defender'; $dura = 'Puede tardar de 30 minutos a varias horas y hace más lento el equipo mientras dura.' }
+        default { $nombre = 'Escaneo de una carpeta con Microsoft Defender'; $dura = 'Tarda según el tamaño de la carpeta.' }
+    }
+    $txt = $nombre + "`n`n" + $dura + "`n`nLo que Defender encuentre lo trata según su propia configuración. Las demás tareas esperan en la cola hasta que termine."
+    if ($dec.Nivel -eq 'Info') { $txt += "`n`n" + [string]$dec.Motivo }
+    if ($Ruta) { $txt += "`n`nCarpeta: " + $Ruta }
+    if (-not (Confirm-Accion ($txt + "`n`n¿Iniciar?") 'Microsoft Defender')) { return }
+    $tAmenazas.Rows.Clear()
+    $opc = Get-TextoTipoEscaneo $Tipo
+    if ($Ruta) { $opc += ': ' + $Ruta }
+    Add-Tarea $nombre $sbEscaneoDefender @{ Tipo = $Tipo; Ruta = $Ruta; Simular = (Test-Simulacion) } {
+        param($res, $ctx, $fallo)
+        if ($fallo -or -not $res) { return }
+        foreach ($m in $res[0].Mensajes) { Write-Registro ('   ' + $m) }
+        foreach ($a in $res[0].Amenazas) { [void]$tAmenazas.Rows.Add($false, [string]$a.Nombre, [string]$a.Archivos, [string]$a.Fecha) }
+        $ui.expLog.IsExpanded = $true
+        Start-Antivirus
+    } -Opciones $opc
+}
+
+# ===========================================================================
+# RESUMEN HONESTO, PUNTOS DEL MENU, IMPACTO Y ULTIMO ANALISIS (modulos\Resumen.ps1)
+# ===========================================================================
+$rutaImpacto = Join-Path $env:LOCALAPPDATA 'PCCare\impacto.json'
+$rutaUltimoAnalisis = Join-Path $env:LOCALAPPDATA 'PCCare\ultimo_analisis.json'
+$script:registroAnalizado = $false
+$script:textoResumenPrevio = ''
+function Get-ConteoTabla {
+    param($Tabla)
+    $c = 0; $a = 0
+    foreach ($f in $Tabla.Rows) {
+        $e = [string]$f['Estado']
+        if ($e -eq 'Crítico') { $c++ } elseif ($e -eq 'Alerta') { $a++ }
+    }
+    return [pscustomobject]@{ Criticos = $c; Alertas = $a }
+}
+function Get-PendientesActualizacion {
+    # -1 si la pagina Actualizaciones todavia no se analizo
+    $r = [pscustomobject]@{ Apps = -1; Drivers = -1 }
+    if (-not $tApps -or $tApps.Rows.Count -eq 0) { return $r }
+    $r.Apps = @($tApps.Rows | Where-Object { [string]$_['Disponible'] -ne '' -and @('Actualizado', 'Ignorada') -notcontains [string]$_['Estado'] }).Count
+    $r.Drivers = 0
+    if ($tDrvPend) { $r.Drivers = @($tDrvPend.Rows | Where-Object { [string]$_['Estado'] -ne 'Actualizado' }).Count }
+    return $r
+}
+function Set-PuntoMenu {
+    param($Punto, [string]$Nivel)
+    if ([string]$Punto.Tag -eq $Nivel) { return }
+    $Punto.Tag = $Nivel
+    $color = Get-ColorNivel $Nivel
+    if (-not $color) { $Punto.Visibility = 'Collapsed'; return }
+    $Punto.Fill = (New-Object System.Windows.Media.BrushConverter).ConvertFromString($color)
+    $Punto.Visibility = 'Visible'
+}
+function Update-PuntosMenu {
+    $s = Get-ConteoTabla $tSeg
+    Set-PuntoMenu $ui.dotSeg (Get-NivelPunto $s.Criticos $s.Alertas)
+    $d = Get-ConteoTabla $tDiag
+    Set-PuntoMenu $ui.dotRend (Get-NivelPunto $d.Criticos $d.Alertas)
+    if ($tBasura.Rows.Count -gt 0) { Set-PuntoMenu $ui.dotLimpieza (Get-NivelEspacio $script:basuraBytes) }
+    $p = Get-PendientesActualizacion
+    if ($p.Apps -ge 0) {
+        $nivel = ''
+        if ($p.Apps -gt 0 -or $p.Drivers -gt 0) { $nivel = 'Ambar' }
+        Set-PuntoMenu $ui.dotAct $nivel
+    }
+}
+function Update-Impacto { $ui.txtImpacto.Text = Get-TextoImpacto (Get-Impacto $rutaImpacto) }
+function Add-ImpactoReal {
+    # Solo cuenta lo aplicado en modo real
+    param([double]$Bytes = 0, [int]$Acciones = 1)
+    if ($Acciones -le 0 -and $Bytes -le 0) { return }
+    [void](Add-Impacto -Ruta $rutaImpacto -Bytes $Bytes -Acciones $Acciones)
+    Update-Impacto
+}
+function Update-UltimoAnalisisPanel {
+    $u = Get-UltimoAnalisis $rutaUltimoAnalisis
+    if ($u -and $u.Fecha) {
+        $ui.txtUltimoAnalisis.Text = 'Guardado el ' + $u.Fecha
+        $ui.btnVerUltimo.IsEnabled = $true
+    }
+}
+function Update-ResumenPanel {
+    $hayRiesgos = ($tDiag.Rows.Count -gt 0 -or $tSeg.Rows.Count -gt 0)
+    $crit = -1; $aler = -1
+    if ($hayRiesgos) {
+        $a = Get-ConteoTabla $tDiag; $b = Get-ConteoTabla $tSeg
+        $crit = $a.Criticos + $b.Criticos; $aler = $a.Alertas + $b.Alertas
+    }
+    $basura = [double]-1
+    if ($tBasura.Rows.Count -gt 0) { $basura = $script:basuraBytes }
+    $p = Get-PendientesActualizacion
+    $reg = -1
+    if ($script:registroAnalizado) { $reg = $tReg.Rows.Count }
+    $lineas = Get-ResumenHonesto -BytesBasura $basura -Criticos $crit -Alertas $aler -AppsPendientes $p.Apps -DriversPendientes $p.Drivers -EntradasRegistro $reg
+    $texto = ($lineas -join "`n")
+    if ($texto -eq $script:textoResumenPrevio) { return }
+    $script:textoResumenPrevio = $texto
+    $ui.txtResHonesto.Text = $texto
+    # se guarda solo cuando hay riesgos y basura analizados, para no pisar un analisis completo con uno parcial
+    if ($hayRiesgos -and $basura -ge 0) {
+        if (Save-UltimoAnalisis -Ruta $rutaUltimoAnalisis -Lineas $lineas) { Update-UltimoAnalisisPanel }
+    }
+}
+$ui.btnVerUltimo.Add_Click({
+        $u = Get-UltimoAnalisis $rutaUltimoAnalisis
+        if (-not $u) { return }
+        $txt = (T 'Último análisis guardado: {0}') -f $u.Fecha
+        $txt += "`n`n" + ((@($u.Lineas) | ForEach-Object { '- ' + (T ([string]$_)) }) -join "`n")
+        [void][System.Windows.MessageBox]::Show($txt, 'PC Care')
+    })
+$ui.btnAvRevisar.Add_Click({ Start-Antivirus })
+$ui.btnScanRapido.Add_Click({ Start-EscaneoDefender 'Rapido' })
+$ui.btnScanCompleto.Add_Click({ Start-EscaneoDefender 'Completo' })
+$ui.btnScanCarpeta.Add_Click({
+        try {
+            Add-Type -AssemblyName System.Windows.Forms
+            $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
+            $dlg.Description = T 'Elige la carpeta que quieres escanear con Microsoft Defender'
+            $dlg.ShowNewFolderButton = $false
+            if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK -and $dlg.SelectedPath) { Start-EscaneoDefender 'Carpeta' $dlg.SelectedPath }
+        }
+        catch { Write-Registro ('No se pudo abrir el selector de carpetas: ' + $_.Exception.Message) }
+    })
+Update-Impacto
+Update-UltimoAnalisisPanel
 
 # ===========================================================================
 # LIMPIEZA
@@ -2467,7 +2792,7 @@ function Add-TareaLimpiezaBasura {
         if ($fallo -or -not $res) { return }
         foreach ($m in $res[0].Mensajes) { Write-Registro ('   ' + $m) }
         if ($res[0].Simulado) { Write-Registro ('SIMULACIÓN: se liberarían ' + (Format-Tamano $res[0].Bytes)) }
-        else { Write-Registro ('Espacio liberado: ' + (Format-Tamano $res[0].Bytes)) }
+        else { Write-Registro ('Espacio liberado: ' + (Format-Tamano $res[0].Bytes)); Add-ImpactoReal -Bytes ([double]$res[0].Bytes) -Acciones 1 }
         $ui.expLog.IsExpanded = $true
     } -Opciones $Opciones
 }
@@ -2521,6 +2846,7 @@ function Start-AnalisisRegistro {
         if ($fallo) { return }
         $tReg.Rows.Clear()
         foreach ($r in $res) { [void]$tReg.Rows.Add($false, $r.Tipo, $r.RutaPS, $r.Valor, $r.Detalle) }
+        $script:registroAnalizado = $true
         Write-Registro ('Registro: {0} entradas inválidas comprobadas.' -f $tReg.Rows.Count)
     }
 }
@@ -2566,7 +2892,10 @@ function Add-TareaAccion {
     param([string]$Id, [string]$Nombre, [string]$Opciones)
     Add-Tarea $Nombre $sbAccionDiag @{ Id = $Id; Simular = (Test-Simulacion) } {
         param($res, $ctx, $fallo)
-        if ($res) { Write-Registro ('   ' + [string]$res[0]) }
+        if ($res) {
+            Write-Registro ('   ' + [string]$res[0])
+            if (-not $fallo -and -not ([string]$res[0]).StartsWith('SIMULACIÓN') -and [string]$res[0] -ne 'Acción no reconocida.') { Add-ImpactoReal -Acciones 1 }
+        }
         $ui.expLog.IsExpanded = $true
     } -Opciones $Opciones
 }
@@ -2898,6 +3227,7 @@ function Add-TareaPapelera {
         param($res, $ctx, $fallo)
         if ($fallo -or -not $res) { return }
         foreach ($m in $res[0].Mensajes) { Write-Registro ('   ' + $m) }
+        if (-not $res[0].Simulado -and @($res[0].Hechos).Count -gt 0) { Add-ImpactoReal -Bytes ([double]$res[0].Bytes) -Acciones 1 }
         if (-not $res[0].Simulado) {
             foreach ($ruta in $res[0].Hechos) {
                 foreach ($f in @($tArch.Rows)) { if ([string]$f['Ruta'] -eq $ruta) { $tArch.Rows.Remove($f); break } }
@@ -2930,7 +3260,7 @@ $ui.btnLimpiarReg.Add_Click({
             if ($fallo -or -not $res) { return }
             foreach ($m in $res[0].Mensajes) { Write-Registro ('   ' + $m) }
             $ui.expLog.IsExpanded = $true
-            if (-not $res[0].Simulado) { Start-AnalisisRegistro }
+            if (-not $res[0].Simulado) { Add-ImpactoReal -Acciones (@($res[0].Hechos).Count); Start-AnalisisRegistro }
         } -Opciones ('{0} entradas del registro' -f $filas.Count)
     })
 
@@ -2955,6 +3285,7 @@ $ui.btnAplicarInicio.Add_Click({
             catch { Write-Registro ('No se pudo cambiar {0}: {1}' -f $f['Nombre'], $_.Exception.Message) }
         }
         $ui.txtInicioCambios.Text = '{0} cambios aplicados. Rigen desde el próximo inicio de sesión.' -f $hechos
+        if (-not (Test-Simulacion)) { Add-ImpactoReal -Acciones $hechos }
         if (Test-Simulacion) { $ui.txtInicioCambios.Text = 'Simulación: {0} cambios registrados, ninguno aplicado.' -f $hechos }
     })
 
@@ -3159,7 +3490,7 @@ function Show-VentanaInicio {
         $tn.Text = T $def.Nombre
         $tn.FontWeight = [System.Windows.FontWeights]::SemiBold
         $tq = New-Object System.Windows.Controls.TextBlock
-        $tq.Text = T $def.Que
+        $tq.Text = (T $def.Que) + '  ' + ((T 'Tiempo aprox.: {0}') -f (T ([string]$def.Tiempo)))
         $tq.FontSize = 11.5
         $tq.TextWrapping = 'Wrap'
         $tq.Foreground = (New-Object System.Windows.Media.BrushConverter).ConvertFromString('#6B7280')

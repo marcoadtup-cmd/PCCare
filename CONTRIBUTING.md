@@ -42,6 +42,8 @@ La validación automática comprueba la sintaxis de todos los `.ps1` en cada Pul
 | `PCCare.ps1` | Ventana principal, motor de cola, limpieza, rendimiento, monitor, seguridad y autoprueba. |
 | `modulos\Cola.ps1` | Registro persistente de tareas y políticas de reanudación. |
 | `modulos\Inicio.ps1` | Lista de tareas de la ventana al abrir y lógica de estados y detalle (sin interfaz, probada en la autoprueba). |
+| `modulos\Proteccion.ps1` | Antivirus activo (SecurityCenter2 y Defender) y escaneo con Microsoft Defender. Decisión de escaneo probada en la autoprueba. |
+| `modulos\Resumen.ps1` | Resumen honesto del análisis, puntos de color del menú, impacto acumulado, último análisis guardado y ficha del equipo. |
 | `modulos\Actualizaciones.ps1` | Motor en segundo plano de aplicaciones (winget) y drivers. |
 | `modulos\UI_Actualizaciones.ps1` | Página Actualizaciones. |
 | `modulos\Ejecutores.ps1` | Tareas que lanzan el informe de auditoría y la optimización de red. |

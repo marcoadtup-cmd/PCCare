@@ -65,16 +65,18 @@ Free code signing provided by [SignPath.io](https://signpath.io), certificate by
 
 | Página | Qué hace |
 |---|---|
-| Panel | Resumen del estado del equipo y el botón **Cuidado inteligente** (limpia, vacía la caché DNS y optimiza la unidad). |
+| Panel | Ficha del equipo (modelo, procesador, RAM, Windows y disco), resumen honesto del análisis (riesgos reales, espacio recuperable y actualizaciones por separado), lo que PC Care ya hizo en modo real y el último análisis guardado. Botón **Cuidado inteligente** (limpia, vacía la caché DNS y optimiza la unidad). |
 | Limpieza | Basura de Windows, navegadores y Papelera. Archivos grandes y duplicados (van a la Papelera, no se borran). Entradas inválidas del registro con respaldo `.reg` previo. |
 | Rendimiento | Programas de inicio, diagnóstico de problemas comunes y TurboPC (alto rendimiento solo cerrando lo que tú marques). |
 | Monitor | CPU, memoria, red, temperatura y salud de discos en tiempo real. |
-| Seguridad | Antivirus, Defender, firewall, BitLocker, TPM, Secure Boot y más. Solo lectura. |
+| Seguridad | Antivirus, Defender, firewall, BitLocker, TPM, Secure Boot y más, en solo lectura. Detecta qué antivirus está activo y, si Microsoft Defender puede, ofrece escaneo rápido, completo o de una carpeta (solo en modo real). |
 | Actualizaciones | Aplicaciones (winget y Microsoft Store) y drivers firmados de Windows Update, con punto de restauración y respaldo de drivers antes de instalar. |
 | Red | Diagnóstico de Wi-Fi, cable o internet compartido por USB: latencia, pérdida de paquetes, DNS, MTU. Mejoras opcionales con archivo para revertirlas. |
 | Informe del equipo | Auditoría de solo lectura que genera un `Informe.html` y archivos CSV para compartir. |
 | Tareas | Qué está corriendo, qué dejaste marcado sin ejecutar, la cola completa y las tareas que quedaron a medias. |
 | Historial | Registro de todo lo que hizo PC Care y en qué modo (simulación o real). |
+
+Tras un análisis, el menú marca con un punto de color las páginas que tienen algo: **rojo** si hay un riesgo crítico y **ámbar** si hay algo mejorable. El espacio recuperable nunca se marca en rojo, porque no es un riesgo.
 
 ## Tareas, cola y reanudación
 
