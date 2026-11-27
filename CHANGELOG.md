@@ -19,6 +19,27 @@ Revisado por: quien aprobó el cambio
 
 Se omiten los apartados que no apliquen.
 
+## 2.6.0 - 2026-11-27 12:50 (hora de Lima)
+
+Autor: NOVALTEK
+Revisado por: pendiente de revisión de NOVALTEK
+
+### Nuevos módulos
+- **Página Programas** (`modulos\Programas.ps1`), con dos pestañas:
+  - **Instalados**: lista completa desde el registro (equipo, 32 bits y usuario), con buscador. Desinstala uno a la vez abriendo el desinstalador **interactivo del fabricante**, previa confirmación. El comando se lee del registro en ese momento, nunca de la tabla; los MSI se abren con `msiexec /x` interactivo. PC Care no se desinstala a sí mismo y avisa antes de quitar componentes compartidos (Visual C++, .NET) o software del fabricante del equipo.
+  - **Con fallos**: programas que fallaron (evento 1000) o se colgaron (evento 1002) en los últimos 30 días, con el módulo que más falló. Solo lectura.
+
+### Mejoras
+- Archivos grandes y duplicados: selector de **unidad** (C:, D: y demás discos fijos). Antes solo revisaba la unidad del sistema. La Papelera acepta archivos de carpetas de usuario de cualquier disco fijo, con las mismas guardas (nunca Windows, Archivos de programa, ProgramData ni AppData).
+- Limpieza de basura: casilla opcional, desmarcada, **"Crear punto de restauración antes de limpiar"**. Comprueba si Windows realmente lo creó (por defecto permite uno cada 24 horas) y lo informa. Aviso honesto en la casilla: protege la configuración de Windows, no recupera temporales ni cachés borrados.
+- Arranque de Windows: cada cambio aplicado en modo real queda registrado en `%LOCALAPPDATA%\PCCare\cambios_arranque.json` (últimos 20) y el botón **"Deshacer el último cambio"** lo revierte con un clic.
+- Desinstalar un programa cuenta en el impacto acumulado del Panel.
+
+### Actualizaciones
+- Versión 2.6.0.
+- 51 textos nuevos en inglés.
+- Autoprueba: programas instalados (todas las claves dentro de Uninstall), interpretación del desinstalador y guardas, programas con fallos y su agrupación, registro para deshacer el arranque, unidades fijas y punto de restauración en simulación.
+
 ## 2.5.0 - 2026-11-27 12:45 (hora de Lima)
 
 Autor: NOVALTEK
